@@ -11,7 +11,8 @@ type InputProps = {
     secureTextEntry?: boolean;
     isPassword?: boolean;
     style?: object;
-    error?: boolean
+    error?: string
+
 };
 
 const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChangeText, secureTextEntry, isPassword = false, style }) => {
@@ -33,6 +34,7 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
                     onChangeText={onChangeText}
                     autoCorrect={false}
                     autoCapitalize="none"
+
                 />
                 {isPassword && (
                     <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -44,7 +46,8 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
                     </TouchableOpacity>
                 )}
             </View>
-            {error && <Text style={styles.errorText}>"Le nom ou pseudo est requis."</Text>}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
 
         </View>
     );

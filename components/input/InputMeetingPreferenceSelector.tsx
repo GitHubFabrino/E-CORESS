@@ -10,6 +10,7 @@ interface MeetingPreferenceSelectorProps {
     onSelectPreference: (preference: Preference) => void;
     onToggleShowPreferences: () => void;
     isPreferencesVisible: boolean;
+    error?: string
 }
 
 const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
@@ -17,6 +18,7 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
     onSelectPreference,
     onToggleShowPreferences,
     isPreferencesVisible,
+    error
 }) => {
     const preferences: Preference[] = ['homme', 'femme', 'lesbienne', 'gay'];
 
@@ -62,8 +64,12 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
                                 <Icon name="check" size={20} color={COLORS.bg1} style={styles.icon} />
                             )}
                         </TouchableOpacity>
+
+
                     ))}
+
                 </View>
+
             )}
             {selectedPreference && (
 
@@ -79,6 +85,7 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
 
 
             )}
+            {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
     );
 };
@@ -140,6 +147,10 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginLeft: 10,
+    },
+    errorText: {
+        color: 'red',
+        marginTop: 5,
     },
 });
 

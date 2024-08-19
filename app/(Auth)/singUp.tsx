@@ -1,9 +1,11 @@
+
+
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import ThemedInput from '@/components/input/InputText';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
@@ -12,19 +14,18 @@ import ThemedDatePicker from '@/components/input/InputDate';
 import GenderSelector from '@/components/input/InputGenreSelector';
 import MeetingPreferenceSelector from '@/components/input/InputMeetingPreferenceSelector';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 
-// Définir les types pour les champs de formulaire
 type FormField =
     | { label: string; value: string; placeholder: string; onChange: React.Dispatch<React.SetStateAction<string>>; isPassword?: boolean }
     | { label: string; value: Date; onChange: React.Dispatch<React.SetStateAction<Date>>; isDatePicker: true }
     | { label: string; value: 'homme' | 'femme' | null; onChange: React.Dispatch<React.SetStateAction<'homme' | 'femme' | null>>; isGenderSelector: true }
     | { label: string; value: 'homme' | 'femme' | 'lesbienne' | 'gay' | null; onChange: React.Dispatch<React.SetStateAction<'homme' | 'femme' | 'lesbienne' | 'gay' | null>>; isMeetingPreferenceSelector: true };
 
-// Définir les types pour les pages du formulaire
+
 type FormPage = {
     fields: FormField[];
 };
-
 export default function SignUpScreen() {
     const [name, setName] = useState('');
     const [userName, setUserName] = useState('');
@@ -38,41 +39,12 @@ export default function SignUpScreen() {
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
 
-    const [errorName, seterrorName] = useState(false);
-    const [errorUsername, seterrorUsername] = useState(false);
-    const [errorEmail, seterrorEmail] = useState(false);
-    const [errorPassWord, seterrorPassWord] = useState(false);
-    const [errorBirthDate, seterrorBirthDate] = useState(false);
-    const [errorAdress, seterrorAdress] = useState(false);
-    const [errorGender, seterrorGender] = useState(false);
-    const [errorSelectedPreference, seterrorSelectedPreference] = useState(false);
-    const [errorIsTermesAccepted, seterrorIsTermesAccepted] = useState(false);
-
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSelectPreference = (preference: 'homme' | 'femme' | 'lesbienne' | 'gay') => {
         setSelectedPreference(preference);
         setIsPreferencesVisible(false);
-    };
-
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-
-
-    const validateFields = () => {
-        const newErrors: { [key: string]: string } = {};
-
-        // Exemple de validation : vérifier si le champ "name" est vide
-        if (name == '') newErrors.name = "Le nom ou pseudo est requis.";
-        if (!userName) newErrors.userName = "Le prénom est requis.";
-        if (!emailUser) newErrors.emailUser = "L'email est requis.";
-        if (!passwordUser) newErrors.passwordUser = "Le mot de passe est requis.";
-        if (!adress) newErrors.adress = "L'adresse est requise.";
-        if (!gender) newErrors.gender = "Le genre est requis.";
-        if (!selectedPreference) newErrors.selectedPreference = "La préférence de rencontre est requise.";
-        if (!isTermsAccepted) newErrors.terms = "Vous devez accepter les termes et conditions.";
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     const handleToggleShowPreferences = () => {
@@ -105,13 +77,89 @@ export default function SignUpScreen() {
         }
     ];
 
-    const handleNextPage = () => {
-        // Vérification du nom
-        const isNameValid = name !== '';
-        seterrorName(!isNameValid);  // Définir l'erreur si le nom est invalide
+    const validateFields = () => {
+        const newErrors: { [key: string]: string } = {};
 
-        // Si le nom est valide et qu'il reste des pages, passer à la suivante
-        if (isNameValid && currentPage < formPages.length - 1) {
+        formPages[currentPage].fields.forEach((field) => {
+            if ('value' in field && typeof field.value === 'string') {
+                if (field.value.trim() === '') {
+                    newErrors[field.label] = `${field.label} est requis`;
+                } else if (field.label === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+                    newErrors[field.label] = 'Email invalide';
+                } else if ('isPassword' in field && field.isPassword && field.value.length < 8) {
+                    newErrors[field.label] = 'Le mot de passe doit comporter au moins 8 caractères';
+                }
+            } else if ('isGenderSelector' in field && field.value === null) {
+                newErrors['Genre'] = 'Le genre est requis';
+            } else if ('isMeetingPreferenceSelector' in field && field.value === null) {
+                newErrors['Préférence de rencontre'] = 'La préférence de rencontre est requise';
+            } else if ('isDatePicker' in field && field.value instanceof Date) {
+                const age = new Date().getFullYear() - field.value.getFullYear();
+                if (age < 18) {
+                    newErrors['Date de naissance'] = 'Vous devez avoir au moins 18 ans';
+                }
+            }
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const renderFields = () => {
+        const page = formPages[currentPage];
+        return page.fields.map((field, index) => {
+            if ('isDatePicker' in field) {
+                return (
+                    <View key={index}>
+                        <ThemedDatePicker label={field.label} value={field.value} onChange={field.onChange}
+                            error={errors[field.label]}
+                        />
+                    </View>
+                );
+            }
+            if ('isGenderSelector' in field) {
+                return (
+                    <View key={index}>
+                        <GenderSelector
+                            selectedGender={field.value}
+                            onSelectGender={field.onChange}
+                            error={errors['Genre']}
+                        />
+                    </View>
+                );
+            }
+            if ('isMeetingPreferenceSelector' in field) {
+                return (
+                    <View key={index}>
+                        <MeetingPreferenceSelector
+                            selectedPreference={selectedPreference}
+                            onSelectPreference={handleSelectPreference}
+                            onToggleShowPreferences={handleToggleShowPreferences}
+                            isPreferencesVisible={isPreferencesVisible}
+                            error={errors['Préférence de rencontre']}
+                        />
+                    </View>
+                );
+            }
+            return (
+                <View key={index}>
+                    <ThemedInput
+                        label={field.label}
+                        value={field.value}
+                        placeholder={field.placeholder}
+                        onChangeText={field.onChange}
+                        isPassword={field.isPassword}
+                        style={styles.textColor}
+                        error={errors[field.label]}
+                    />
+
+                </View>
+            );
+        });
+    };
+
+    const handleNextPage = () => {
+        if (validateFields() && currentPage < formPages.length - 1) {
             setCurrentPage(currentPage + 1);
         }
     };
@@ -122,47 +170,20 @@ export default function SignUpScreen() {
         }
     };
 
-    const renderFields = () => {
-        const page = formPages[currentPage];
-        return page.fields.map((field, index) => {
-            if ('isDatePicker' in field) {
-                return <ThemedDatePicker key={index} label={field.label} value={field.value} onChange={field.onChange} />;
-            }
-            if ('isGenderSelector' in field) {
-                return <GenderSelector key={index} selectedGender={field.value} onSelectGender={field.onChange} />;
-            }
-            if ('isMeetingPreferenceSelector' in field) {
-                return <MeetingPreferenceSelector key={index}
-                    selectedPreference={selectedPreference}
-                    onSelectPreference={handleSelectPreference}
-                    onToggleShowPreferences={handleToggleShowPreferences}
-                    isPreferencesVisible={isPreferencesVisible}
-                />
-            }
-            return (
-                <View key={index}>
-                    <ThemedInput
-
-                        label={field.label}
-                        value={field.value}
-                        placeholder={field.placeholder}
-                        onChangeText={field.onChange}
-                        isPassword={field.isPassword}
-                        style={styles.textColor}
-                        error={errorName}
-                    />
-                    {errorName && <Text style={styles.errorText}>"Le nom ou pseudo est requis."</Text>}
-
-                </View>
-            );
-        });
+    const handleCreateAccount = () => {
+        if (validateFields() && isTermsAccepted) {
+            setIsLoading(true);
+            setTimeout(() => {
+                setIsLoading(false);
+                router.navigate('/(Auth)/singin');
+            }, 2000);
+        } else {
+            setErrors((prev) => ({ ...prev, termsAccepted: 'Vous devez accepter les termes et conditions' }));
+        }
     };
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#fff', dark: '#1D3D47' }}
-            headerImage={<LogoWave />}
-        >
+        <ParallaxScrollView headerBackgroundColor={{ light: '#fff', dark: '#1D3D47' }} headerImage={<LogoWave />}>
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type="title" style={styles.textColor}>
                     Créez votre compte
@@ -170,12 +191,10 @@ export default function SignUpScreen() {
             </ThemedView>
 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-
                 <View style={styles.progressContainer}>
                     <View style={[styles.progressBar, { width: `${((currentPage + 1) / formPages.length) * 100}%` }]} />
                 </View>
                 {renderFields()}
-
 
                 <View style={styles.navigationContainer}>
                     {currentPage > 0 && (
@@ -189,64 +208,53 @@ export default function SignUpScreen() {
                         </TouchableOpacity>
                     )}
                 </View>
-                {currentPage >= formPages.length - 1 && <View>
-                    <View style={styles.termsContainer}>
-                        <TouchableOpacity
-                            onPress={() => setIsTermsAccepted(!isTermsAccepted)}
-                            style={styles.checkboxContainer}
-                        >
-                            <Icon
-                                name={isTermsAccepted ? 'check-box' : 'check-box-outline-blank'}
-                                size={24}
-                                color={COLORS.bg1}
-                            />
-                        </TouchableOpacity>
-                        <Text style={styles.termsText}>
-                            En continuant, vous confirmez que vous avez lu et accepté notre{' '}
-                            <Text style={styles.link} onPress={() => {/* Navigate to terms and conditions */ }}>Termes et conditions</Text> et{' '}
-                            <Text style={styles.link} onPress={() => {/* Navigate to privacy policy */ }}>politique de confidentialité</Text>.
-                        </Text>
-                    </View>
-                    <ThemedButton
-                        onClick={() => {
-                            if (isTermsAccepted) {
-                                router.navigate('/(Auth)/singin');
-                            }
-                        }}
-                        text={'Créer votre compte'}
-                        style={{ marginTop: 30, color: '#232B57' }}
-                    />
-                </View>}
 
+                {currentPage >= formPages.length - 1 && (
+                    <View>
+                        <View style={styles.termsContainer}>
+                            <TouchableOpacity onPress={() => setIsTermsAccepted(!isTermsAccepted)} style={styles.checkboxContainer}>
+                                <Icon name={isTermsAccepted ? 'check-box' : 'check-box-outline-blank'} size={24} color={COLORS.bg1} />
+                            </TouchableOpacity>
+                            <Text style={styles.termsText}>
+                                En continuant, vous confirmez que vous avez lu et accepté notre{' '}
+                                <Text style={styles.link} onPress={() => {/* Navigate to terms and conditions */ }}>Termes et conditions</Text> et{' '}
+                                <Text style={styles.link} onPress={() => {/* Navigate to privacy policy */ }}>politique de confidentialité</Text>.
+                            </Text>
+                        </View>
+                        {errors['termsAccepted'] && <Text style={styles.errorText}>{errors['termsAccepted']}</Text>}
+
+                        <ThemedButton
+                            onClick={handleCreateAccount}
+                            text={'Créer votre compte'}
+                            style={{ marginTop: 30, color: '#232B57' }}
+                        />
+                    </View>
+                )}
             </ScrollView>
 
-
+            <LoadingSpinner isVisible={isLoading} text='En cours de création...' size={60} />
         </ParallaxScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    errorText: {
-        color: 'red',
-        marginTop: 5,
-    },
     scrollContainer: {
-        paddingHorizontal: 20,
+        flexGrow: 1,
+        padding: 20,
+    },
+    titleContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
     },
     textColor: {
         color: COLORS.bg1,
     },
     progressContainer: {
-        marginVertical: 20,
-        height: 6,
+        height: 10,
         backgroundColor: '#e0e0e0',
         borderRadius: 5,
         overflow: 'hidden',
+        marginBottom: 20,
     },
     progressBar: {
         height: '100%',
@@ -256,29 +264,39 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginTop: 20,
     },
     navButton: {
-        backgroundColor: '#fff',
-        borderRadius: 50,
         padding: 10,
-        elevation: 5,
     },
     termsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 20,
+        marginTop: 20,
     },
     checkboxContainer: {
         marginRight: 10,
     },
     termsText: {
+        fontSize: 14,
         color: COLORS.bg1,
     },
     link: {
         color: COLORS.jaune,
+        textDecorationLine: 'underline',
+    },
+    errorText: {
+        color: 'red',
+        marginTop: 10,
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    activityIndicatorWrapper: {
+        padding: 20,
     },
 });
-
-
-
 

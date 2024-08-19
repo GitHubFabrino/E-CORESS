@@ -8,9 +8,10 @@ interface DatePickerProps {
     label: string;
     value: Date;
     onChange: (date: Date) => void;
+    error?: string
 }
 
-const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange }) => {
+const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange, error }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     const showDatePickerHandler = () => {
@@ -48,6 +49,8 @@ const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange })
                     onChange={onChangeDate}
                 />
             )}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
         </View>
     );
 };
@@ -55,6 +58,10 @@ const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange })
 const styles = StyleSheet.create({
     datePickerContainer: {
         marginVertical: 10,
+    },
+    errorText: {
+        color: 'red',
+        marginTop: 5,
     },
     label: {
         color: COLORS.bg1,

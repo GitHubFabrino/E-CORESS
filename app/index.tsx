@@ -59,7 +59,7 @@ export default function HomeScreenAcceuil() {
 
             <View style={styles.containerText}>
                 <Text style={styles.text}>
-                    aiores corporis sequi id nihil porro distinctio itaque ea voluptas dignissimos numquam corrupti odio a!
+                    Une belle opportunité de nouer des liens à la fois amicaux et romantiques avec de vraies personnes.
                 </Text>
             </View>
 

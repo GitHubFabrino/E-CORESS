@@ -5,9 +5,10 @@ import { COLORS } from '@/assets/style/style.color';
 interface GenderSelectorProps {
     selectedGender: 'homme' | 'femme' | null;
     onSelectGender: (gender: 'homme' | 'femme') => void;
+    error?: string;
 }
 
-const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelectGender }) => {
+const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelectGender, error }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Vous êtes :</Text>
@@ -35,6 +36,8 @@ const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelec
                     </View>
                 </TouchableOpacity>
             </View>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
         </View>
     );
 };
@@ -87,13 +90,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     selectedRadioCircle: {
-        borderColor: COLORS.bg1, // Couleur de la bordure lorsque sélectionné
+        borderColor: COLORS.bg1,
     },
     selectedRadio: {
         width: 12,
         height: 12,
         borderRadius: 6,
-        backgroundColor: COLORS.bg1, // Couleur du cercle intérieur lorsque sélectionné
+        backgroundColor: COLORS.bg1,
+    },
+    errorText: {
+        color: 'red',
+        marginTop: 5,
     },
 });
 
