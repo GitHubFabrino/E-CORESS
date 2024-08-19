@@ -199,12 +199,12 @@ export default function SignUpScreen() {
                 <View style={styles.navigationContainer}>
                     {currentPage > 0 && (
                         <TouchableOpacity onPress={handlePreviousPage} style={styles.navButton}>
-                            <Icon name="chevron-left" size={30} color={COLORS.bg1} />
+                            <Icon name="chevron-left" size={35} color={COLORS.bg1} />
                         </TouchableOpacity>
                     )}
                     {currentPage < formPages.length - 1 && (
                         <TouchableOpacity onPress={handleNextPage} style={styles.navButton}>
-                            <Icon name="chevron-right" size={30} color={COLORS.bg1} />
+                            <Icon name="chevron-right" size={35} color={COLORS.bg1} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -267,7 +267,10 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     navButton: {
-        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 50,
+        padding: 15,
+        elevation: 5,
     },
     termsContainer: {
         flexDirection: 'row',

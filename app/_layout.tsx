@@ -32,6 +32,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(Auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="importImage" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

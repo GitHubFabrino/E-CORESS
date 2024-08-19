@@ -44,7 +44,9 @@ export default function SignInScreen() {
             setIsLoading(true);
             setTimeout(() => {
                 setIsLoading(false);
-                router.replace('/(tabs)/');
+                // router.replace('/(tabs)/');
+                router.replace('/importImage');
+
             }, 2000);
         }
     };
