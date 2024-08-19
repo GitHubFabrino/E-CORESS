@@ -36,6 +36,7 @@ export default function ImportImageScreen() {
                 text="Ajouter une photo"
                 style={styles.addButton}
             />
+
         </ThemedView>
     );
 }
