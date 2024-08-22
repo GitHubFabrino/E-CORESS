@@ -1,13 +1,43 @@
-import React from 'react';
-import { Image, StyleSheet, View, Text } from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, View, Text, Pressable } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { router } from 'expo-router';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ImportImageScreen() {
+    const [selectedImage, setSelectedImage] = useState<string | undefined>();
+
+    const addPhoto = () => {
+        if (selectedImage) {
+            router.navigate('/(tabs)/')
+        }
+
+    }
+
+    const openImagePicker = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Désolé, nous avons besoin des permissions pour accéder à vos photos !');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+            allowsEditing: true,
+            aspect: [4, 3],
+            base64: false,
+        });
+
+        if (!result.canceled) {
+            setSelectedImage(result.assets[0].uri);
+        }
+    };
+
 
     return (
         <ThemedView style={styles.container}>
@@ -17,8 +47,25 @@ export default function ImportImageScreen() {
                 resizeMode="contain"
             />
             <View style={styles.addContainer} accessible={true} accessibilityLabel="Ajouter une photo">
-                <Icon name="add" size={35} color={COLORS.bg1} />
-                <Text style={styles.textAddImage}>Ajouter une photo</Text>
+
+                {
+                    selectedImage ? (
+                        <Pressable onPress={() => openImagePicker()}>
+                            <Image
+                                source={{ uri: selectedImage }}
+                                style={{ width: 250, height: 250, borderRadius: 125, }}
+                                resizeMode="cover"
+                            />
+                        </Pressable>
+
+                    ) : (<View style={styles.add}>
+                        <Pressable onPress={() => openImagePicker()} style={styles.add}>
+                            <Icon name="add" size={35} color={COLORS.bg1} />
+                            <Text style={styles.textAddImage}>Ajouter une photo</Text>
+                        </Pressable>
+
+                    </View>)
+                }
             </View>
 
             <ThemedView style={styles.titleContainer}>
@@ -31,11 +78,11 @@ export default function ImportImageScreen() {
                 </Text>
             </View>
 
-            <ThemedButton
-                onClick={() => { router.navigate('/(Auth)/singin') }}
+            {selectedImage && <ThemedButton
+                onClick={addPhoto}
                 text="Ajouter une photo"
                 style={styles.addButton}
-            />
+            />}
 
         </ThemedView>
     );
@@ -63,6 +110,9 @@ const styles = StyleSheet.create({
         width: 250,
         borderRadius: 125,
         backgroundColor: COLORS.grayOne,
+    },
+    add: {
+        alignItems: 'center'
     },
     textAddImage: {
         fontSize: 15,

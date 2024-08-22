@@ -11,8 +11,7 @@ type InputProps = {
     secureTextEntry?: boolean;
     isPassword?: boolean;
     style?: object;
-    error?: string
-
+    error?: string;
 };
 
 const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChangeText, secureTextEntry, isPassword = false, style }) => {
@@ -25,7 +24,10 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
     return (
         <View style={styles.container}>
             <Text style={[styles.labelInput, style]}>{label}</Text>
-            <View style={styles.inputContainer}>
+            <View style={[
+                styles.inputContainer,
+                error ? styles.inputError : null
+            ]}>
                 <TextInput
                     style={styles.input}
                     placeholder={placeholder}
@@ -34,7 +36,6 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
                     onChangeText={onChangeText}
                     autoCorrect={false}
                     autoCapitalize="none"
-
                 />
                 {isPassword && (
                     <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -47,8 +48,6 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
                 )}
             </View>
             {error && <Text style={styles.errorText}>{error}</Text>}
-
-
         </View>
     );
 };
@@ -70,6 +69,9 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: 5,
         padding: 10,
+    },
+    inputError: {
+        borderColor: 'red',
     },
     errorText: {
         color: 'red',

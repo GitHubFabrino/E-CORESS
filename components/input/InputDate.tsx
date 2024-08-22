@@ -8,7 +8,7 @@ interface DatePickerProps {
     label: string;
     value: Date;
     onChange: (date: Date) => void;
-    error?: string
+    error?: string;
 }
 
 const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange, error }) => {
@@ -35,7 +35,13 @@ const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange, e
     return (
         <View style={styles.datePickerContainer}>
             <Text style={styles.label}>{label}</Text>
-            <TouchableOpacity onPress={showDatePickerHandler} style={styles.dateInput}>
+            <TouchableOpacity
+                onPress={showDatePickerHandler}
+                style={[
+                    styles.dateInput,
+                    error ? styles.dateInputError : null
+                ]}
+            >
                 <Text style={[styles.textColor, styles.textfontSize]}>
                     {formatDate(value)}
                 </Text>
@@ -50,7 +56,6 @@ const ThemedDatePicker: React.FC<DatePickerProps> = ({ label, value, onChange, e
                 />
             )}
             {error && <Text style={styles.errorText}>{error}</Text>}
-
         </View>
     );
 };
@@ -77,6 +82,9 @@ const styles = StyleSheet.create({
         borderColor: COLORS.bg1,
         padding: 10,
         borderRadius: 5,
+    },
+    dateInputError: {
+        borderColor: 'red',
     },
     textColor: {
         color: COLORS.bg1,

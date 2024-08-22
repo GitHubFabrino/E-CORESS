@@ -46,6 +46,7 @@ export default function HomeScreenAcceuil() {
                     style={[styles.reactLogo, { opacity: fadeAnim }]}
                 />
             }
+            height={250}
         >
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type="title" style={styles.colorText} >BIENVENU SUR</ThemedText>
