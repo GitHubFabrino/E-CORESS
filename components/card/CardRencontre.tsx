@@ -40,8 +40,8 @@ const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: screenWidth * 0.8, // Ajustez la largeur du conteneur selon vos besoins
-        marginHorizontal: 10, // Espace horizontal entre les cartes
+        width: screenWidth * 0.8,
+        marginHorizontal: 10,
         borderRadius: 20,
         backgroundColor: 'red',
         shadowColor: '#000',
