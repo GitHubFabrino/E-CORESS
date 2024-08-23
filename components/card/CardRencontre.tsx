@@ -1,6 +1,5 @@
-// CardRencontre.tsx
-import React from 'react';
-import { StyleSheet, Image, View, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, Image, View, Dimensions, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
 import { COLORS } from '@/assets/style/style.color';
@@ -13,6 +12,35 @@ interface CardRencontreProps {
 }
 
 const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
+    const [liked, setLiked] = useState(false);  // Pour gérer l'état du bouton
+    const [heartShown, setHeartShown] = useState(false); // Pour gérer l'affichage du cœur flottant
+    const floatingHeart = useRef(new Animated.Value(0)).current; // Valeur animée pour l'icône flottante
+
+    const handleHeartPress = () => {
+        if (!liked) {
+            setLiked(true);
+
+            // Lancer l'animation du cœur flottant
+            setHeartShown(true);
+            Animated.sequence([
+                Animated.timing(floatingHeart, {
+                    toValue: 1,  // Va de bas en haut
+                    duration: 600,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(floatingHeart, {
+                    toValue: 0,  // Réinitialise après disparition
+                    duration: 0,
+                    useNativeDriver: true,
+                }),
+            ]).start(() => setHeartShown(false));  // Cacher le cœur après animation
+        }
+    };
+
+    const handleClosePress = () => {
+        setLiked(false);
+    };
+
     return (
         <View style={styles.cardContainer}>
             <Image
@@ -27,13 +55,29 @@ const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
                 </View>
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.closeButton}>
+                <TouchableOpacity style={styles.closeButton} onPress={handleClosePress}>
                     <Icon name="close-outline" size={40} color={COLORS.bg1} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.heartButton}>
-                    <Icon name="heart-outline" size={40} color={COLORS.white} />
+                <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
+                    {/* Icône de cœur dans le bouton */}
+                    <Icon name={liked ? "heart" : "heart-outline"} size={40} color={liked ? COLORS.red : COLORS.white} />
                 </TouchableOpacity>
             </View>
+
+            {/* Icône du cœur flottant */}
+            {heartShown && (
+                <Animated.View style={[styles.floatingHeart, {
+                    opacity: floatingHeart,
+                    transform: [{
+                        translateY: floatingHeart.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -100]  // Monte vers le haut
+                        })
+                    }]
+                }]}>
+                    <Icon name="heart" size={80} color={COLORS.red} />
+                </Animated.View>
+            )}
         </View>
     );
 };
@@ -98,6 +142,12 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    // Style pour le cœur flottant
+    floatingHeart: {
+        position: 'absolute',
+        bottom: 100,
+        left: '45%',
     },
 });
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Dimensions, FlatList, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Dimensions, FlatList, View, Animated } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -13,7 +13,27 @@ const data = [
   { id: '2', imageSource: require('@/assets/images/img1.jpeg'), name: 'Maria, 30' },
   { id: '3', imageSource: require('@/assets/images/img1.jpeg'), name: 'John, 28' },
 ];
+const [liked, setLiked] = useState(false);
+const [scaleValue] = useState(new Animated.Value(0)); // Animation scale
 
+const handlePress = () => {
+  setLiked(!liked);
+
+  if (!liked) {
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 1.5,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }
+};
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
@@ -60,3 +80,87 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 });
+
+
+// import React, { useState } from 'react';
+// import { View, TouchableOpacity, Image, StyleSheet, Animated, Text } from 'react-native';
+// import Icon from 'react-native-vector-icons/Ionicons';
+
+// interface CardRencontreProps {
+//   imageSource: any;
+//   name: string;
+// }
+
+// const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
+//   const [liked, setLiked] = useState(false);
+//   const [scaleValue] = useState(new Animated.Value(0)); // Animation scale
+
+//   const handlePress = () => {
+//     setLiked(!liked);
+
+//     if (!liked) {
+//       Animated.sequence([
+//         Animated.timing(scaleValue, {
+//           toValue: 1.5,
+//           duration: 200,
+//           useNativeDriver: true,
+//         }),
+//         Animated.timing(scaleValue, {
+//           toValue: 0,
+//           duration: 200,
+//           useNativeDriver: true,
+//         }),
+//       ]).start();
+//     }
+//   };
+
+//   return (
+//     <View style={styles.card}>
+//       <Image source={imageSource} style={styles.image} />
+//       <Text style={styles.name}>{name}</Text>
+//       <TouchableOpacity onPress={handlePress} style={styles.heartButton}>
+//         <Animated.View
+//           style={[
+//             styles.heartIconContainer,
+//             { transform: [{ scale: scaleValue }] }
+//           ]}
+//         >
+//           <Icon name={liked ? "heart" : "heart-outline"} size={30} color={liked ? 'red' : 'black'} />
+//         </Animated.View>
+//       </TouchableOpacity>
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   card: {
+//     margin: 10,
+//     borderRadius: 10,
+//     overflow: 'hidden',
+//     backgroundColor: '#fff',
+//     shadowColor: '#000',
+//     shadowOpacity: 0.2,
+//     shadowRadius: 10,
+//     elevation: 5,
+//   },
+//   image: {
+//     width: 150,
+//     height: 150,
+//   },
+//   name: {
+//     padding: 10,
+//     fontSize: 16,
+//     fontWeight: 'bold',
+//   },
+//   heartButton: {
+//     position: 'absolute',
+//     top: 10,
+//     right: 10,
+//   },
+//   heartIconContainer: {
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });
+
+// export default CardRencontre;
