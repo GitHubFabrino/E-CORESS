@@ -5,8 +5,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from 'expo-router';
 import CardRencontre from '@/components/card/CardRencontre';
+import { AppDispatch, RootState } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+
 
 const data = [
   { id: '1', imageSource: require('@/assets/images/img1.jpeg'), name: 'Angelo, 25' },
@@ -35,6 +38,12 @@ const handlePress = () => {
   }
 };
 export default function HomeScreen() {
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const auth = useSelector((state: RootState) => state.user);
+
+  console.log("datako ayy", auth.user);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}

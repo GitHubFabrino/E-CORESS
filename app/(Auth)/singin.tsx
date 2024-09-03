@@ -10,6 +10,10 @@ import { COLORS } from '@/assets/style/style.color';
 import { LogoWave } from '@/components/LogoWave';
 import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 import ForgotPasswordModal from '@/components/Modal/ForgotPasswordModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { authenticate, login, logout, setError } from '@/store/userSlice';
+import { authenticateUser } from '@/request/ApiRest';
 
 export default function SignInScreen() {
     const [emailUser, setEmailUser] = useState('');
@@ -18,6 +22,10 @@ export default function SignInScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [errorEmail, setErrorEmail] = useState('');
     const [errorPwd, setErrorPwd] = useState('');
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const auth = useSelector((state: RootState) => state.user);
 
     const validateForm = () => {
         let valid = true;
@@ -39,17 +47,33 @@ export default function SignInScreen() {
         return valid;
     };
 
-    const handleConnect = () => {
+    const handleConnect = async () => {
         if (validateForm()) {
             setIsLoading(true);
-            setTimeout(() => {
-                setIsLoading(false);
-                // router.replace('/(tabs)/');
-                router.replace('/importImage');
+            try {
+                const response = await authenticateUser(emailUser, passwordUser);
+                if (response.error === 0) {
+                    dispatch(login(response));
+                    console.log("data la ee:", response);
+                    setTimeout(() => {
+                        setIsLoading(false);
+                        response.user.profile_photo ? router.replace('/(tabs)/') : router.replace('/importImage');
+                    }, 2000);
+                } else if ((response.error === 1)) {
+                    setIsLoading(false);
+                    dispatch(setError(response));
+                    setErrorEmail("L'email n'existe pas");
+                    setErrorPwd("Le mot de passe incorrect");
+                    throw new Error(response.error_m);
+                }
 
-            }, 2000);
+            } catch (error) {
+                dispatch(logout());
+                throw error;
+            }
         }
     };
+
 
     const handleForgotPassword = () => {
         setModalVisible(true);
