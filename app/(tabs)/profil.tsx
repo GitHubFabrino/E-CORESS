@@ -6,8 +6,25 @@ import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import ThemedButton from '@/components/button/Button';
+import { COLORS } from '@/assets/style/style.color';
+import { logoutUser } from '@/request/ApiRest';
+import { AppDispatch, RootState } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/store/userSlice';
+import { router } from 'expo-router';
 
 export default function ProfilScreen() {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const auth = useSelector((state: RootState) => state.user);
+
+    const handledeConnect = async () => {
+        await logoutUser('0')
+        dispatch(logout())
+        router.replace('/(Auth)/singin')
+    };
+
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -84,6 +101,11 @@ export default function ProfilScreen() {
                     ),
                 })}
             </Collapsible>
+            <ThemedButton
+                onClick={handledeConnect}
+                text="Connecte-toi maintenant"
+                style={styles.button}
+            />
         </ParallaxScrollView>
     );
 }
@@ -98,5 +120,9 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: 'row',
         gap: 8,
+    },
+    button: {
+        marginTop: 10,
+        backgroundColor: COLORS.jaune,
     },
 });

@@ -71,10 +71,6 @@ const formateResponse = (response: any) => {
     return responseText.substring(jsonStartIndex);
 }
 
-
-
-
-//const dispatch = useDispatch();
 // Fonction pour enregistrer un utilisateur
 export const registerUser = async (userData: {
     reg_email: string;
@@ -101,15 +97,12 @@ export const registerUser = async (userData: {
                 reg_birthday: userData.reg_birthday,
                 reg_looking: userData.reg_looking,
                 reg_city: userData.reg_city,
-                reg_username: userData.reg_username // Ajouté ici
+                reg_username: userData.reg_username
             }
         });
-
-        console.log("RESPONSE BRUTE : ", response.data);
-
-
+        // console.log("RESPONSE BRUTE : ", response.data);
         const jsonString = formateResponse(response.data)
-        // Nettoyer et parser les données JSON
+
         try {
             const jsonData = JSON.parse(jsonString);
             if (jsonData.error) {
@@ -125,6 +118,25 @@ export const registerUser = async (userData: {
         }
     } catch (error) {
         console.error('API Error', error);
+        throw error;
+    }
+};
+
+
+
+// Fonction pour deconnection un utilisateur
+export const logoutUser = async (idApp: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: 'logout',
+                query: 0,
+            }
+        });
+
+    } catch (error) {
+        console.error("Erreur lors de deconnextion:", error);
         throw error;
     }
 };
