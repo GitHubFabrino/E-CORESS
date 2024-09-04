@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
 
+
 // export default function HomeScreenAcceuil() {
 //     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 //     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -82,6 +83,7 @@ export default function HomeScreenAcceuil() {
         require('@/assets/images/imageAcceuil/img3.jpeg'),
     ];
 
+
     useEffect(() => {
         const interval = setInterval(() => {
             Animated.timing(fadeAnim, {
@@ -100,6 +102,8 @@ export default function HomeScreenAcceuil() {
 
         return () => clearInterval(interval);
     }, [fadeAnim, images.length]); // Corrigez ici les dépendances du hook
+
+
 
     return (
         <ParallaxScrollView

@@ -12,16 +12,21 @@ import GenderSelector from '@/components/input/InputGenreSelector';
 import MeetingPreferenceSelector from '@/components/input/InputMeetingPreferenceSelector';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LoadingSpinner from '@/components/spinner/LoadingSpinner';
+import { registerUser } from '@/request/ApiRest';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { login, setError } from '@/store/userSlice';
 
 export default function SignUpScreen() {
     const [name, setName] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
     const [emailUser, setEmailUser] = useState<string>('');
     const [passwordUser, setPasswordUser] = useState<string>('');
-    const [birthDate, setBirthDate] = useState<Date | null>(new Date());
+    const [birthDate, setBirthDate] = useState<Date>(new Date());
     const [adress, setAdress] = useState<string>('');
     const [gender, setGender] = useState<'homme' | 'femme' | null>(null);
     const [selectedPreference, setSelectedPreference] = useState<'homme' | 'femme' | 'lesbienne' | 'gay' | null>(null);
+
     const [isPreferencesVisible, setIsPreferencesVisible] = useState(false);
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -72,15 +77,87 @@ export default function SignUpScreen() {
         });
 
         setErrors(newErrors);
+
+
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleCreateAccount = () => {
+    const formatDate = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    console.log("ERRORS : ", errors);
+
+    const cleanInput = () => {
+        setName('')
+        setUserName('')
+        setBirthDate(new Date())
+        setAdress('')
+        setEmailUser(''
+        )
+        setGender(null)
+        setGender(null)
+        setPasswordUser('')
+        setIsTermsAccepted(false)
+    }
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const auth = useSelector((state: RootState) => state.user);
+    const handleCreateAccount = async () => {
         if (validateFields() && isTermsAccepted) {
             setIsLoading(true);
+            // Préparer les données pour l'API
+            const userData = {
+                reg_name: name,
+                reg_username: userName,
+                reg_email: emailUser,
+                reg_pass: passwordUser,
+                reg_birthday: formatDate(birthDate), // Formater la date ici
+                reg_gender: gender || null,
+                reg_looking: selectedPreference || null,
+                reg_city: adress,
+
+            };
+            console.log('USERDATA', userData);
+
+            try {
+                const response = await registerUser(userData)
+                if (response.error === 1) {
+                    setErrors({ "Nom ou pseudo": "Nom ou pseudo est déjà pris", "Email": "Email déjà pris" })
+                    setIsLoading(false);
+                    dispatch(setError(response));
+                }
+                if (response.error === 0) {
+                    setIsLoading(false);
+                    dispatch(login(response));
+                    cleanInput();
+                    router.replace('/(tabs)/')
+                }
+
+                console.log('USERDATA RETURN API ', response);
+            } catch (error) {
+                console.error('error', error);
+
+                throw error;
+            }
+
+
+
+
+
+
+
+
+
+
+
+
             setTimeout(() => {
                 setIsLoading(false);
-                router.navigate('/importImage');
+                //  router.navigate('/importImage');
             }, 2000);
         } else {
             setErrors((prev) => ({ ...prev, termsAccepted: 'Vous devez accepter les termes et conditions' }));
@@ -237,310 +314,4 @@ const styles = StyleSheet.create({
     },
 });
 
-
-
-
-
-// import React, { useState } from 'react';
-// import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal } from 'react-native';
-// import ParallaxScrollView from '@/components/ParallaxScrollView';
-// import { ThemedText } from '@/components/ThemedText';
-// import { ThemedView } from '@/components/ThemedView';
-// import { router } from 'expo-router';
-// import ThemedInput from '@/components/input/InputText';
-// import ThemedButton from '@/components/button/Button';
-// import { COLORS } from '@/assets/style/style.color';
-// import { LogoWave } from '@/components/LogoWave';
-// import ThemedDatePicker from '@/components/input/InputDate';
-// import GenderSelector from '@/components/input/InputGenreSelector';
-// import MeetingPreferenceSelector from '@/components/input/InputMeetingPreferenceSelector';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
-// import LoadingSpinner from '@/components/spinner/LoadingSpinner';
-
-// type FormField =
-//     | { label: string; value: string; placeholder: string; onChange: React.Dispatch<React.SetStateAction<string>>; isPassword?: boolean }
-//     | { label: string; value: Date; onChange: React.Dispatch<React.SetStateAction<Date>>; isDatePicker: true }
-//     | { label: string; value: 'homme' | 'femme' | null; onChange: React.Dispatch<React.SetStateAction<'homme' | 'femme' | null>>; isGenderSelector: true }
-//     | { label: string; value: 'homme' | 'femme' | 'lesbienne' | 'gay' | null; onChange: React.Dispatch<React.SetStateAction<'homme' | 'femme' | 'lesbienne' | 'gay' | null>>; isMeetingPreferenceSelector: true };
-
-
-// type FormPage = {
-//     fields: FormField[];
-// };
-// export default function SignUpScreen() {
-//     const [name, setName] = useState('');
-//     const [userName, setUserName] = useState('');
-//     const [emailUser, setEmailUser] = useState('');
-//     const [passwordUser, setPasswordUser] = useState('');
-//     const [birthDate, setBirthDate] = useState(new Date());
-//     const [adress, setAdress] = useState('');
-//     const [gender, setGender] = useState<'homme' | 'femme' | null>(null);
-//     const [selectedPreference, setSelectedPreference] = useState<'homme' | 'femme' | 'lesbienne' | 'gay' | null>(null);
-//     const [isPreferencesVisible, setIsPreferencesVisible] = useState(false);
-//     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-//     const [currentPage, setCurrentPage] = useState(0);
-
-//     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-//     const [isLoading, setIsLoading] = useState(false);
-
-//     const handleSelectPreference = (preference: 'homme' | 'femme' | 'lesbienne' | 'gay') => {
-//         setSelectedPreference(preference);
-//         setIsPreferencesVisible(false);
-//     };
-
-//     const handleToggleShowPreferences = () => {
-//         setIsPreferencesVisible(!isPreferencesVisible);
-//     };
-//     const formPages: FormPage[] = [
-//         {
-//             fields: [
-//                 { label: 'Nom ou pseudo', value: name, placeholder: 'Votre nom ou pseudo', onChange: setName },
-//                 { label: 'Prénom', value: userName, placeholder: 'Votre prénom', onChange: setUserName },
-//             ]
-//         },
-//         {
-//             fields: [
-//                 { label: 'Email', value: emailUser, placeholder: 'Votre email', onChange: setEmailUser },
-//                 { label: 'Mot de passe', value: passwordUser, placeholder: 'Votre mot de passe', onChange: setPasswordUser, isPassword: true }
-//             ]
-//         },
-//         {
-//             fields: [
-//                 { label: 'Date de naissance', value: birthDate, onChange: setBirthDate, isDatePicker: true },
-//                 { label: 'Où habites-tu?', value: adress, placeholder: 'Votre adresse', onChange: setAdress }
-//             ]
-//         },
-//         {
-//             fields: [
-//                 { label: 'Genre', value: gender, onChange: setGender, isGenderSelector: true },
-//                 { label: 'Préférence de rencontre', value: selectedPreference, onChange: setSelectedPreference, isMeetingPreferenceSelector: true }
-//             ]
-//         }
-//     ];
-
-//     const validateFields = () => {
-//         const newErrors: { [key: string]: string } = {};
-
-//         formPages[currentPage].fields.forEach((field) => {
-//             if ('value' in field && typeof field.value === 'string') {
-//                 if (field.value.trim() === '') {
-//                     newErrors[field.label] = `${field.label} est requis`;
-//                 } else if (field.label === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
-//                     newErrors[field.label] = 'Email invalide';
-//                 } else if ('isPassword' in field && field.isPassword && field.value.length < 8) {
-//                     newErrors[field.label] = 'Le mot de passe doit comporter au moins 8 caractères';
-//                 }
-//             } else if ('isGenderSelector' in field && field.value === null) {
-//                 newErrors['Genre'] = 'Le genre est requis';
-//             } else if ('isMeetingPreferenceSelector' in field && field.value === null) {
-//                 newErrors['Préférence de rencontre'] = 'La préférence de rencontre est requise';
-//             } else if ('isDatePicker' in field && field.value instanceof Date) {
-//                 const age = new Date().getFullYear() - field.value.getFullYear();
-//                 if (age < 18) {
-//                     newErrors['Date de naissance'] = 'Vous devez avoir au moins 18 ans';
-//                 }
-//             }
-//         });
-
-//         setErrors(newErrors);
-//         return Object.keys(newErrors).length === 0;
-//     };
-
-//     const renderFields = () => {
-//         const page = formPages[currentPage];
-//         return page.fields.map((field, index) => {
-//             if ('isDatePicker' in field) {
-//                 return (
-//                     <View key={index}>
-//                         <ThemedDatePicker label={field.label} value={field.value} onChange={field.onChange}
-//                             error={errors[field.label]}
-//                         />
-//                     </View>
-//                 );
-//             }
-//             if ('isGenderSelector' in field) {
-//                 return (
-//                     <View key={index}>
-//                         <GenderSelector
-//                             selectedGender={field.value}
-//                             onSelectGender={field.onChange}
-//                             error={errors['Genre']}
-//                         />
-//                     </View>
-//                 );
-//             }
-//             if ('isMeetingPreferenceSelector' in field) {
-//                 return (
-//                     <View key={index}>
-//                         <MeetingPreferenceSelector
-//                             selectedPreference={selectedPreference}
-//                             onSelectPreference={handleSelectPreference}
-//                             onToggleShowPreferences={handleToggleShowPreferences}
-//                             isPreferencesVisible={isPreferencesVisible}
-//                             error={errors['Préférence de rencontre']}
-//                         />
-//                     </View>
-//                 );
-//             }
-//             return (
-//                 <View key={index}>
-//                     <ThemedInput
-//                         label={field.label}
-//                         value={field.value}
-//                         placeholder={field.placeholder}
-//                         onChangeText={field.onChange}
-//                         isPassword={field.isPassword}
-//                         style={styles.textColor}
-//                         error={errors[field.label]}
-//                     />
-
-//                 </View>
-//             );
-//         });
-//     };
-
-//     const handleNextPage = () => {
-//         if (validateFields() && currentPage < formPages.length - 1) {
-//             setCurrentPage(currentPage + 1);
-//         }
-//     };
-
-//     const handlePreviousPage = () => {
-//         if (currentPage > 0) {
-//             setCurrentPage(currentPage - 1);
-//         }
-//     };
-
-//     const handleCreateAccount = () => {
-//         if (validateFields() && isTermsAccepted) {
-//             setIsLoading(true);
-//             setTimeout(() => {
-//                 setIsLoading(false);
-//                 router.navigate('/(Auth)/singin');
-//             }, 2000);
-//         } else {
-//             setErrors((prev) => ({ ...prev, termsAccepted: 'Vous devez accepter les termes et conditions' }));
-//         }
-//     };
-
-//     return (
-//         <ParallaxScrollView headerBackgroundColor={{ light: '#fff', dark: '#1D3D47' }} headerImage={<LogoWave />}>
-//             <ThemedView style={styles.titleContainer}>
-//                 <ThemedText type="title" style={styles.textColor}>
-//                     Créez votre compte
-//                 </ThemedText>
-//             </ThemedView>
-
-//             <ScrollView contentContainerStyle={styles.scrollContainer}>
-//                 <View style={styles.progressContainer}>
-//                     <View style={[styles.progressBar, { width: `${((currentPage + 1) / formPages.length) * 100}%` }]} />
-//                 </View>
-//                 {renderFields()}
-
-//                 <View style={styles.navigationContainer}>
-//                     {currentPage > 0 && (
-//                         <TouchableOpacity onPress={handlePreviousPage} style={styles.navButton}>
-//                             <Icon name="chevron-left" size={35} color={COLORS.bg1} />
-//                         </TouchableOpacity>
-//                     )}
-//                     {currentPage < formPages.length - 1 && (
-//                         <TouchableOpacity onPress={handleNextPage} style={styles.navButton}>
-//                             <Icon name="chevron-right" size={35} color={COLORS.bg1} />
-//                         </TouchableOpacity>
-//                     )}
-//                 </View>
-
-//                 {currentPage >= formPages.length - 1 && (
-//                     <View>
-//                         <View style={styles.termsContainer}>
-//                             <TouchableOpacity onPress={() => setIsTermsAccepted(!isTermsAccepted)} style={styles.checkboxContainer}>
-//                                 <Icon name={isTermsAccepted ? 'check-box' : 'check-box-outline-blank'} size={24} color={COLORS.bg1} />
-//                             </TouchableOpacity>
-//                             <Text style={styles.termsText}>
-//                                 En continuant, vous confirmez que vous avez lu et accepté notre{' '}
-//                                 <Text style={styles.link} onPress={() => {/* Navigate to terms and conditions */ }}>Termes et conditions</Text> et{' '}
-//                                 <Text style={styles.link} onPress={() => {/* Navigate to privacy policy */ }}>politique de confidentialité</Text>.
-//                             </Text>
-//                         </View>
-//                         {errors['termsAccepted'] && <Text style={styles.errorText}>{errors['termsAccepted']}</Text>}
-
-//                         <ThemedButton
-//                             onClick={handleCreateAccount}
-//                             text={'Créer votre compte'}
-//                             style={{ marginTop: 30, color: '#232B57' }}
-//                         />
-//                     </View>
-//                 )}
-//             </ScrollView>
-
-//             <LoadingSpinner isVisible={isLoading} text='En cours de création...' size={60} />
-//         </ParallaxScrollView>
-//     );
-// }
-
-// const styles = StyleSheet.create({
-//     scrollContainer: {
-//         flexGrow: 1,
-//         padding: 20,
-//     },
-//     titleContainer: {
-//         alignItems: 'center',
-//         marginBottom: 20,
-//     },
-//     textColor: {
-//         color: COLORS.bg1,
-//     },
-//     progressContainer: {
-//         height: 10,
-//         backgroundColor: '#e0e0e0',
-//         borderRadius: 5,
-//         overflow: 'hidden',
-//         marginBottom: 20,
-//     },
-//     progressBar: {
-//         height: '100%',
-//         backgroundColor: COLORS.jaune,
-//     },
-//     navigationContainer: {
-//         flexDirection: 'row',
-//         justifyContent: 'space-between',
-//         alignItems: 'center',
-//         marginTop: 20,
-//     },
-//     navButton: {
-//         backgroundColor: '#fff',
-//         borderRadius: 50,
-//         padding: 15,
-//         elevation: 5,
-//     },
-//     termsContainer: {
-//         flexDirection: 'row',
-//         alignItems: 'center',
-//         marginTop: 20,
-//     },
-//     checkboxContainer: {
-//         marginRight: 10,
-//     },
-//     termsText: {
-//         fontSize: 14,
-//         color: COLORS.bg1,
-//     },
-//     link: {
-//         color: COLORS.jaune,
-//         textDecorationLine: 'underline',
-//     },
-//     errorText: {
-//         color: 'red',
-//         marginTop: 10,
-//     },
-//     modalBackground: {
-//         flex: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-//     },
-//     activityIndicatorWrapper: {
-//         padding: 20,
-//     },
-// });
 

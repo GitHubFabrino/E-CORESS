@@ -43,7 +43,7 @@ export default function HomeScreen() {
 
   const auth = useSelector((state: RootState) => state.user);
 
-  console.log("datako ayy", auth.user);
+  console.log("DATA IN PROFIL", auth.user);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}

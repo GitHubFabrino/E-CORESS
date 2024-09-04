@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Dimensions, FlatList, View, Image, TouchableOpacity, TextInput, Text } from 'react-native';
+import { StyleSheet, Dimensions, FlatList, View, Image, TouchableOpacity, TextInput, Text, BackHandler, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import CardItem from '@/components/card/CardItem';
@@ -9,6 +9,7 @@ import { COLORS } from '@/assets/style/style.color';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import Input from '@/components/input/InputText';
+import { useFocusEffect } from 'expo-router';
 
 interface CardData {
     id: string;
@@ -78,6 +79,19 @@ export default function AproximiteScreen() {
     const toggleFilterModal = () => {
         setIsFilterModalVisible(!isFilterModalVisible);
     };
+
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //         const onBackPress = () => {
+    //             return true; // Retourne true pour empêcher le retour
+    //         };
+
+    //         BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    //         // Nettoyage de l'écouteur lorsque le composant est démonté
+    //         return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    //     }, [])
+    // );
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
