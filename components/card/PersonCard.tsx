@@ -10,7 +10,7 @@ interface PersonCardProps {
     profilePic: any;
     lastMessage: string;
     isOnline: boolean;
-    unreadCount: number;
+    unreadCount: string;
 
 }
 
@@ -19,7 +19,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ id, name, profilePic, lastMessa
 
         <TouchableOpacity onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}`)} // Utiliser router.push pour naviguer
             style={styles.personCard}>
-            <Image source={profilePic} style={styles.profilePic} />
+            <Image source={{ uri: profilePic }} style={styles.profilePic} />
             <Text style={styles.personName}>{name}</Text>
         </TouchableOpacity>
     );

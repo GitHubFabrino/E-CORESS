@@ -1,13 +1,23 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { COLORS } from '@/assets/style/style.color';
 import { Badge } from 'react-native-elements';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const auth = useSelector((state: RootState) => state.user);
+
+  const [unread, setunread] = useState(auth.allChats.unread.length);
+  useEffect(() => {
+    setunread(auth.allChats.unread.length)
+  }, [auth]);
 
   return (
     <Tabs
@@ -40,13 +50,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={{ position: 'relative' }}>
               <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />
-              <Badge
-                value="3" // Nombre de notifications
+              {unread !== 0 && (<Badge
+                value={unread} // Nombre de notifications
                 status="error"
                 containerStyle={{ position: 'absolute', top: -4, right: -4 }}
                 badgeStyle={{ backgroundColor: COLORS.jaune }}
                 textStyle={{ color: COLORS.white }}
-              />
+              />)}
             </View>
           ),
         }}

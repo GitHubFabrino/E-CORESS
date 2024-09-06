@@ -1,32 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { COLORS } from '@/assets/style/style.color';
 import PersonCard from '@/components/card/PersonCard';
 import MessageCard from '@/components/card/MessageCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface Person {
     id: string;
     name: string;
-    profilePic: any;
-    lastMessage: string;
-    isOnline: boolean;
-    unreadCount: number;
+    firstName: string;
+    age: string;
+    city: string;
+    photo: string;
+    error: number;
+    last_a: string;
+    status: number;
+    online: number;
+    unread: number;
+    premium: string;
+    story: string;
+    stories: string;
+    unreadCount: string;
+    last_m: string;
+    last_m_time: string | null;
+    credits: string;
+    lang_prefix: string;
+    last_m_t: string;
+    check_m: number;
+    gift: number;
 }
 
-const people: Person[] = [
-    { id: '1', name: 'Alice', profilePic: require('@/assets/images/img1.jpeg'), lastMessage: 'Hey there!', isOnline: true, unreadCount: 2 },
-    { id: '2', name: 'Bob', profilePic: require('@/assets/images/img2.jpeg'), lastMessage: 'How are you?', isOnline: false, unreadCount: 0 },
-    { id: '3', name: 'Charlie', profilePic: require('@/assets/images/img1.jpeg'), lastMessage: 'I\'m fine, thanks!', isOnline: true, unreadCount: 0 },
-    { id: '4', name: 'David', profilePic: require('@/assets/images/img2.jpeg'), lastMessage: 'I\'m busy now, sorry!', isOnline: false, unreadCount: 0 },
-    { id: '5', name: 'Eve', profilePic: require('@/assets/images/img1.jpeg'), lastMessage: 'What about you?', isOnline: true, unreadCount: 1 },
-
-];
-
 const MessageScreen: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const auth = useSelector((state: RootState) => state.user);
+    const people: Person[] = auth.allChats.matches
+
+
+
     return (
         <View style={styles.container}>
             <ThemedView style={styles.titleContainer}>
@@ -39,7 +55,7 @@ const MessageScreen: React.FC = () => {
                 renderItem={({ item }) => (
                     <PersonCard
                         name={item.name}
-                        profilePic={item.profilePic} id={item.id} lastMessage={item.lastMessage} isOnline={item.isOnline} unreadCount={item.unreadCount} />
+                        profilePic={item.photo} id={item.id} lastMessage={item.last_m} isOnline={item.online == 0 ? false : true} unreadCount={item.unreadCount} />
                 )}
                 contentContainerStyle={styles.personList}
             />
@@ -54,9 +70,9 @@ const MessageScreen: React.FC = () => {
 
                         id={item.id}
                         name={item.name}
-                        profilePic={item.profilePic}
-                        lastMessage={item.lastMessage}
-                        isOnline={item.isOnline}
+                        profilePic={item.photo}
+                        lastMessage={item.last_m}
+                        isOnline={item.online == 0 ? false : true}
                         unreadCount={item.unreadCount}
                     />
                 )}

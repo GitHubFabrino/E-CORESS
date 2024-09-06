@@ -1,32 +1,93 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, FlatList, Image } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { COLORS } from '@/assets/style/style.color';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
+import { getMessage, sendMessage } from '@/request/ApiRest';
 
 interface Message {
     id: string;
-    text: string;
-    senderId: string;
+    isMe: boolean;
+    seen: string;
+    type: string;  // 'text', 'image', 'story'
+    body: string;
+    story: string;
+    storyData: any[];
+    avatar: string;
+    gif: string;
+    gift: string;
+    photo: string;
+    timestamp: string;
 }
 
 const ChatScreen: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const auth = useSelector((state: RootState) => state.user);
     const route = useRoute();
     const navigation = useNavigation();
     const { userId, userName, profilePic } = route.params as { userId: string; userName: string; profilePic: any };
 
-    const [messages, setMessages] = useState<Message[]>([
-        { id: '1', text: 'Hello!', senderId: userId },
-        { id: '2', text: 'How are you?', senderId: 'me' },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
 
-    const handleSend = () => {
+    console.log('USER ID IN CHAT', userId);
+
+
+    // Simuler la réponse de l'API
+    useEffect(() => {
+        getMessageAll()
+    }, [auth.idUser, userId]);
+
+    const getMessageAll = async () => {
+        const dataMessage = await getMessage(auth.idUser, userId)
+        console.log('DATA RESPONSE MESSAGE', dataMessage);
+        setMessages(dataMessage.chat);
+    }
+
+    const handleSend = async () => {
         if (newMessage.trim()) {
-            setMessages([...messages, { id: (messages.length + 1).toString(), text: newMessage, senderId: 'me' }]);
+            // Créer le nouveau message localement
+            const newMsg: Message = {
+                id: (messages.length + 1).toString(),
+                isMe: true,
+                seen: '0',
+                type: 'text',
+                body: newMessage,
+                story: '0',
+                storyData: [],
+                avatar: profilePic,
+                gif: '0',
+                gift: '0',
+                photo: '0',
+                timestamp: new Date().toLocaleDateString()
+            };
+
+            // Mettre à jour l'UI immédiatement
+            setMessages([...messages, newMsg]);
             setNewMessage('');
+            const query = `${auth.idUser}[message]${userId}[message]${newMessage}[message]text`;
+
+            console.log("QUERY", query);
+
+
+            const dataResponseSendMessage = await sendMessage(query)
+
         }
     };
+
+
+    const renderItem = ({ item }: { item: Message }) => (
+        <View style={[styles.messageContainer, item.isMe ? styles.myMessageContainer : styles.otherMessageContainer]}>
+            {item.isMe ? '' : <Image source={{ uri: item.avatar }} style={styles.avatar} />}
+            <View style={[styles.messageBubble, item.isMe ? styles.myMessage : styles.otherMessage]}>
+                {item.type === 'image' && <Image source={{ uri: item.body }} style={styles.messageImage} />}
+                {item.type === 'text' && <ParseHtmlToComponents html={item.body} />}
+            </View>
+        </View>
+    );
 
     return (
         <View style={styles.container}>
@@ -38,19 +99,15 @@ const ChatScreen: React.FC = () => {
                     <Ionicons name="arrow-back" size={24} color={COLORS.white} />
                 </TouchableOpacity>
 
-                <View style={styles.messageCard} >
-                    <Image source={profilePic} style={styles.profilePic} />
+                <View style={styles.messageCard}>
+                    <Image source={{ uri: profilePic }} style={styles.profilePic} />
                     <Text style={styles.personName}>{userName}</Text>
                 </View>
             </View>
             <FlatList
                 data={messages}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={[styles.messageBubble, item.senderId === 'me' ? styles.myMessage : styles.otherMessage]}>
-                        <Text style={styles.messageText}>{item.text}</Text>
-                    </View>
-                )}
+                renderItem={renderItem}
                 style={styles.messagesList}
                 contentContainerStyle={styles.messagesContainer}
             />
@@ -78,13 +135,6 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
         marginTop: 25
     },
-
-    messageCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-
-    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -111,11 +161,10 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontWeight: 'bold',
     },
-    headerTitle: {
-        fontSize: 18,
-        color: COLORS.white,
-        flex: 1,
-        textAlign: 'center',
+    messageCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
     },
     messagesList: {
         flex: 1,
@@ -123,43 +172,61 @@ const styles = StyleSheet.create({
     messagesContainer: {
         padding: 10,
     },
+    messageContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 10,
+    },
+    avatar: {
+        width: 20,
+        height: 20,
+        borderRadius: 20,
+        marginRight: 10,
+    },
     messageBubble: {
         padding: 10,
         borderRadius: 10,
-        marginBottom: 10,
         maxWidth: '80%',
     },
-    myMessage: {
+    myMessageContainer: {
         alignSelf: 'flex-end',
-        backgroundColor: '#f6cf444f',
-        marginRight: 10
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+    },
+    otherMessageContainer: {
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+    },
+    myMessage: {
+        backgroundColor: COLORS.jaune,
+        color: COLORS.red,
     },
     otherMessage: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#43539251',
-        marginLeft: 10
+        backgroundColor: COLORS.lightGray,
     },
-    messageText: {
-        color: COLORS.bg1,
+    messageImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 10,
     },
     footer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
         borderTopWidth: 1,
         borderTopColor: COLORS.lightGray,
+        padding: 10,
+        backgroundColor: COLORS.white,
+    },
+    iconButton: {
+        marginHorizontal: 10,
     },
     input: {
         flex: 1,
-        height: 40,
-        borderColor: COLORS.lightGray,
-        borderWidth: 1,
+        backgroundColor: COLORS.lightGray,
         borderRadius: 20,
-        paddingHorizontal: 10,
-        marginHorizontal: 10,
-    },
-    iconButton: {
         padding: 10,
+        marginHorizontal: 10,
     },
 });
 

@@ -9,7 +9,7 @@ interface MessageCardProps {
     profilePic: any;
     lastMessage: string;
     isOnline: boolean;
-    unreadCount: number;
+    unreadCount: string;
 
 }
 
@@ -21,12 +21,12 @@ const MessageCard: React.FC<MessageCardProps> = ({ id, name, profilePic, lastMes
             style={styles.messageCard}
             onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}`)} // Utiliser router.push pour naviguer
         >
-            <Image source={profilePic} style={styles.messageProfilePic} />
+            <Image source={{ uri: profilePic }} style={styles.messageProfilePic} />
             <View style={styles.messageContent}>
                 <Text style={styles.messageName}>{name}</Text>
                 <Text style={styles.messageText}>{lastMessage}</Text>
             </View>
-            {unreadCount > 0 && (
+            {unreadCount !== "0" && (
                 <View style={styles.unreadBadge}>
                     <Text style={styles.unreadCount}>{unreadCount}</Text>
                 </View>

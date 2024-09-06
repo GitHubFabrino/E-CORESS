@@ -12,8 +12,8 @@ import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 import ForgotPasswordModal from '@/components/Modal/ForgotPasswordModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { authenticate, login, logout, setError } from '@/store/userSlice';
-import { authenticateUser } from '@/request/ApiRest';
+import { authenticate, login, logout, setAllChats, setError, setSpotlight } from '@/store/userSlice';
+import { authenticateUser, getChats, spotlight, userProfil } from '@/request/ApiRest';
 
 export default function SignInScreen() {
     const [emailUser, setEmailUser] = useState('');
@@ -54,7 +54,15 @@ export default function SignInScreen() {
                 const response = await authenticateUser(emailUser, passwordUser);
                 if (response.error === 0) {
                     dispatch(login(response));
-                    console.log("data la ee:", response);
+                    //          console.log("data la ee:", response);
+                    const profileUser = await userProfil(auth.idUser)
+                    console.log("DATA USER PROFIL", profileUser);
+                    const spotlightData = await spotlight(auth.idUser)
+                    dispatch(setSpotlight(spotlightData))
+                    const getAllChats = await getChats(auth.idUser)
+                    dispatch(setAllChats(getAllChats))
+                    //   console.log("SPOTLIGHT DATA", spotlightData);
+                    console.log("DATA CHAT ", getAllChats);
                     setTimeout(() => {
                         setIsLoading(false);
                         response.user.profile_photo ? router.replace('/(tabs)/') : router.replace('/importImage');
@@ -69,6 +77,7 @@ export default function SignInScreen() {
 
             } catch (error) {
                 dispatch(logout());
+                setIsLoading(false)
                 throw error;
             }
         }

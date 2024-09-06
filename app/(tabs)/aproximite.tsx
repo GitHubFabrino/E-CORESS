@@ -10,6 +10,8 @@ import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import Input from '@/components/input/InputText';
 import { useFocusEffect } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
 
 interface CardData {
     id: string;
@@ -19,20 +21,29 @@ interface CardData {
     isOnline: boolean;
 }
 
-const data: CardData[] = [
-    { id: '1', imageSources: [require('@/assets/images/img1.jpeg'), require('@/assets/images/img2.jpeg')], name: 'Angelo, 25', address: '123 Main St', isOnline: true },
-    { id: '2', imageSources: [require('@/assets/images/img2.jpeg'), require('@/assets/images/img1.jpeg')], name: 'Maria, 30', address: '456 Elm St', isOnline: false },
-    { id: '3', imageSources: [require('@/assets/images/img1.jpeg'), require('@/assets/images/img2.jpeg')], name: 'John, 28', address: '789 Pine St', isOnline: true },
-    { id: '4', imageSources: [require('@/assets/images/img2.jpeg'), require('@/assets/images/img1.jpeg')], name: 'Angelo, 25', address: '123 Main St', isOnline: true },
-    { id: '5', imageSources: [require('@/assets/images/img1.jpeg'), require('@/assets/images/img2.jpeg')], name: 'Maria, 30', address: '456 Elm St', isOnline: false },
-    { id: '6', imageSources: [require('@/assets/images/img2.jpeg'), require('@/assets/images/img1.jpeg')], name: 'John, 28', address: '789 Pine St', isOnline: true },
-];
+
 
 const { width } = Dimensions.get('window');
 const itemWidth = 150;
 const getNumColumns = () => Math.floor(width / itemWidth);
 
 export default function AproximiteScreen() {
+
+
+    const transformApiData = (apiData: any[]): CardData[] => {
+        return apiData.map((item) => ({
+            id: item.id,
+            imageSources: [item.photo, item.spotPhoto],  // Vous pouvez ajouter d'autres sources d'images si nécessaire
+            name: item.name,
+            address: item.city || 'Location unknown',  // Remplacez par la ville ou une valeur par défaut
+            isOnline: item.status === 1,  // Transformer le statut en booléen (en ligne ou hors ligne)
+        }));
+    };
+    const dispatch = useDispatch<AppDispatch>();
+
+    const auth = useSelector((state: RootState) => state.user);
+    const data: CardData[] = transformApiData(auth.spotlight.spotlight)
+
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<CardData | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -92,6 +103,7 @@ export default function AproximiteScreen() {
     //         return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     //     }, [])
     // );
+
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
@@ -116,7 +128,7 @@ export default function AproximiteScreen() {
                     <TouchableOpacity onPress={() => toggleModal(item)} style={styles.cardItem} activeOpacity={0.7}>
                         <View>
                             <CardItem
-                                imageSource={item.imageSources[0]}
+                                imageSource={{ uri: item.imageSources[0] }}
                                 name={item.name}
                                 address={item.address}
                                 onligne={item.isOnline}
@@ -137,7 +149,7 @@ export default function AproximiteScreen() {
                 >
                     <View style={styles.modalContent}>
                         <Image
-                            source={selectedItem.imageSources[currentImageIndex]}
+                            source={{ uri: selectedItem.imageSources[currentImageIndex] }}
                             style={styles.modalImage}
                             resizeMode="cover"
                         />

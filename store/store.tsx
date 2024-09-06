@@ -8,10 +8,11 @@ const store = configureStore({
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [], // Vous pouvez spécifier des actions si nécessaire
-                ignoredPaths: [],   // Vous pouvez spécifier des chemins dans l'état si nécessaire
-            },
+            // serializableCheck: {
+            //     ignoredActions: [], // Vous pouvez spécifier des actions si nécessaire
+            //     ignoredPaths: [],   // Vous pouvez spécifier des chemins dans l'état si nécessaire
+            // },
+            serializableCheck: false,
         }),
 });
 

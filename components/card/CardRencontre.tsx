@@ -44,7 +44,7 @@ const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
     return (
         <View style={styles.cardContainer}>
             <Image
-                source={imageSource}
+                source={{ uri: imageSource }}
                 style={styles.stepImage}
                 resizeMode="cover"
             />
@@ -116,7 +116,16 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     name: {
-        color: COLORS.white
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: COLORS.white,
+        backgroundColor: COLORS.darkBlue,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        borderRadius: 10,
+    },
+    modalName: {
+
     },
     buttonContainer: {
         position: 'absolute',
