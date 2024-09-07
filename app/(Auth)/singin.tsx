@@ -12,8 +12,8 @@ import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 import ForgotPasswordModal from '@/components/Modal/ForgotPasswordModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { authenticate, login, logout, setAllChats, setError, setSpotlight } from '@/store/userSlice';
-import { authenticateUser, getChats, spotlight, userProfil } from '@/request/ApiRest';
+import { login, logout, setError } from '@/store/userSlice';
+import { authenticateUser } from '@/request/ApiRest';
 
 export default function SignInScreen() {
     const [emailUser, setEmailUser] = useState('');
@@ -53,32 +53,25 @@ export default function SignInScreen() {
             try {
                 const response = await authenticateUser(emailUser, passwordUser);
                 if (response.error === 0) {
-                    dispatch(login(response));
-                    //          console.log("data la ee:", response);
-                    const profileUser = await userProfil(auth.idUser)
-                    console.log("DATA USER PROFIL", profileUser);
-                    const spotlightData = await spotlight(auth.idUser)
-                    dispatch(setSpotlight(spotlightData))
-                    const getAllChats = await getChats(auth.idUser)
-                    dispatch(setAllChats(getAllChats))
-                    //   console.log("SPOTLIGHT DATA", spotlightData);
-                    console.log("DATA CHAT ", getAllChats);
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        response.user.profile_photo ? router.replace('/(tabs)/') : router.replace('/importImage');
-                    }, 2000);
-                } else if ((response.error === 1)) {
-                    setIsLoading(false);
-                    dispatch(setError(response));
+
+                    await dispatch(login(response));
+                    const targetRoute = response.user.profile_photo ? '/(tabs)/' : '/importImage';
+                    router.replace(targetRoute);
+
+                } else if (response.error === 1) {
+
                     setErrorEmail("L'email n'existe pas");
-                    setErrorPwd("Le mot de passe incorrect");
+                    setErrorPwd("Le mot de passe est incorrect");
+                    dispatch(setError(response));
+
                     throw new Error(response.error_m);
                 }
 
             } catch (error) {
+                console.error('Error during authentication:', error);
                 dispatch(logout());
-                setIsLoading(false)
-                throw error;
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -93,7 +86,6 @@ export default function SignInScreen() {
     };
 
     const handleForgotPasswordSubmit = (email: string) => {
-        // Remplacez cette fonction par l'envoi de la demande de réinitialisation du mot de passe
         console.log('Demande de réinitialisation envoyée pour :', email);
         setModalVisible(false);
     };

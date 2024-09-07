@@ -7,6 +7,8 @@ import PersonCard from '@/components/card/PersonCard';
 import MessageCard from '@/components/card/MessageCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
+import { getChats } from '@/request/ApiRest';
+import { setAllChats } from '@/store/userSlice';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -37,11 +39,25 @@ interface Person {
 
 const MessageScreen: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-
+    const [people, setPeople] = useState<Person[]>([]);
     const auth = useSelector((state: RootState) => state.user);
-    const people: Person[] = auth.allChats.matches
 
+    useEffect(() => {
+        if (auth.idUser) {
+            getMessage();
+        }
+    }, [auth.newM]);
 
+    const getMessage = async () => {
+        try {
+            const response = await getChats(auth.idUser);
+            dispatch(setAllChats(response));
+            const { matches } = response;
+            setPeople(matches);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -55,7 +71,12 @@ const MessageScreen: React.FC = () => {
                 renderItem={({ item }) => (
                     <PersonCard
                         name={item.name}
-                        profilePic={item.photo} id={item.id} lastMessage={item.last_m} isOnline={item.online == 0 ? false : true} unreadCount={item.unreadCount} />
+                        profilePic={item.photo}
+                        id={item.id}
+                        lastMessage={item.last_m}
+                        isOnline={item.online !== 0}
+                        unreadCount={item.unreadCount}
+                    />
                 )}
                 contentContainerStyle={styles.personList}
             />
@@ -67,12 +88,11 @@ const MessageScreen: React.FC = () => {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <MessageCard
-
                         id={item.id}
                         name={item.name}
                         profilePic={item.photo}
                         lastMessage={item.last_m}
-                        isOnline={item.online == 0 ? false : true}
+                        isOnline={item.online !== 0}
                         unreadCount={item.unreadCount}
                     />
                 )}
@@ -87,6 +107,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
         paddingHorizontal: 10,
         paddingTop: 50,
+
     },
     titleContainer: {
         marginBottom: 10,
@@ -99,7 +120,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 1,
-        marginBottom: 5
+        marginBottom: 5,
     },
     messageList: {
         flexGrow: 1,

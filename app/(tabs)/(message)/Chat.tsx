@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
 import { getMessage, sendMessage } from '@/request/ApiRest';
+import { setNewmessage } from '@/store/userSlice';
 
 interface Message {
     id: string;
@@ -72,8 +73,11 @@ const ChatScreen: React.FC = () => {
 
             console.log("QUERY", query);
 
-
             const dataResponseSendMessage = await sendMessage(query)
+            if (dataResponseSendMessage.status === 200) {
+
+            }
+            dispatch(setNewmessage(!auth.newM))
 
         }
     };

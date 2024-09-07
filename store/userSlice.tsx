@@ -8,7 +8,8 @@ interface UserState {
     isAuthenticated: boolean;
     error: string | null;
     spotlight: any;
-    allChats: any
+    allChats: any,
+    newM: any
 }
 
 const initialState: UserState = {
@@ -17,7 +18,8 @@ const initialState: UserState = {
     isAuthenticated: false,
     error: null,
     spotlight: null,
-    allChats: null
+    allChats: null,
+    newM: null
 };
 
 const userSlice = createSlice({
@@ -43,11 +45,14 @@ const userSlice = createSlice({
         },
         setAllChats: (state, action) => {
             state.allChats = action.payload
-        }
+        },
+        setNewmessage: (state, action) => {
+            state.newM = action.payload
+        },
     },
 });
 
-export const { logout, login, setError, setSpotlight, setAllChats } = userSlice.actions;
+export const { logout, login, setError, setSpotlight, setAllChats, setNewmessage } = userSlice.actions;
 export default userSlice.reducer;
 
 export const authenticate = (email: string, pwd: string): AppThunk => async dispatch => {
@@ -55,9 +60,11 @@ export const authenticate = (email: string, pwd: string): AppThunk => async disp
         const response = await authenticateUser(email, pwd);
         if (response.error === 0) {
             dispatch(login(response));
+            return response
         } else {
             dispatch(setError(response));
-            throw new Error(response.error_m);
+            // throw new Error(response.error_m);
+            return response
         }
     } catch (error) {
         dispatch(logout());

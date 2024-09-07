@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Dimensions, FlatList, View, Animated } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,7 +7,7 @@ import { Link } from 'expo-router';
 import CardRencontre from '@/components/card/CardRencontre';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getChats, spotlight, userProfil } from '@/request/ApiRest';
+import { spotlight } from '@/request/ApiRest';
 import { setSpotlight } from '@/store/userSlice';
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
@@ -45,28 +45,22 @@ export default function HomeScreen() {
 
   const auth = useSelector((state: RootState) => state.user);
 
-  useEffect(() => {
-    console.log("ID USER", auth.idUser);
-    getProfile()
+  // useEffect(() => {
+  //   console.log("ID USER", auth.idUser);
+  //   getProfile()
 
-  }, [auth.user]);
+  // },);
 
   const getProfile = async () => {
     try {
-      const profileUser = await userProfil(auth.idUser)
-      console.log("DATA USER PROFIL", profileUser);
       const spotlightData = await spotlight(auth.idUser)
       dispatch(setSpotlight(spotlightData))
-      const getAllChats = await getChats(auth.idUser)
-      //   console.log("SPOTLIGHT DATA", spotlightData);
-      console.log("DATA CHAT ", getAllChats);
-
     } catch (error) {
       console.error('error', error);
       throw error;
     }
   }
-  console.log("DATA SPOTLIGHT STORE", auth.spotlight);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -76,7 +70,7 @@ export default function HomeScreen() {
       </ThemedView>
       <View style={styles.cardContainer}>
         <FlatList
-          data={auth.spotlight.spotlight}
+          data={auth.spotlight.spotlight || null}
           horizontal
           renderItem={({ item }) => (
             <CardRencontre
