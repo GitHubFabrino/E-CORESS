@@ -9,7 +9,6 @@ import { COLORS } from '@/assets/style/style.color';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import Input from '@/components/input/InputText';
-import { useFocusEffect } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 
@@ -91,18 +90,6 @@ export default function AproximiteScreen() {
         setIsFilterModalVisible(!isFilterModalVisible);
     };
 
-    // useFocusEffect(
-    //     React.useCallback(() => {
-    //         const onBackPress = () => {
-    //             return true; // Retourne true pour empêcher le retour
-    //         };
-
-    //         BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-    //         // Nettoyage de l'écouteur lorsque le composant est démonté
-    //         return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    //     }, [])
-    // );
 
     return (
         <ThemedView style={styles.container}>

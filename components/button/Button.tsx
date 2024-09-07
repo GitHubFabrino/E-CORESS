@@ -7,12 +7,13 @@ interface ButtonProps {
     style?: object;
     onClick: () => void;
     disabled?: boolean;
+    styleText?: object
 }
-const ThemedButton: React.FC<ButtonProps> = ({ text, style, onClick, disabled }) => {
+const ThemedButton: React.FC<ButtonProps> = ({ text, style, onClick, disabled, styleText }) => {
     return (
         <Pressable onPress={onClick} style={[styles.button, style, disabled && styles.disabledButton]}
             disabled={disabled} >
-            <Text style={styles.text}>{text}</Text>
+            <Text style={[styles.text, styleText]}>{text}</Text>
         </Pressable>
     );
 };
