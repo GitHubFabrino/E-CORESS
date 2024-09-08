@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, FlatList, Image, Pressable } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { COLORS } from '@/assets/style/style.color';
@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
 import { getMessage, sendMessage } from '@/request/ApiRest';
-import { setNewmessage } from '@/store/userSlice';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
 interface Message {
@@ -36,7 +35,7 @@ const ChatScreen: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | undefined>();
-
+    const flatListRef = useRef<FlatList>(null);
 
 
     console.log('USER ID IN CHAT', userId);
@@ -105,6 +104,7 @@ const ChatScreen: React.FC = () => {
 
             // Mettre à jour l'UI avec le message texte
             setMessages([...messages, textMsg]);
+            scrollToEnd();
 
             // Créer la query pour le texte
             const queryText = `${auth.idUser}[message]${userId}[message]${newMessage}[message]text`;
@@ -119,7 +119,11 @@ const ChatScreen: React.FC = () => {
             setNewMessage('');
         }
     };
-
+    const scrollToEnd = () => {
+        if (flatListRef.current) {
+            flatListRef.current.scrollToEnd({ animated: true });
+        }
+    };
 
 
     const openImagePicker = async () => {
@@ -178,11 +182,13 @@ const ChatScreen: React.FC = () => {
                 </View>
             </View>
             <FlatList
+                ref={flatListRef}
                 data={messages}
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
                 style={styles.messagesList}
                 contentContainerStyle={styles.messagesContainer}
+                onContentSizeChange={scrollToEnd}
             />
             <View style={styles.footer}>
                 {
