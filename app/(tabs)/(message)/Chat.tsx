@@ -9,6 +9,7 @@ import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
 import { getMessage, sendMessage } from '@/request/ApiRest';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
+import { setNewmessage } from '@/store/userSlice';
 interface Message {
     id: string;
     isMe: boolean;
@@ -117,6 +118,7 @@ const ChatScreen: React.FC = () => {
 
             // Réinitialiser le champ de texte après l'envoi
             setNewMessage('');
+            dispatch(setNewmessage(newMessage))
         }
     };
     const scrollToEnd = () => {
