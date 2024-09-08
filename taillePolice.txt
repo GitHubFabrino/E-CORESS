@@ -4,3 +4,4 @@ Texte du corps (Body Text) : 16 - 18 sp ou pt
 Petite légende (Caption) : 12 - 14 sp ou pt
 label 14 
 Taille du texte de l'input : 16
+

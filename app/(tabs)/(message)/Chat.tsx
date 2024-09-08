@@ -55,36 +55,36 @@ const ChatScreen: React.FC = () => {
 
     const handleSend = async () => {
         // Envoyer l'image si elle est sélectionnée
-        if (selectedImage) {
-            const imageMsg: Message = {
-                id: (messages.length + 1).toString(),
-                isMe: true,
-                seen: '0',
-                type: 'image',
-                body: selectedImage, // URL de l'image
-                story: '0',
-                storyData: [],
-                avatar: profilePic,
-                gif: '0',
-                gift: '0',
-                photo: selectedImage,
-                timestamp: new Date().toLocaleDateString()
-            };
+        // if (selectedImage) {
+        //     const imageMsg: Message = {
+        //         id: (messages.length + 1).toString(),
+        //         isMe: true,
+        //         seen: '0',
+        //         type: 'image',
+        //         body: selectedImage, // URL de l'image 
+        //         story: '0',
+        //         storyData: [],
+        //         avatar: profilePic,
+        //         gif: '0',
+        //         gift: '0',
+        //         photo: selectedImage,
+        //         timestamp: new Date().toLocaleDateString()
+        //     };
 
-            // Mettre à jour l'UI avec le message image
-            setMessages([...messages, imageMsg]);
+        //     // Mettre à jour l'UI avec le message image
+        //     setMessages([...messages, imageMsg]);
 
-            // Créer la query pour l'image
-            const queryImage = `${auth.idUser}[message]${userId}[message]${selectedImage}[message]image`;
-            const responseImage = await sendMessage(queryImage);
-            if (responseImage.status !== 200) {
-                console.error('Erreur lors de l\'envoi de l\'image');
-                return;
-            }
+        //     // Créer la query pour l'image
+        //     const queryImage = `${auth.idUser}[message]${userId}[message]${selectedImage}[message]image`;
+        //     const responseImage = await sendMessage(queryImage);
+        //     if (responseImage.status !== 200) {
+        //         console.error('Erreur lors de l\'envoi de l\'image');
+        //         return;
+        //     }
 
-            // Réinitialiser l'image sélectionnée après l'envoi
-            setSelectedImage(undefined);
-        }
+        //     // Réinitialiser l'image sélectionnée après l'envoi
+        //     setSelectedImage(undefined);
+        // }
 
         // Envoyer le texte si présent
         if (newMessage.trim()) {
@@ -108,8 +108,10 @@ const ChatScreen: React.FC = () => {
 
             // Créer la query pour le texte
             const queryText = `${auth.idUser}[message]${userId}[message]${newMessage}[message]text`;
+            console.log('query ', queryText);
+
             const responseText = await sendMessage(queryText);
-            if (responseText.status !== 200) {
+            if (responseText !== 200) {
                 console.error('Erreur lors de l\'envoi du texte');
             }
 

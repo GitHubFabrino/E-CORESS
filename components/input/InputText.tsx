@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import Icon from 'react-native-vector-icons/Ionicons';
 
 type InputProps = {
-    label: string;
+    label?: string;
     value: string;
     placeholder?: string;
     onChangeText: (text: string) => void;
@@ -23,7 +23,7 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.labelInput, style]}>{label}</Text>
+            {label && <Text style={[styles.labelInput, style]}>{label}</Text>}
             <View style={[
                 styles.inputContainer,
                 error ? styles.inputError : null

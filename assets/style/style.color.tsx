@@ -9,5 +9,7 @@ export const COLORS = {
     white: '#fff',
     grayOne: '#f0f0f06e',
     red: 'red',
-    green: 'green'
+    green: 'green',
+    bg2: '#e6e4e47d',
+    bg3: '#e6e4e444'
 }

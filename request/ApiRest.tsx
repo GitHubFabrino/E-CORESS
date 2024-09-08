@@ -351,8 +351,8 @@ export const sendMessage = async (Query: string): Promise<any> => {
         console.log('DATA OF SEND Message ALL ', responseData);
         if (response.status === 200) {
 
-            console.log('Message envoyé avec succès:', responseData);
-            return response.data
+            console.log('Message envoyé avec succès:', response.status);
+            return response.status
         } else {
             console.error('Erreur lors de l\'envoi du message:', response.statusText);
             throw new Error('Réponse inattendue.');
