@@ -41,7 +41,7 @@ export default function HomeScreenAcceuil() {
 
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#1D3D47', dark: '#1D3D47' }}
+            headerBackgroundColor={{ light: '#1D3D47' }}
             headerImage={
                 <Animated.Image
                     source={images[currentImageIndex]}

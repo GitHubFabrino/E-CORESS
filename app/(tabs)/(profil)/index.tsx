@@ -6,16 +6,18 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
-import { logoutUser } from '@/request/ApiRest';
+import { logoutUser, userProfil } from '@/request/ApiRest';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/store/userSlice';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import AboutSection from '@/components/input/AboutSection';
 import InputSelector from '@/components/input/InputSelector';
+import { UserProfileInterface } from './interfaceProfile';
+import InputSelectorA from '@/components/input/InputSelectorA';
 
 export default function ProfilScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -32,7 +34,22 @@ export default function ProfilScreen() {
     const [placevalue, setplaceValue] = useState<string>('');
     const [modifiPlace, setmodifPlace] = useState(true);
 
+    const [username, setusername] = useState<string>('');
+    const [modifusername, setmodifusername] = useState(true);
 
+    const [name, setplacename] = useState<string>('');
+    const [modifiname, setmodifname] = useState(true);
+
+    const [email, setemail] = useState<string>('');
+    const [modifiemail, setmodifemail] = useState(true);
+
+    const [birthday, setbirthday] = useState<string>('');
+    const [modifbirthday, setmodifbirthday] = useState(true);
+
+    const [genre, setgenre] = useState<string>('');
+    const [modifigenre, setmodifgenre] = useState(true);
+
+    const [profil, setProfil] = useState<UserProfileInterface | null>(null);
 
 
 
@@ -52,6 +69,26 @@ export default function ProfilScreen() {
             setIsModalGallery(false);
         }, [])
     );
+
+    useEffect(() => {
+        if (auth.idUser) {
+            getProfils();
+        }
+    }, [auth.newM]);
+
+    const getProfils = async () => {
+        try {
+            const response = await userProfil(auth.idUser);
+            console.log("RESPONSE QUESTION: ", response);
+            setProfil(response.user)
+
+            console.log('SETPROFILE : ', profil?.ip);
+
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+
 
     const handledeConnect = async () => {
         setIsModalDec(!isModalDeconnexion)
@@ -95,13 +132,6 @@ export default function ProfilScreen() {
         setIsModalOption(false);
         setIsModalDec(false)
     };
-    const data = [
-        { id: 1, image: require('@/assets/images/imageAcceuil/img1.jpeg') },
-        { id: 2, image: require('@/assets/images/imageAcceuil/img1.jpeg') },
-        { id: 3, image: require('@/assets/images/imageAcceuil/img1.jpeg') },
-        { id: 4, image: require('@/assets/images/imageAcceuil/img1.jpeg') },
-        { id: 5, image: require('@/assets/images/imageAcceuil/img1.jpeg') },
-    ]
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
@@ -123,10 +153,11 @@ export default function ProfilScreen() {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <ThemedView>
                     <View style={styles.cardProfilItem}>
-                        <Image source={require('../../../assets/images/imageAcceuil/img1.jpeg')} style={styles.cardProfil} />
+                        <Image source={{ uri: profil?.profile_photo }} style={styles.cardProfil} />
+
                         <View>
-                            <ThemedText type="subtitle" style={styles.cardProfilName}>Nom Prénom</ThemedText>
-                            <ThemedText type="defaultSemiBold" style={styles.cardProfilName}>35 Ans</ThemedText>
+                            <ThemedText type="subtitle" style={styles.cardProfilName}>{profil?.name}</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={styles.cardProfilName}>{profil?.age} Ans</ThemedText>
                         </View>
                     </View>
                 </ThemedView>
@@ -138,12 +169,12 @@ export default function ProfilScreen() {
                         <View style={styles.cardGallery}>
                             <FlatList
                                 horizontal
-                                data={data}
-                                keyExtractor={(item) => item.id.toString()}  // Conversion de l'id en chaîne
+                                data={profil?.galleria}
+                                keyExtractor={(item) => item.photoId.toString()}  // Conversion de l'id en chaîne
                                 renderItem={({ item }) => (
                                     <ThemedView style={styles.containerImage}>
                                         <TouchableOpacity onPress={() => { }}>
-                                            <Image source={item.image} style={styles.cardGalleryImage} />
+                                            <Image source={{ uri: item.image }} style={styles.cardGalleryImage} />
                                         </TouchableOpacity>
                                     </ThemedView>
                                 )}
@@ -156,10 +187,54 @@ export default function ProfilScreen() {
                 }
 
                 {
-                    isModalParam && (<ThemedView>
-                        <ThemedText>Param</ThemedText>
-                    </ThemedView>)
+                    isModalParam && (
+                        <ThemedView>
+                            <ThemedView style={styles.containerInfo1}>
+                                <AboutSection
+                                    titre='Username'
+                                    aproposValue={profil?.username || ''}
+                                    setAproposValue={setusername}
+                                    modifApropos={modifusername}
+                                    setModifApropos={setmodifusername}
+                                />
+
+                                <AboutSection
+                                    titre='E-mail'
+                                    aproposValue={profil?.email || ''}
+                                    setAproposValue={setemail}
+                                    modifApropos={modifiemail}
+                                    setModifApropos={setmodifemail}
+                                />
+
+                                <AboutSection
+                                    titre='Nom'
+                                    aproposValue={profil?.name || ''}
+                                    setAproposValue={setusername}
+                                    modifApropos={modifiname}
+                                    setModifApropos={setmodifname}
+                                />
+
+                                <AboutSection
+                                    titre='Anniversaire'
+                                    aproposValue={profil?.birthday || ''}
+                                    setAproposValue={setbirthday}
+                                    modifApropos={modifbirthday}
+                                    setModifApropos={setmodifbirthday}
+                                />
+                                <AboutSection
+                                    titre='Genre'
+                                    aproposValue={profil?.gender || ''}
+                                    setAproposValue={setgenre}
+                                    modifApropos={modifigenre}
+                                    setModifApropos={setmodifgenre}
+                                    isSelector={true}
+                                    options={['Masculin', 'Feminin', 'Autre']}
+                                />
+                            </ThemedView>
+                        </ThemedView>
+                    )
                 }
+
 
                 <ThemedView style={styles.containerOption}>
                     <TouchableOpacity onPress={() => { }} >
@@ -179,7 +254,7 @@ export default function ProfilScreen() {
                                 <Image source={require('@/assets/images/icon2.png')} style={styles.iconItem} />
                             </View>
                             <View style={styles.textItem}>
-                                <ThemedText type='defaultSemiBold'>5000 crédits</ThemedText>
+                                <ThemedText type='defaultSemiBold'>{profil?.credits} crédits</ThemedText>
                                 <ThemedText type='defaultSemiBold' style={styles.text}>Acheter Crédits</ThemedText>
                             </View>
                         </View>
@@ -201,7 +276,7 @@ export default function ProfilScreen() {
 
                 <AboutSection
                     titre='A Propos'
-                    aproposValue={apropos}
+                    aproposValue={profil?.bio || ''}
                     setAproposValue={setapropos}
                     modifApropos={modifApropos}
                     setModifApropos={setmodifApropos}
@@ -209,7 +284,7 @@ export default function ProfilScreen() {
 
                 <AboutSection
                     titre='Emplacement'
-                    aproposValue={placevalue}
+                    aproposValue={profil?.city || ''}
                     setAproposValue={setplaceValue}
                     modifApropos={modifiPlace}
                     setModifApropos={setmodifPlace}
@@ -264,34 +339,51 @@ export default function ProfilScreen() {
 
                             </View>
                         </ThemedView>
-                        {modifInfo ? (
-                            <ThemedView style={styles.containerText}>
-                                <ThemedText>Texte</ThemedText>
-                                <ThemedText>Texte</ThemedText>
-                            </ThemedView>) :
-                            (<InputSelector
-                                titre='aaaa'
-                                options={options}
-                                selectedValue={selectedOption}
-                                onValueChange={(value) => setSelectedOption(value)}
-                            />)}
-                        {modifInfo ? (
-                            <ThemedView style={styles.containerText}>
-                                <ThemedText>Texte</ThemedText>
-                                <ThemedText>Texte</ThemedText>
-                            </ThemedView>) :
-                            (<InputSelector
-                                titre='aaaa'
-                                options={options}
-                                selectedValue={selectedOption}
-                                onValueChange={(value) => setSelectedOption(value)}
-                            />)}
+                        {profil?.question.map((item) => (
+                            <View key={item.id}>
+                                {modifInfo ? (
+                                    <ThemedView style={styles.containerText}>
+                                        <ThemedText>{item.question}</ThemedText>
+                                        <ThemedText>{item.userAnswer || 'Pas de réponse'}</ThemedText>
+                                    </ThemedView>
+                                ) : (
+                                    <InputSelectorA
+                                        titre={item.question}
+                                        options={item.answers.map(answer => ({
+                                            value: answer.answer,
+                                            label: answer.text
+                                        }))}
+                                        selectedValue={selectedOption}
+                                        onValueChange={(value) => {
+                                            setSelectedOption(value);
+                                            item.userAnswer = value;
+                                        }}
+                                    />
+                                )}
+                            </View>
+                        ))}
 
                     </View>
 
                 </ThemedView>
 
+                <AboutSection
+                    titre='Intérêts'
+                    aproposValue={profil?.bio || ''}
+                    setAproposValue={setapropos}
+                    modifApropos={modifApropos}
+                    setModifApropos={setmodifApropos}
+                />
 
+                <AboutSection
+                    titre='Languages'
+                    aproposValue={profil?.language || ''}
+                    setAproposValue={setapropos}
+                    modifApropos={modifApropos}
+                    setModifApropos={setmodifApropos}
+                    isSelector={true}
+                    options={['Englais', 'Francais']}
+                />
 
 
 
@@ -522,7 +614,18 @@ const styles = StyleSheet.create({
         // backgroundColor: COLORS.bg2,
         color: COLORS.white,
     },
-
+    containerInfo1: {
+        padding: 10,
+        backgroundColor: COLORS.lightGray,
+        borderRadius: 10,
+        marginBottom: 20
+    },
+    infoItem: {
+        marginVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.grayOne,
+        paddingBottom: 5
+    },
 
     messageCard: {
         flexDirection: 'row',
@@ -581,8 +684,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalRight: {
-        justifyContent: 'flex-start', // Place en haut verticalement
-        alignItems: 'flex-end',       // Place à droite horizontalement
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
         marginTop: 50
     },
     modalContent: {

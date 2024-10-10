@@ -166,7 +166,7 @@ export default function SignUpScreen() {
 
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#fff', dark: '#1D3D47' }}
+            headerBackgroundColor={{ light: '#fff' }}
             height={100}
         >
             <ThemedView style={styles.titleContainer}>
@@ -255,7 +255,7 @@ export default function SignUpScreen() {
                     <ThemedText style={styles.textContainer}>J'ai déjà un compte?</ThemedText>
                     <Link href="/(Auth)/singin">
                         <ThemedText type="link" style={styles.link}>
-                            S'inscrire
+                            Se connecté
                         </ThemedText>
                     </Link>
                 </ThemedView>

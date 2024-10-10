@@ -63,7 +63,7 @@ export default function HomeScreen() {
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerBackgroundColor={{ light: '#A1CEDC' }}
     >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Rencontres</ThemedText>
@@ -83,9 +83,9 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
         />
       </View>
-      <Link href="/(Auth)/singin" style={styles.link}>
+      {/* <Link href="/(Auth)/singin" style={styles.link}>
         <ThemedText type="link">Go to SINGIN</ThemedText>
-      </Link>
+      </Link> */}
     </ParallaxScrollView>
   );
 }

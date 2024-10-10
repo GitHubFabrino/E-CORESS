@@ -16,8 +16,8 @@ import { login, logout, setError } from '@/store/userSlice';
 import { authenticateUser } from '@/request/ApiRest';
 
 export default function SignInScreen() {
-    const [emailUser, setEmailUser] = useState('');
-    const [passwordUser, setPasswordUser] = useState('');
+    const [emailUser, setEmailUser] = useState('andry@gmail.com');
+    const [passwordUser, setPasswordUser] = useState('123456789');
     const [isLoading, setIsLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [errorEmail, setErrorEmail] = useState('');

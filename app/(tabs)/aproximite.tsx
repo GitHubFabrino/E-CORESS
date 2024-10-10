@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, Dimensions, FlatList, View, Image, TouchableOpacity, TextInput, Text, BackHandler, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -11,6 +11,7 @@ import Slider from '@react-native-community/slider';
 import Input from '@/components/input/InputText';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
+import { router, useFocusEffect } from 'expo-router';
 
 interface CardData {
     id: string;
@@ -18,6 +19,7 @@ interface CardData {
     name: string;
     address: string;
     isOnline: boolean;
+    photo: any
 }
 
 
@@ -32,6 +34,7 @@ export default function AproximiteScreen() {
     const transformApiData = (apiData: any[]): CardData[] => {
         return apiData.map((item) => ({
             id: item.id,
+            photo: item.photo,
             imageSources: [item.photo, item.spotPhoto],  // Vous pouvez ajouter d'autres sources d'images si nécessaire
             name: item.name,
             address: item.city || 'Location unknown',  // Remplacez par la ville ou une valeur par défaut
@@ -40,8 +43,20 @@ export default function AproximiteScreen() {
     };
     const dispatch = useDispatch<AppDispatch>();
 
+
+
     const auth = useSelector((state: RootState) => state.user);
-    const data: CardData[] = transformApiData(auth.spotlight.spotlight)
+    //const data: CardData[] = transformApiData(auth.spotlight.spotlight)
+    const [data, setdata] = useState(transformApiData(auth.spotlight.spotlight));
+
+    useFocusEffect(
+        useCallback(() => {
+            // Réinitialiser l'état à chaque fois que l'utilisateur revient à cet écran
+            setSelectedItem(null);
+            setIsModalVisible(false);
+            setFilteredData(data); // Si vous avez des filtres actifs, vous pouvez aussi les réinitialiser
+        }, [data])
+    );
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<CardData | null>(null);
@@ -153,7 +168,7 @@ export default function AproximiteScreen() {
                                 <TouchableOpacity style={styles.navButton} onPress={handlePreviousImage}>
                                     <Icon name="chevron-back" size={24} color={COLORS.bg1} />
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.messageButton}>
+                                <TouchableOpacity style={styles.messageButton} onPress={() => router.push(`/Chat?userId=${selectedItem.id}&userName=${selectedItem.name}&profilePic=${selectedItem.photo}`)}>
                                     <Icon name="chatbubble-outline" size={30} color={COLORS.white} />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.navButton} onPress={handleNextImage}>

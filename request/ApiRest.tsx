@@ -231,7 +231,7 @@ export const spotlight = async (userId: string): Promise<any> => {
 };
 
 
-// Fonction pour enregistrer un utilisateur
+
 export const getChats = async (userId: string): Promise<any> => {
     try {
         const response = await apiClient.get('', {
