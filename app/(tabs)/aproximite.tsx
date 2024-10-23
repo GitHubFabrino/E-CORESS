@@ -12,6 +12,7 @@ import Input from '@/components/input/InputText';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { router, useFocusEffect } from 'expo-router';
+import { translations } from '@/service/translate';
 
 interface CardData {
     id: string;
@@ -30,6 +31,11 @@ const getNumColumns = () => Math.floor(width / itemWidth);
 
 export default function AproximiteScreen() {
 
+    const dispatch = useDispatch<AppDispatch>();
+    const auth = useSelector((state: RootState) => state.user);
+    const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+
+    const t = translations[lang];
 
     const transformApiData = (apiData: any[]): CardData[] => {
         return apiData.map((item) => ({
@@ -41,11 +47,7 @@ export default function AproximiteScreen() {
             isOnline: item.status === 1,  // Transformer le statut en booléen (en ligne ou hors ligne)
         }));
     };
-    const dispatch = useDispatch<AppDispatch>();
 
-
-
-    const auth = useSelector((state: RootState) => state.user);
     //const data: CardData[] = transformApiData(auth.spotlight.spotlight)
     const [data, setdata] = useState(transformApiData(auth.spotlight.spotlight));
 
@@ -109,7 +111,7 @@ export default function AproximiteScreen() {
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">A proximité</ThemedText>
+                <ThemedText type="title">{t.aproximite}</ThemedText>
                 <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
                     <Icon name="filter" size={30} color={COLORS.darkBlue} />
                 </TouchableOpacity>
@@ -117,10 +119,10 @@ export default function AproximiteScreen() {
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={showAllUsers} style={styles.button}>
-                    <ThemedText type='defaultSemiBold'>Tous les utilisateurs</ThemedText>
+                    <ThemedText type='defaultSemiBold'>{t.allUsers}</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={showOnlineUsers} style={styles.button}>
-                    <ThemedText type='defaultSemiBold'>Maintenant en ligne</ThemedText>
+                    <ThemedText type='defaultSemiBold'>{t.onLigneNow}</ThemedText>
                 </TouchableOpacity>
             </View>
 
@@ -138,7 +140,8 @@ export default function AproximiteScreen() {
                         </View>
                     </TouchableOpacity>
                 )}
-                keyExtractor={(item) => item.id}
+                // keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => index.toString()}
                 numColumns={getNumColumns()}
                 columnWrapperStyle={styles.columnWrapper}
             />

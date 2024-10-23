@@ -1,5 +1,5 @@
 import { authenticateUser } from '@/request/ApiRest';
-import { createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { AppThunk } from './store';
 
 interface UserState {
@@ -9,7 +9,11 @@ interface UserState {
     error: string | null;
     spotlight: any;
     allChats: any,
-    newM: any
+    newM: any,
+    lang: any,
+    isEmail: boolean,
+    isPhone: boolean,
+    isFb: boolean
 }
 
 const initialState: UserState = {
@@ -19,7 +23,11 @@ const initialState: UserState = {
     error: null,
     spotlight: null,
     allChats: null,
-    newM: null
+    newM: null,
+    lang: null,
+    isEmail: false,
+    isPhone: false,
+    isFb: false
 };
 
 const userSlice = createSlice({
@@ -49,10 +57,18 @@ const userSlice = createSlice({
         setNewmessage: (state, action) => {
             state.newM = action.payload
         },
+        setLanguage: (state, action) => {
+            state.lang = action.payload
+        },
+        setActiveMethod: (state, action: PayloadAction<string>) => {
+            state.isEmail = action.payload === 'email';
+            state.isFb = action.payload === 'fb';
+            state.isPhone = action.payload === 'phone';
+        }
     },
 });
 
-export const { logout, login, setError, setSpotlight, setAllChats, setNewmessage } = userSlice.actions;
+export const { logout, login, setError, setSpotlight, setAllChats, setNewmessage, setLanguage, setActiveMethod } = userSlice.actions;
 export default userSlice.reducer;
 
 export const authenticate = (email: string, pwd: string): AppThunk => async dispatch => {
@@ -60,6 +76,8 @@ export const authenticate = (email: string, pwd: string): AppThunk => async disp
         const response = await authenticateUser(email, pwd);
         if (response.error === 0) {
             dispatch(login(response));
+            console.log('reponse login ', response);
+
             return response
         } else {
             dispatch(setError(response));

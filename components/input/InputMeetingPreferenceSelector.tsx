@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { COLORS } from '@/assets/style/style.color';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Assurez-vous d'installer cette bibliothèque
+import { translations } from '@/service/translate';
 
 type Preference = 'homme' | 'femme' | 'lesbienne' | 'gay';
 
@@ -10,7 +11,8 @@ interface MeetingPreferenceSelectorProps {
     onSelectPreference: (preference: Preference) => void;
     onToggleShowPreferences: () => void;
     isPreferencesVisible: boolean;
-    error?: string
+    error?: string;
+    lang: 'FR' | 'EN';
 }
 
 const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
@@ -18,8 +20,10 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
     onSelectPreference,
     onToggleShowPreferences,
     isPreferencesVisible,
-    error
+    error,
+    lang
 }) => {
+    const t = translations[lang];
     const preferences: Preference[] = ['homme', 'femme', 'lesbienne', 'gay'];
 
     return (
@@ -28,7 +32,7 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
                 style={styles.button}
                 onPress={onToggleShowPreferences}
             >
-                <Text style={styles.buttonText}>Je veux rencontrer</Text>
+                <Text style={styles.buttonText}>{t.meet}</Text>
             </TouchableOpacity>
             {isPreferencesVisible && (
                 <View style={styles.preferencesContainer}>
@@ -57,8 +61,7 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
                                     },
                                 ]}
                             >
-                                {preference.charAt(0).toUpperCase() +
-                                    preference.slice(1)}
+                                {t[preference].charAt(0).toUpperCase() + t[preference].slice(1)}
                             </Text>
                             {preference === selectedPreference && (
                                 <Icon name="check" size={20} color={COLORS.bg1} style={styles.icon} />
@@ -77,7 +80,7 @@ const MeetingPreferenceSelector: React.FC<MeetingPreferenceSelectorProps> = ({
                     style={styles.option}
 
                 >
-                    <Text style={styles.optionText}>{selectedPreference}</Text>
+                    <Text style={styles.optionText}>{t[selectedPreference]}</Text>
 
                     <Icon name="check" size={20} color={COLORS.bg1} style={styles.icon} />
 

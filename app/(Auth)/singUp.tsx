@@ -16,8 +16,17 @@ import { registerUser } from '@/request/ApiRest';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { login, setError } from '@/store/userSlice';
+import { translations } from '@/service/translate';
 
 export default function SignUpScreen() {
+
+
+    const dispatch = useDispatch<AppDispatch>();
+    const auth = useSelector((state: RootState) => state.user);
+    const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+
+    const t = translations[lang];
+
     const [name, setName] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
     const [emailUser, setEmailUser] = useState<string>('');
@@ -45,33 +54,56 @@ export default function SignUpScreen() {
         const newErrors: { [key: string]: string } = {};
 
         const fields = [
-            { label: 'Nom ou pseudo', value: name, placeholder: 'Votre nom ou pseudo', onChange: setName },
-            { label: 'Prénom', value: userName, placeholder: 'Votre prénom', onChange: setUserName },
-            { label: 'Email', value: emailUser, placeholder: 'Votre email', onChange: setEmailUser },
-            { label: 'Mot de passe', value: passwordUser, placeholder: 'Votre mot de passe', onChange: setPasswordUser, isPassword: true },
-            { label: 'Date de naissance', value: birthDate || new Date(), onChange: setBirthDate, isDatePicker: true },
-            { label: 'Où habites-tu?', value: adress, placeholder: 'Votre adresse', onChange: setAdress },
-            { label: 'Genre', value: gender, onChange: setGender, isGenderSelector: true },
-            { label: 'Préférence de rencontre', value: selectedPreference, onChange: setSelectedPreference, isMeetingPreferenceSelector: true }
+            { label: t.errors.nameRequired, value: name, placeholder: 'Votre nom ou pseudo', onChange: setName },
+            { label: t.errors.firstNameRequired, value: userName, placeholder: 'Votre prénom', onChange: setUserName },
+            { label: t.errors.emailRequired, value: emailUser, placeholder: 'Votre email', onChange: setEmailUser },
+            { label: t.errors.passwordRequired, value: passwordUser, placeholder: 'Votre mot de passe', onChange: setPasswordUser, isPassword: true },
+            { label: t.errors.birthDateRequired, value: birthDate || new Date(), onChange: setBirthDate, isDatePicker: true },
+            { label: t.errors.addressRequired, value: adress, placeholder: 'Votre adresse', onChange: setAdress },
+            { label: t.errors.genderRequired, value: gender, onChange: setGender, isGenderSelector: true },
+            { label: t.errors.preferenceRequired, value: selectedPreference, onChange: setSelectedPreference, isMeetingPreferenceSelector: true }
         ];
 
+        // fields.forEach((field) => {
+        //     if ('value' in field && typeof field.value === 'string') {
+        //         if (field.value.trim() === '') {
+        //             newErrors[field.label] = `${field.label} ${t.errors.required}`;
+        //         } else if (field.label === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+        //             newErrors[field.label] = 'Email invalide';
+        //         } else if (t.errors.passwordRequired in field && field.isPassword && field.value.length < 8) {
+        //             newErrors[field.label] = t.errors.minPasswordLength
+        //         }
+        //     } else if (t.errors.genderRequired in field && field.value === null) {
+        //         newErrors[t.errors.genderRequired] = t.errors.genderRequired;
+        //     } else if (field.isMeetingPreferenceSelector in field && field.value === null) {
+        //         newErrors[t.errors.preferenceRequired] = t.errors.preferenceRequired;
+        //     } else if ('isDatePicker' in field && field.value instanceof Date) {
+        //         const age = new Date().getFullYear() - field.value.getFullYear();
+        //         if (age < 18) {
+        //             newErrors['Date de naissance'] = t.errors.ageRestriction;
+        //         }
+        //     }
+        // });
+
         fields.forEach((field) => {
-            if ('value' in field && typeof field.value === 'string') {
+            if (typeof field.value === 'string') {
                 if (field.value.trim() === '') {
-                    newErrors[field.label] = `${field.label} est requis`;
+                    newErrors[field.label] = `${field.label} ${t.errors.required}`;
                 } else if (field.label === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
                     newErrors[field.label] = 'Email invalide';
-                } else if ('isPassword' in field && field.isPassword && field.value.length < 8) {
-                    newErrors[field.label] = 'Le mot de passe doit comporter au moins 8 caractères';
+                } else if (field.isPassword && field.value.length < 8) {  // Check if isPassword exists
+                    newErrors[field.label] = t.errors.minPasswordLength;
                 }
-            } else if ('isGenderSelector' in field && field.value === null) {
-                newErrors['Genre'] = 'Le genre est requis';
-            } else if ('isMeetingPreferenceSelector' in field && field.value === null) {
-                newErrors['Préférence de rencontre'] = 'La préférence de rencontre est requise';
-            } else if ('isDatePicker' in field && field.value instanceof Date) {
+            } else if (field.value === null) {
+                if (field.isGenderSelector) {
+                    newErrors[t.errors.genderRequired] = t.errors.genderRequired;
+                } else if (field.isMeetingPreferenceSelector) {
+                    newErrors[t.errors.preferenceRequired] = t.errors.preferenceRequired;
+                }
+            } else if (field.isDatePicker && field.value instanceof Date) {
                 const age = new Date().getFullYear() - field.value.getFullYear();
                 if (age < 18) {
-                    newErrors['Date de naissance'] = 'Vous devez avoir au moins 18 ans';
+                    newErrors['Date de naissance'] = t.errors.ageRestriction;
                 }
             }
         });
@@ -103,9 +135,6 @@ export default function SignUpScreen() {
         setIsTermsAccepted(false)
     }
 
-    const dispatch = useDispatch<AppDispatch>();
-
-    const auth = useSelector((state: RootState) => state.user);
     const handleCreateAccount = async () => {
         if (validateFields() && isTermsAccepted) {
             setIsLoading(true);
@@ -143,24 +172,12 @@ export default function SignUpScreen() {
 
                 throw error;
             }
-
-
-
-
-
-
-
-
-
-
-
-
             setTimeout(() => {
                 setIsLoading(false);
                 //  router.navigate('/importImage');
             }, 2000);
         } else {
-            setErrors((prev) => ({ ...prev, termsAccepted: 'Vous devez accepter les termes et conditions' }));
+            setErrors((prev) => ({ ...prev, termsAccepted: t.errors.termsAccepted }));
         }
     };
 
@@ -171,66 +188,68 @@ export default function SignUpScreen() {
         >
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type="title" style={styles.textColor}>
-                    Créez votre compte
+                    {t.createAccount}
                 </ThemedText>
             </ThemedView>
 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View>
                     <ThemedInput
-                        label="Nom ou pseudo"
+                        label={t.name}
                         value={name}
-                        placeholder="Votre nom ou pseudo"
+                        placeholder={t.namePlaceholder}
                         onChangeText={setName}
-                        error={errors['Nom ou pseudo']}
+                        error={errors[t.errors.nameRequired]}
                     />
                     <ThemedInput
-                        label="Prénom"
+                        label={t.firstName}
                         value={userName}
-                        placeholder="Votre prénom"
+                        placeholder={t.firstNamePlaceholder}
                         onChangeText={setUserName}
-                        error={errors['Prénom']}
+                        error={errors[t.errors.firstNameRequired]}
                     />
                     <ThemedInput
-                        label="Email"
+                        label={t.email}
                         value={emailUser}
-                        placeholder="Votre email"
+                        placeholder={t.placeholderEmail}
                         onChangeText={setEmailUser}
-                        error={errors['Email']}
+                        error={errors[t.errors.emailRequired]}
                     />
                     <ThemedInput
-                        label="Mot de passe"
+                        label={t.password}
                         value={passwordUser}
-                        placeholder="Votre mot de passe"
+                        placeholder={t.passwordPlaceholder}
                         onChangeText={setPasswordUser}
                         isPassword={true}
-                        error={errors['Mot de passe']}
+                        error={errors[t.errors.passwordRequired]}
                     />
                     <ThemedDatePicker
-                        label="Date de naissance"
+                        label={t.birthDateLabel}
                         value={birthDate || new Date()}
                         onChange={setBirthDate}
-                        error={errors['Date de naissance']}
+                        error={errors[t.errors.birthDateRequired]}
                     />
 
                     <ThemedInput
-                        label="Où habites-tu?"
+                        label={t.address}
                         value={adress}
-                        placeholder="Votre adresse"
+                        placeholder={t.addressPlaceholder}
                         onChangeText={setAdress}
-                        error={errors['Où habites-tu?']}
+                        error={errors[t.errors.addressRequired]}
                     />
                     <GenderSelector
                         selectedGender={gender}
                         onSelectGender={setGender}
-                        error={errors['Genre']}
+                        error={errors[t.errors.genderRequired]}
+                        lang={lang}
                     />
                     <MeetingPreferenceSelector
                         selectedPreference={selectedPreference}
                         onSelectPreference={handleSelectPreference}
                         onToggleShowPreferences={handleToggleShowPreferences}
                         isPreferencesVisible={isPreferencesVisible}
-                        error={errors['Préférence de rencontre']}
+                        error={errors[t.errors.preferenceRequired]}
+                        lang={lang}
                     />
                 </View>
                 <View style={styles.termsContainer}>
@@ -238,30 +257,29 @@ export default function SignUpScreen() {
                         <Icon name={isTermsAccepted ? 'check-box' : 'check-box-outline-blank'} size={24} color={COLORS.bg1} />
                     </TouchableOpacity>
                     <Text style={styles.termsText}>
-                        En continuant, vous confirmez que vous avez lu et accepté notre{' '}
-                        <Text style={styles.link} onPress={() => {/* Navigate to terms and conditions */ }}>Termes et conditions</Text> et{' '}
-                        <Text style={styles.link} onPress={() => {/* Navigate to privacy policy */ }}>politique de confidentialité</Text>.
+                        {t.termsText}
+                        <Text style={styles.link} onPress={() => {/* Navigate to terms and conditions */ }}>{t.termsText1}</Text>
                     </Text>
                 </View>
                 {errors['termsAccepted'] && <Text style={styles.errorText}>{errors['termsAccepted']}</Text>}
 
                 <ThemedButton
                     onClick={handleCreateAccount}
-                    text="Créer votre compte"
+                    text={t.createAccountButton}
                     style={{ marginTop: 30 }}
                 />
 
                 <ThemedView style={styles.accountContainer}>
-                    <ThemedText style={styles.textContainer}>J'ai déjà un compte?</ThemedText>
+                    <ThemedText style={styles.textContainer}>{t.alreadyHaveAccount1}</ThemedText>
                     <Link href="/(Auth)/singin">
                         <ThemedText type="link" style={styles.link}>
-                            Se connecté
+                            {t.singIn}
                         </ThemedText>
                     </Link>
                 </ThemedView>
             </ScrollView>
 
-            <LoadingSpinner isVisible={isLoading} text="En cours de création..." size={60} />
+            <LoadingSpinner isVisible={isLoading} text={t.loading} size={60} />
         </ParallaxScrollView>
     );
 }

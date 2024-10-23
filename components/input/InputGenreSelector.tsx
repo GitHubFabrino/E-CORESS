@@ -1,24 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '@/assets/style/style.color';
+import { translations } from '@/service/translate';
 
 interface GenderSelectorProps {
     selectedGender: 'homme' | 'femme' | null;
     onSelectGender: (gender: 'homme' | 'femme') => void;
+    lang: 'FR' | 'EN';
     error?: string;
 }
 
-const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelectGender, error }) => {
+const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelectGender, error, lang }) => {
+    const t = translations[lang];
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Vous êtes :</Text>
+            <Text style={styles.label}>{t.genderLabel1}</Text>
             <View style={styles.optionsContainer}>
                 <TouchableOpacity
                     style={[styles.card]}
                     onPress={() => onSelectGender('homme')}
                 >
                     <View style={styles.optionContent}>
-                        <Text style={styles.optionText}>Homme</Text>
+                        <Text style={styles.optionText}>{t.male}</Text>
                         <View style={[styles.radioCircle, selectedGender === 'homme' && styles.selectedRadioCircle]}>
                             {selectedGender === 'homme' && <View style={styles.selectedRadio} />}
                         </View>
@@ -29,7 +32,7 @@ const GenderSelector: React.FC<GenderSelectorProps> = ({ selectedGender, onSelec
                     onPress={() => onSelectGender('femme')}
                 >
                     <View style={styles.optionContent}>
-                        <Text style={styles.optionText}>Femme</Text>
+                        <Text style={styles.optionText}>{t.femelle}</Text>
                         <View style={[styles.radioCircle, selectedGender === 'femme' && styles.selectedRadioCircle]}>
                             {selectedGender === 'femme' && <View style={styles.selectedRadio} />}
                         </View>

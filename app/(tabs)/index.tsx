@@ -9,6 +9,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { spotlight } from '@/request/ApiRest';
 import { setSpotlight } from '@/store/userSlice';
+import { translations } from '@/service/translate';
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
@@ -20,6 +21,16 @@ const data = [
 ];
 
 export default function HomeScreen() {
+  const dispatch = useDispatch<AppDispatch>();
+  const auth = useSelector((state: RootState) => state.user);
+  const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+
+  const t = translations[lang];
+
+
+
+
+
   const [liked, setLiked] = useState(false);
   const [scaleValue] = useState(new Animated.Value(0)); // Animation scale
 
@@ -41,9 +52,6 @@ export default function HomeScreen() {
       ]).start();
     }
   };
-  const dispatch = useDispatch<AppDispatch>();
-
-  const auth = useSelector((state: RootState) => state.user);
 
   // useEffect(() => {
   //   console.log("ID USER", auth.idUser);
@@ -61,12 +69,14 @@ export default function HomeScreen() {
     }
   }
 
+  console.log();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC' }}
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Rencontres</ThemedText>
+        <ThemedText type="title">{t.meeting}</ThemedText>
       </ThemedView>
       <View style={styles.cardContainer}>
         <FlatList
@@ -79,7 +89,8 @@ export default function HomeScreen() {
               name={item.name}
             />
           )}
-          keyExtractor={item => item.id}
+          // keyExtractor={item => item.id}
+          keyExtractor={(item, index) => index.toString()}
           showsHorizontalScrollIndicator={false}
         />
       </View>

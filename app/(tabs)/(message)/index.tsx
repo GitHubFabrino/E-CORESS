@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { getChats } from '@/request/ApiRest';
 import { setAllChats } from '@/store/userSlice';
+import { translations } from '@/service/translate';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -38,9 +39,12 @@ interface Person {
 }
 
 const MessageScreen: React.FC = () => {
+
     const dispatch = useDispatch<AppDispatch>();
-    const [people, setPeople] = useState<Person[]>([]);
     const auth = useSelector((state: RootState) => state.user);
+    const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+    const t = translations[lang];
+    const [people, setPeople] = useState<Person[]>([]);
 
     useEffect(() => {
         if (auth.idUser) {
@@ -81,7 +85,7 @@ const MessageScreen: React.FC = () => {
                 contentContainerStyle={styles.personList}
             />
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="subtitle">Récents</ThemedText>
+                <ThemedText type="subtitle">{t.recent}</ThemedText>
             </ThemedView>
             <FlatList
                 data={people}

@@ -18,9 +18,14 @@ import AboutSection from '@/components/input/AboutSection';
 import InputSelector from '@/components/input/InputSelector';
 import { UserProfileInterface } from './interfaceProfile';
 import InputSelectorA from '@/components/input/InputSelectorA';
+import { translations } from '@/service/translate';
 
 export default function ProfilScreen() {
     const dispatch = useDispatch<AppDispatch>();
+    const auth = useSelector((state: RootState) => state.user);
+    const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+
+    const t = translations[lang];
 
     const [isModalOption, setIsModalOption] = useState(false);
     const [isModalParam, setIsModalParam] = useState(false);
@@ -50,7 +55,7 @@ export default function ProfilScreen() {
     const [modifigenre, setmodifgenre] = useState(true);
 
     const [profil, setProfil] = useState<UserProfileInterface | null>(null);
-
+    const [option, setoption] = useState(['']);
 
 
     //  const [placevalue, setplaceValue] = useState<string>('');
@@ -59,7 +64,6 @@ export default function ProfilScreen() {
     const [selectedOption, setSelectedOption] = useState<string>('Option 1');
     const options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
 
-    const auth = useSelector((state: RootState) => state.user);
 
     useFocusEffect(
         useCallback(() => {
@@ -71,7 +75,7 @@ export default function ProfilScreen() {
     );
 
     useEffect(() => {
-        if (auth.idUser) {
+        if (auth?.idUser) {
             getProfils();
         }
     }, [auth.newM]);
@@ -132,10 +136,19 @@ export default function ProfilScreen() {
         setIsModalOption(false);
         setIsModalDec(false)
     };
+
+    useEffect(() => {
+        if (lang === 'EN') {
+            setoption(['Male', 'Female', 'Other']);
+        } else {
+            setoption(['Masculin', 'Feminin', 'Autre']);
+        }
+    }, [lang]);
+
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Profil</ThemedText>
+                <ThemedText type="title">{t.profile}</ThemedText>
                 <ThemedView style={styles.containerIcon}>
 
                     <TouchableOpacity onPress={handelGallery} style={styles.filterButton}>
@@ -157,7 +170,7 @@ export default function ProfilScreen() {
 
                         <View>
                             <ThemedText type="subtitle" style={styles.cardProfilName}>{profil?.name}</ThemedText>
-                            <ThemedText type="defaultSemiBold" style={styles.cardProfilName}>{profil?.age} Ans</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={styles.cardProfilName}>{profil?.age} {t.years}</ThemedText>
                         </View>
                     </View>
                 </ThemedView>
@@ -191,7 +204,7 @@ export default function ProfilScreen() {
                         <ThemedView>
                             <ThemedView style={styles.containerInfo1}>
                                 <AboutSection
-                                    titre='Username'
+                                    titre={t.username}
                                     aproposValue={profil?.username || ''}
                                     setAproposValue={setusername}
                                     modifApropos={modifusername}
@@ -199,7 +212,7 @@ export default function ProfilScreen() {
                                 />
 
                                 <AboutSection
-                                    titre='E-mail'
+                                    titre={t.email}
                                     aproposValue={profil?.email || ''}
                                     setAproposValue={setemail}
                                     modifApropos={modifiemail}
@@ -207,7 +220,7 @@ export default function ProfilScreen() {
                                 />
 
                                 <AboutSection
-                                    titre='Nom'
+                                    titre={t.Name}
                                     aproposValue={profil?.name || ''}
                                     setAproposValue={setusername}
                                     modifApropos={modifiname}
@@ -215,20 +228,20 @@ export default function ProfilScreen() {
                                 />
 
                                 <AboutSection
-                                    titre='Anniversaire'
+                                    titre={t.birthday}
                                     aproposValue={profil?.birthday || ''}
                                     setAproposValue={setbirthday}
                                     modifApropos={modifbirthday}
                                     setModifApropos={setmodifbirthday}
                                 />
                                 <AboutSection
-                                    titre='Genre'
+                                    titre={t.genderLabel}
                                     aproposValue={profil?.gender || ''}
                                     setAproposValue={setgenre}
                                     modifApropos={modifigenre}
                                     setModifApropos={setmodifgenre}
                                     isSelector={true}
-                                    options={['Masculin', 'Feminin', 'Autre']}
+                                    options={option}
                                 />
                             </ThemedView>
                         </ThemedView>
@@ -275,7 +288,7 @@ export default function ProfilScreen() {
                 </ThemedView>
 
                 <AboutSection
-                    titre='A Propos'
+                    titre={t.about}
                     aproposValue={profil?.bio || ''}
                     setAproposValue={setapropos}
                     modifApropos={modifApropos}
@@ -283,7 +296,7 @@ export default function ProfilScreen() {
                 />
 
                 <AboutSection
-                    titre='Emplacement'
+                    titre={t.ubication}
                     aproposValue={profil?.city || ''}
                     setAproposValue={setplaceValue}
                     modifApropos={modifiPlace}
@@ -292,7 +305,7 @@ export default function ProfilScreen() {
 
                 <ThemedView style={styles.containerInfo}>
                     <View style={styles.itemTitre}>
-                        <ThemedText type='defaultSemiBold'>Informations personnelles</ThemedText>
+                        <ThemedText type='defaultSemiBold'>{t.infoPer}</ThemedText>
                         {modifInfo ? (
                             <TouchableOpacity onPress={() => setmodifInfo(!modifInfo)}>
                                 <Icon name="create-outline" size={25} color={COLORS.darkBlue} />
@@ -305,7 +318,7 @@ export default function ProfilScreen() {
                     </View>
                     <View style={styles.infoCard}>
                         <ThemedView>
-                            <ThemedText type='default'>Choisissez un partenaire :</ThemedText>
+                            <ThemedText type='default'>{t.partenaire} :</ThemedText>
                             <View style={styles.item}>
                                 <InputSelector
                                     style={styles.selec}
@@ -314,13 +327,13 @@ export default function ProfilScreen() {
                                     onValueChange={(value) => setSelectedOption(value)}
                                 />
                                 <TouchableOpacity onPress={() => { }} style={styles.envoyeDemande}>
-                                    <ThemedText style={styles.envText}>envoyer la demande</ThemedText>
+                                    <ThemedText style={styles.envText}>{t.request}</ThemedText>
                                 </TouchableOpacity>
                             </View>
                         </ThemedView>
 
                         <ThemedView>
-                            <ThemedText type='default'>Mes partenaires :</ThemedText>
+                            <ThemedText type='default'>{t.myPartener} :</ThemedText>
                             <View style={styles.item}>
                                 <View style={styles.messageCard}>
                                     <Image source={require('@/assets/images/imageAcceuil/img1.jpeg')} style={styles.messageProfilePic} />
@@ -368,7 +381,7 @@ export default function ProfilScreen() {
                 </ThemedView>
 
                 <AboutSection
-                    titre='Intérêts'
+                    titre={t.interest}
                     aproposValue={profil?.bio || ''}
                     setAproposValue={setapropos}
                     modifApropos={modifApropos}
