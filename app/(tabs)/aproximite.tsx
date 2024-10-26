@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Dimensions, FlatList, View, Image, TouchableOpacity, TextInput, Text, BackHandler, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -13,6 +13,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { router, useFocusEffect } from 'expo-router';
 import { translations } from '@/service/translate';
+import { fetchUserData } from '@/request/ApiRest';
+// import { parse } from 'react-native-html-parser';
+import cheerio from 'cheerio';
 
 interface CardData {
     id: string;
@@ -36,6 +39,94 @@ export default function AproximiteScreen() {
     const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
 
     const t = translations[lang];
+
+
+    useEffect(() => {
+        const getData = async () => {
+            const htmlString = await fetchUserData("18,57", "2", "36", "0", "0", ""); // Attends la résolution de la promesse
+            console.log(htmlString);
+
+
+        };
+
+        getData(); // Appelle la fonction pour obtenir les données
+    }, []);
+
+    interface User {
+        profileLink: string;
+        name: string;
+        age: string;
+        location: string;
+        photoUrl: string;
+    }
+
+
+    const extractData = (html: string): User[] => {
+        const users: User[] = [];
+
+        // Utilisation d'expressions régulières pour extraire les informations
+        const userPattern = /<div class="search">.*?<h1><a href="(.*?)">(.*?)<\/a><\/h1>.*?<span class="loc"><span>(.*?)<\/span><\/span>.*?<img class="profile-photo" data-src="(.*?)"/gs;
+
+        let match;
+        while ((match = userPattern.exec(html)) !== null) {
+            const profileLink = match[1] || '';
+            const nameWithAge = match[2] || '';
+            const age = nameWithAge.split(',')[1]?.trim() || 'Age unknown';
+            const location = match[3] || 'Location unknown';
+            const photoUrl = match[4] || '';
+
+            users.push({
+                profileLink,
+                name: nameWithAge.split(',')[0] || 'Name unknown',
+                age,
+                location,
+                photoUrl
+            });
+        }
+
+        return users;
+    };
+    interface UserProfile {
+        name: string;
+        age: string;
+        image: string;
+        location: string;
+    }
+    const extractUserProfiles = (html: string): UserProfile[] => {
+        const userProfiles: UserProfile[] = [];
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+
+        const userCards = wrapper.querySelectorAll('.search');
+
+        userCards.forEach((card) => {
+            const nameElement = card.querySelector('.name h1 a');
+            const imageElement = card.querySelector('.profile-photo');
+            const locationElement = card.querySelector('.loc span');
+
+            // Vérification si nameElement est défini avant d'accéder à textContent
+            const nameText = nameElement ? nameElement.textContent : null;
+            const ageMatch = nameText?.match(/,\s*(\d+)/);
+
+            // Vérification si locationElement est défini avant d'accéder à textContent
+            const locationText = locationElement ? locationElement.textContent : 'Unknown';
+
+            const userProfile: UserProfile = {
+                name: nameText ? nameText.split(',')[0].trim() : 'Unknown',
+                age: ageMatch ? ageMatch[1] : 'Unknown',
+                image: imageElement?.getAttribute('data-src') || '',
+                location: locationText?.trim() || '',
+            };
+
+            userProfiles.push(userProfile);
+        });
+
+        console.log('zzzz', userProfiles);
+
+
+        return userProfiles;
+    };
+    // Utilisation de la fonction pour extraire les profils
 
     const transformApiData = (apiData: any[]): CardData[] => {
         return apiData.map((item) => ({

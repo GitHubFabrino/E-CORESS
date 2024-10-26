@@ -13,7 +13,7 @@ import ForgotPasswordModal from '@/components/Modal/ForgotPasswordModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { login, logout, setError, setLanguage } from '@/store/userSlice';
-import { authenticateUser } from '@/request/ApiRest';
+import { authenticateUser, fetchUserData } from '@/request/ApiRest';
 import { translations } from '@/service/translate';
 
 
@@ -41,6 +41,8 @@ export default function SignInScreen() {
 
     useEffect(() => {
         setLang(auth.lang);
+
+
     }, [auth.user, auth.lang]);
 
     const validateForm = () => {
@@ -68,6 +70,9 @@ export default function SignInScreen() {
             setIsLoading(true);
             try {
                 const response = await authenticateUser(emailUser, passwordUser);
+
+                console.log("REPOSNSE LOGIN", response);
+
                 if (response.error === 0) {
 
                     await dispatch(login(response));

@@ -30,6 +30,7 @@ export default function HomeScreenAcceuil() {
     ];
 
     useEffect(() => {
+        setLang('FR')
         const interval = setInterval(() => {
             Animated.timing(fadeAnim, {
                 toValue: 0,
