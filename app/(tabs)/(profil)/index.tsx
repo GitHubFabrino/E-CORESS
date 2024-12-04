@@ -19,6 +19,7 @@ import InputSelector from '@/components/input/InputSelector';
 import { UserProfileInterface } from './interfaceProfile';
 import InputSelectorA from '@/components/input/InputSelectorA';
 import { translations } from '@/service/translate';
+import InterestList from '@/components/input/InteretList';
 
 export default function ProfilScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -380,12 +381,18 @@ export default function ProfilScreen() {
 
                 </ThemedView>
 
-                <AboutSection
+                {/* <AboutSection
                     titre={t.interest}
                     aproposValue={profil?.bio || ''}
                     setAproposValue={setapropos}
                     modifApropos={modifApropos}
                     setModifApropos={setmodifApropos}
+                /> */}
+
+
+                <InterestList
+                    title={t.interest}
+                    profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
                 />
 
                 <AboutSection

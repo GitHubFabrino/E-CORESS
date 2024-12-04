@@ -9,12 +9,13 @@ const { width: screenWidth } = Dimensions.get('window');
 interface CardRencontreProps {
     imageSource: any;
     name: string;
+    onNext: () => void;
 }
 
 const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
-    const [liked, setLiked] = useState(false);  // Pour gérer l'état du bouton
-    const [heartShown, setHeartShown] = useState(false); // Pour gérer l'affichage du cœur flottant
-    const floatingHeart = useRef(new Animated.Value(0)).current; // Valeur animée pour l'icône flottante
+    const [liked, setLiked] = useState(false);
+    const [heartShown, setHeartShown] = useState(false);
+    const floatingHeart = useRef(new Animated.Value(0)).current;
 
     const handleHeartPress = () => {
         if (!liked) {
@@ -81,6 +82,86 @@ const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name }) => {
         </View>
     );
 };
+// interface CardRencontreProps {
+//     imageSource: any;
+//     name: string;
+//     onNext: () => void; // Nouvelle prop
+// }
+
+// const CardRencontre: React.FC<CardRencontreProps> = ({ imageSource, name, onNext }) => {
+//     const [liked, setLiked] = useState(false);
+//     const [heartShown, setHeartShown] = useState(false);
+//     const floatingHeart = useRef(new Animated.Value(0)).current;
+
+//     const handleHeartPress = () => {
+//         setLiked(true);
+//         animateHeart();
+//         onNext(); // Passer à la carte suivante
+//     };
+
+//     const handleClosePress = () => {
+//         setLiked(false);
+//         onNext(); // Passer à la carte suivante
+//     };
+
+//     const animateHeart = () => {
+//         setHeartShown(true);
+//         Animated.sequence([
+//             Animated.timing(floatingHeart, {
+//                 toValue: 1,
+//                 duration: 600,
+//                 useNativeDriver: true,
+//             }),
+//             Animated.timing(floatingHeart, {
+//                 toValue: 0,
+//                 duration: 0,
+//                 useNativeDriver: true,
+//             }),
+//         ]).start(() => setHeartShown(false));
+//     };
+
+//     return (
+//         <View style={styles.cardContainer}>
+//             <Image source={{ uri: imageSource }} style={styles.stepImage} resizeMode="cover" />
+//             <View style={styles.textOverlay}>
+//                 <View style={styles.nameContainer}>
+//                     <Icon name="shield-checkmark" size={25} color={COLORS.jaune} style={styles.icon} />
+//                     <ThemedText type="midleText" style={styles.name}>
+//                         {name}
+//                     </ThemedText>
+//                 </View>
+//             </View>
+//             <View style={styles.buttonContainer}>
+//                 <TouchableOpacity style={styles.closeButton} onPress={handleClosePress}>
+//                     <Icon name="close-outline" size={40} color={COLORS.bg1} />
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
+//                     <Icon name={liked ? 'heart' : 'heart-outline'} size={40} color={liked ? COLORS.red : COLORS.white} />
+//                 </TouchableOpacity>
+//             </View>
+//             {heartShown && (
+//                 <Animated.View
+//                     style={[
+//                         styles.floatingHeart,
+//                         {
+//                             opacity: floatingHeart,
+//                             transform: [
+//                                 {
+//                                     translateY: floatingHeart.interpolate({
+//                                         inputRange: [0, 1],
+//                                         outputRange: [0, -100],
+//                                     }),
+//                                 },
+//                             ],
+//                         },
+//                     ]}
+//                 >
+//                     <Icon name="heart" size={80} color={COLORS.red} />
+//                 </Animated.View>
+//             )}
+//         </View>
+//     );
+// };
 
 const styles = StyleSheet.create({
     cardContainer: {

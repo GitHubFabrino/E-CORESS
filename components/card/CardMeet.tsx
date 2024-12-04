@@ -8,11 +8,11 @@ interface CardItemProps {
     imageSource: any;
     name: string;
     address: string;
-    onligne: boolean
-    age: string
+    age: string,
+    fan: number
 }
 
-const CardItem: React.FC<CardItemProps> = ({ imageSource, name, address, onligne, age }) => {
+const CardMeet: React.FC<CardItemProps> = ({ imageSource, name, address, age, fan }) => {
     return (
         <View style={styles.card}>
             <View style={styles.image}>
@@ -21,15 +21,17 @@ const CardItem: React.FC<CardItemProps> = ({ imageSource, name, address, onligne
             <View style={styles.infoContainer}>
                 <View style={styles.textContainer}>
                     <ThemedText type="midleText" style={styles.name}>{name}, {age}</ThemedText>
+
+                    {fan === 1 ? (
+                        <View style={styles.heart}><Icon name="heart" size={15} color={"red"} /></View>
+                    ) : (<ThemedText type="midleText" style={styles.name}></ThemedText>)}
                 </View>
                 <View style={styles.locationContainer}>
                     <Icon name="location-outline" size={15} color={COLORS.bg1} />
                     <ThemedText type="midleText" style={styles.address}>{address}</ThemedText>
                 </View>
             </View>
-            {onligne && (
-                <View style={styles.onlineIndicator} />
-            )}
+
         </View>
     );
 };
@@ -66,6 +68,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    heart: {
+        width: 30,
+        height: 30,
+        borderRadius: 30,
+
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
     name: {
         fontSize: 14,
         fontWeight: 'bold',
@@ -90,4 +100,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CardItem;
+export default CardMeet;

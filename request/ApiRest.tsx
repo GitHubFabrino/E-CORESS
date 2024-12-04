@@ -12,76 +12,6 @@ const apiClient = axios.create({
     },
     withCredentials: true,
 });
-// export const authenticateUser = async (email: string, password: string): Promise<any> => {
-//     try {
-//         const response = await apiClient.get('', {
-//             params: {
-//                 action: 'login',
-//                 login_email: email,
-//                 login_pass: password,
-//                 dID: 0,
-//             }
-//         });
-
-//         const responseData = response.data;
-//         console.log("DATA", responseData);
-
-//         if (typeof responseData === 'object') {
-//             if (responseData.error) {
-//                 return responseData;
-//             } else {
-//                 return responseData;
-//             }
-//         } else if (typeof responseData === 'string') {
-//             try {
-//                 const jsonData = JSON.parse(responseData);
-//                 if (jsonData.error) {
-//                     return jsonData;
-//                 } else {
-//                     return jsonData;
-//                 }
-//             } catch (e) {
-//                 console.error('Erreur de parsing des données JSON:', e);
-//                 throw new Error('Réponse inattendue, impossible de parser la chaîne JSON.');
-//             }
-//         } else {
-//             throw new Error('Réponse inattendue.');
-//         }
-//     } catch (error) {
-//         console.error("Erreur lors de l'authentification:", error);
-//         throw error;
-//     }
-// };
-
-
-// export const fetchUserData = async (): Promise<string> => {
-//     const url = 'https://www.e-coress.com/requests/apiService.php';
-//     const data = new URLSearchParams({
-//         action: 'meet_filter',
-//         age: '18,57',
-//         gender: '2',
-//         radius: '36',
-//         online: '0',
-//         limit: '0',
-//         username: ''
-//     });
-
-//     const config = {
-//         headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//             'Cookie': 'user=49; Path=/requests; Expires=Tue, 19 Jan 2038 03:14:07 GMT;'
-//         }
-//     };
-
-//     try {
-//         const response = await axios.post(url, data.toString(), config);
-//         console.log("fetch data meet : ", response.data); // Traiter les données ici
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error fetching data:', error);
-//         return ''
-//     }
-// };
 
 export const fetchUserData = async (
     age: string,
@@ -90,7 +20,7 @@ export const fetchUserData = async (
     online: string,
     limit: string,
     username: string
-): Promise<string> => {
+): Promise<any> => {
     const url = 'https://www.e-coress.com/requests/apiService.php';
 
     // Configurer les paramètres
@@ -125,35 +55,46 @@ export const fetchUserData = async (
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        return '';
+        return { data: [] }
     }
 };
-const extractData = (html: string) => {
-    const data = [];
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
 
-    const userCards = tempDiv.getElementsByClassName('search');
-    for (let i = 0; i < userCards.length; i++) {
-        const card = userCards[i];
+export const fetchUserDataWall = async (
+    id: string,
+    b: string,
+): Promise<any> => {
+    const url = 'https://www.e-coress.com/requests/belloo.php';
 
-        const profileLinkElement = card.querySelector('h1 a') as HTMLAnchorElement | null;
-        const nameElement = card.querySelector('h1 a') as HTMLAnchorElement | null;
-        const locationElement = card.querySelector('.loc span') as HTMLSpanElement | null;
-        const photoElement = card.querySelector('.profile-photo') as HTMLImageElement | null;
+    // Configurer les paramètres
+    const data = new URLSearchParams({
+        action: 'wall',
+        id,
+        b
+    });
 
-        const profileLink = profileLinkElement ? profileLinkElement.href : 'Link unknown';
-        const name = nameElement ? nameElement.innerText : 'Name unknown';
-        const age = name.split(',')[1]?.trim() || 'Age unknown';
-        const location = locationElement ? locationElement.innerText : 'Location unknown';
-        const photoUrl = photoElement ? photoElement.getAttribute('data-src') || '' : '';
+    try {
+        // Récupérer le cookie depuis AsyncStorage
+        const sessionCookie = await AsyncStorage.getItem('session_cookie');
+        if (!sessionCookie) {
+            throw new Error('Session cookie not found');
+        }
 
-        data.push({ profileLink, name, age, location, photoUrl });
+        // Configurer les en-têtes avec le cookie récupéré
+        const config = {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': sessionCookie
+            }
+        };
+
+        // Effectuer la requête
+        const response = await axios.post(url, data.toString(), config);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return { data: [] }
     }
-    return data;
 };
-// Appel de la fonction
-
 
 export const authenticateUser = async (email: string, password: string): Promise<any> => {
     try {
@@ -167,9 +108,7 @@ export const authenticateUser = async (email: string, password: string): Promise
         });
         // Vérifier si la réponse contient des cookies
         const cookies = response.headers['set-cookie'];
-        const cookies2 = response.headers;
         console.log('Cookies1:', cookies);
-        console.log('Cookies2:', cookies2);
 
         // Stockage de chaque cookie dans AsyncStorage
         if (cookies && cookies.length > 0) {
@@ -323,6 +262,10 @@ export const logoutUser = async (idApp: string): Promise<any> => {
         throw error;
     }
 };
+
+
+
+
 // Fonction pour extraire le JSON depuis la réponse brute
 const extractJsonFromResponse = (response: string) => {
     const jsonStart = response.indexOf('{');
@@ -348,10 +291,6 @@ export const userProfil = async (userId: string): Promise<any> => {
                 id: userId
             }
         });
-        // console.log("RESPONSE BRUTE : ", response.data);
-        // console.log("RESPONSE BRUTE : ", JSON.stringify(response.data, null, 2));
-
-        // console.log('RESPONSE TYPE ', typeof response.data);
         if (typeof response.data === 'string') {
             try {
                 const jsonData = JSON.parse(response.data);
@@ -372,6 +311,7 @@ export const userProfil = async (userId: string): Promise<any> => {
         throw error;
     }
 };
+
 
 
 export const spotlight = async (userId: string): Promise<any> => {
@@ -558,45 +498,291 @@ export const sendMessage = async (Query: string): Promise<any> => {
     }
 };
 
+// ************************** 03/12/24
+export const updateCredits = async (idUser: string, type: string, credits: string, reason: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: 'updateCredits',
+                // query: `${idUser},1,1,Credits for like,`
+                query: `${idUser},${type},${credits},${reason},`
+            }
+        });
 
-// //solution 1
-// // console.log("RESPONSE BRUTE : ", response.data);
-// console.log("RESPONSE BRUTE : ", JSON.stringify(response.data, null, 2));
-// const jsonString = JSON.stringify(response.data, null, 2)
-// // Supprimer toutes les balises HTML
-// const a = jsonString.replace(/<\/?[^>]+>/g, "");
-// //  console.log("JSON SANS HTML", a);
-// const cleanString = a.replace(/\s/g, "");
-// const withoutBracesString = cleanString.replace(/^\{|\}$/g, "");
-// // Parse the cleaned string into a JavaScript object
-// const jsonObject = JSON.parse(cleanString);
-// console.log("JSON OK", jsonObject.user.question);
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Mise à jour des crédits réussie:", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de la mise à jour des crédits:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
 
-
-
-
-     // const jsonString = formateResponse(response.data)
-
-
-
-        // // Nettoyer et parser les données JSON
-        // try {
-        //     const jsonData = JSON.parse(jsonString);
-        //     const json2 = extractJsonFromResponse(response.data)
-
-        //     console.log('JSONDATAERROR : ', jsonData.error);
-        //     console.log('JSONDATA1: ', jsonData);
-        //     console.log('JSONDATA2: ', json2);
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des crédits:", error);
+        throw error;
+    }
+};
 
 
-        //     if (jsonData.error) {
-        //         return jsonData; // Retourner l'objet d'erreur
-        //     } else {
-        //         // console.log('data ici : ', jsonData);
+export const gameLike = async (uid1: string, uid2: string, type: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: 'game_like',
+                uid1: uid1,
+                uid2: uid2,
+                uid3: type
 
-        //         return jsonData; // Retourner les données utilisateur
-        //     }
-        // } catch (e) {
-        //     console.error('Erreur de parsing des données JSON:', e);
-        //     throw e;
-        // }
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'game_like' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'game_like':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error) {
+        console.error("Erreur lors de l'action 'game_like':", error);
+        throw error;
+    }
+};
+
+
+export const addVisit = async (uid1: string, uid2: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: 'addVisit',
+                uid1: uid1,
+                uid2: uid2
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'addVisit' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'addVisit':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error) {
+        console.error("Erreur lors de l'action 'addVisit':", error);
+        throw error;
+    }
+};
+
+
+export const meet = async (uid1: string, uid2: string, uid3: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "meet",
+                uid1: uid1,
+                uid2: uid2,
+                uid3: uid3,
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'meet' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'meet':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'meet':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'meet': ${error.message || error}`);
+    }
+};
+
+
+export const cuser = async (uid1: string, uid2: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "cuser",
+                uid1: uid1,
+                uid2: uid2,
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'cuser' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'cuser':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'cuser':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'cuser': ${error.message || error}`);
+    }
+};
+
+export const message = async (idSend: string, idReceve: string, photo: string, name: string, credit: number): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "message",
+                query: `${idSend}[rt]${idReceve}[rt]${photo}[rt]${name}[rt]Credits[rt]credits[rt]${credit}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'message' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'message':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'message':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'message': ${error.message || error}`);
+    }
+};
+
+export const sendMessageCredit = async (idSend: string, idReceve: string, credit: number): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "sendMessage",
+                query: `${idSend}[message]${idReceve}[message]Credits[message]credits[message]${credit}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'Sendmessage' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'Sendmessage':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'Sendmessage':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'Sendmessage': ${error.message || error}`);
+    }
+};
+
+
+export const updateSRadius = async (uid1: string, radius: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "updateSRadius",
+                query: `${uid1},${radius}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'updateSRadius' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'updateSRadius':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'updateSRadius':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'updateSRadius': ${error.message || error}`);
+    }
+};
+
+export const updateGender = async (uid1: string, genre: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "updateGender",
+                query: `${uid1},${genre}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'updateGender' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'updateGender':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'updateGender':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'updateGender': ${error.message || error}`);
+    }
+};
+
+export const updateAge = async (uid1: string, age: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "updateSRadius",
+                query: `${uid1},18,${age}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'updateAge' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'updateAge':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'updateAge':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'updateAge': ${error.message || error}`);
+    }
+};
+
+export const game = async (uid1: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "game",
+                id: uid1
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'game' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'game':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'game':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'game': ${error.message || error}`);
+    }
+};

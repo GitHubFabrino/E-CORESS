@@ -9,13 +9,14 @@ import { COLORS } from '@/assets/style/style.color';
 import InputSelector from './InputSelector';
 
 interface AboutSectionProps {
-    titre: String;
+    titre?: String;
     aproposValue: string;
-    setAproposValue: (text: string) => void;
-    modifApropos: boolean;
-    setModifApropos: (value: boolean) => void;
+    setAproposValue?: (text: string) => void;
+    modifApropos?: boolean;
+    setModifApropos?: (value: boolean) => void;
     isSelector?: boolean;
     options?: string[];
+    see?: boolean
 }
 
 const AboutSection: React.FC<AboutSectionProps> = ({
@@ -25,15 +26,16 @@ const AboutSection: React.FC<AboutSectionProps> = ({
     modifApropos,
     setModifApropos,
     isSelector = false,
-    options = []
+    options = [],
+    see = true
 }) => {
     return (
         <ThemedView style={styles.containerInfo}>
             <View style={styles.itemTitre}>
                 <ThemedText type='defaultSemiBold'>{titre}</ThemedText>
-                <TouchableOpacity onPress={() => setModifApropos(!modifApropos)}>
+                {see && <TouchableOpacity onPress={() => setModifApropos!(!modifApropos)}>
                     <Icon name={modifApropos ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                </TouchableOpacity>
+                </TouchableOpacity>}
             </View>
             <View style={styles.infoCard}>
                 {modifApropos ? (
@@ -45,11 +47,11 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                             selectedValue={aproposValue}
                             onValueChange={(itemValue) => {
                                 console.log("Selected Value:", itemValue); // Débogage
-                                setAproposValue(itemValue);
+                                setAproposValue!(itemValue);
                             }}
                         />
                     ) : (
-                        <InputText value={aproposValue} onChangeText={setAproposValue} />
+                        <InputText value={aproposValue} onChangeText={setAproposValue!} />
                     )
                 )}
             </View>
@@ -75,6 +77,7 @@ const styles = StyleSheet.create({
     },
     infoCard: {
         width: '100%',
-        padding: 10
+        padding: 10,
+
     },
 });

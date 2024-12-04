@@ -64,6 +64,7 @@ export const translations: {
         aproximite: String
         allUsers: String
         onLigneNow: String
+        popular: string
         recent: String
         profile: String
         years: String
@@ -78,7 +79,26 @@ export const translations: {
         username: String
         Name: String
         birthday: String
-
+        noData: String
+        suggestion: String
+        All: string
+        showMe: String
+        age: String
+        applyFilter: String
+        findByEmail: string
+        local: String
+        localisationInconu: string,
+        spend1: string,
+        spend2: string,
+        transfert: string,
+        sendCredit: string,
+        cancel: string,
+        sug1: string,
+        sug2: string,
+        sug3: string,
+        sug4: string,
+        notNow: string,
+        pack: string
     };
 } = {
     FR: {
@@ -158,7 +178,28 @@ export const translations: {
         noAnswer: 'Pas de réponse',
         username: 'Nom d\'utilisateur',
         Name: 'Nom',
-        birthday: 'Anniversaire'
+        birthday: 'Anniversaire',
+        noData: "Rien n'a été trouvé",
+        All: "Tous",
+        showMe: "Montre-Moi",
+        age: "Âge",
+        applyFilter: "Appliquer les filtres",
+        findByEmail: "Recherche par email",
+        local: "Localisation",
+        localisationInconu: "Localisation inconnue",
+        suggestion: "Veuillez élargir votre filtre de recherche pour obtenir plus de résultats",
+        spend1: "Vous dépensez",
+        spend2: "Crédit(s)",
+        transfert: 'Transférer des crédits de vous à ',
+        sendCredit: 'Envoyer',
+        cancel: 'Annuller',
+        popular: 'Les plus populaires',
+        sug1: 'Élargissez votre recherche',
+        sug2: 'Désolé, personne ne correspond à vos préférences',
+        sug3: 'Rechercher des personnes d\'autres âges?',
+        sug4: 'Changez vos préférences',
+        notNow: 'Pas Maintenant',
+        pack: 'Forfaits de crédits'
     },
     EN: {
         welcome: "WELCOME TO",
@@ -237,6 +278,28 @@ export const translations: {
         noAnswer: 'No answer',
         username: 'Username',
         Name: 'Name',
-        birthday: 'Birthday'
+        birthday: 'Birthday',
+        noData: "Nothing has been found ",
+        All: "All",
+        showMe: "Show me",
+        age: "Age",
+        applyFilter: "Apply the filters",
+        findByEmail: "Search by email",
+        local: "Localisation",
+        localisationInconu: "Localisation unknow",
+        suggestion: "Please expand your search filter to get more results",
+        spend1: "You spend",
+        spend2: "Credit(s)",
+        transfert: 'Transfer credits from you to',
+        sendCredit: 'Send Credit',
+        cancel: 'Cancel',
+        popular: 'Users most populars',
+        sug1: 'Expand you search',
+        sug2: 'Sorry, no one fits you preferences',
+        sug3: 'Search for people of other ages?',
+        sug4: 'Change you preferences',
+        notNow: 'Not Now',
+        pack: 'Credits packages'
+
     }
 };

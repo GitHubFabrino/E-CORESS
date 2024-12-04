@@ -12,9 +12,10 @@ type InputProps = {
     isPassword?: boolean;
     style?: object;
     error?: string;
+    styleforme?: object;
 };
 
-const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChangeText, secureTextEntry, isPassword = false, style }) => {
+const Input: React.FC<InputProps> = ({ error, label, value, placeholder, styleforme, onChangeText, secureTextEntry, isPassword = false, style }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -27,9 +28,9 @@ const Input: React.FC<InputProps> = ({ error, label, value, placeholder, onChang
             <View style={[
                 styles.inputContainer,
                 error ? styles.inputError : null
-            ]}>
+                , style]}>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, styleforme]}
                     placeholder={placeholder}
                     secureTextEntry={isPassword && !isPasswordVisible}
                     value={value}
