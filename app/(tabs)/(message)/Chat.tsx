@@ -6,10 +6,21 @@ import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
-import { getMessage, sendMessage } from '@/request/ApiRest';
+import { getGif, getMessage, message, sendImage, sendMessage, today, updateCredits, userProfil } from '@/request/ApiRest';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
 import { setNewmessage } from '@/store/userSlice';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { ThemedText } from '@/components/ThemedText';
+import { translations } from '@/service/translate';
+import Modal from 'react-native-modal/dist/modal';
+import { Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+const itemWidth = 60;
+const getNumColumns = () => Math.floor(width / itemWidth);
 interface Message {
     id: string;
     isMe: boolean;
@@ -24,11 +35,30 @@ interface Message {
     photo: string; // Utilisé uniquement pour le type 'image'
     timestamp: string;
 }
+interface GifImage {
+    url: string;
+}
 
+// Type pour un objet dans le tableau `data`
+interface GifData {
+    images: {
+        fixed_height_small?: GifImage;
+    };
+}
+
+// Type pour le tableau des résultats
+type GifArray = GifData[];
+type DataImage = {
+    id: number;
+    Image: string | null;
+}[];
 
 const ChatScreen: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const auth = useSelector((state: RootState) => state.user);
+    const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+    const t = translations[lang];
+    const [dataImages, setdataImages] = useState<DataImage>([]);
     const route = useRoute();
     const navigation = useNavigation();
     const { userId, userName, profilePic } = route.params as { userId: string; userName: string; profilePic: any };
@@ -38,89 +68,132 @@ const ChatScreen: React.FC = () => {
     const [selectedImage, setSelectedImage] = useState<string | undefined>();
     const flatListRef = useRef<FlatList>(null);
 
-
-    console.log('USER ID IN CHAT', userId);
-
-
-    // Simuler la réponse de l'API
     useEffect(() => {
         getMessageAll()
+        getSolde()
+        getSoldeChat()
+        getAllGift()
     }, [auth.idUser, userId]);
 
+    useFocusEffect(
+        useCallback(() => {
+            getSolde()
+            getSoldeChat()
+        }, [])
+    );
+
+    const [soldeChat, setSolde] = useState<number>(0);
+    const [soldeUser, setsoldeUser] = useState<number>(0);
+
+    const [SoldeUserInsuffisant, setSoldeUserInsuffisant] = useState(false);
+    const [State, setState] = useState('');
+
+    const closeTarif = () => {
+        setSoldeUserInsuffisant(false);
+    };
+
+    const getAllGift = async () => {
+        // Fonction pour récupérer l'index et `downsized_medium`
+        const findIndexAndImage = (data: GifArray) => {
+            return data.map((item, index) => ({
+                id: index + 1, // Index de l'objet (commence à 1)
+                Image: item.images?.fixed_height_small?.url || null, // URL de l'image ou null si non disponible
+            }));
+        };
+
+        // Appeler la fonction avec des données
+        const resultData = await getGif(); // Typiquement, cela renvoie un tableau
+        const result = findIndexAndImage(resultData);
+        setdataImages(result); // Mettre à jour l'état avec des données typées
+
+        // Afficher le résultat
+        console.log(result);
+    };
+
+
+    const getSoldeChat = async () => {
+        const resultData = await userProfil(userId);
+        setSolde(resultData.user.credits)
+        setState(resultData.user.online)
+        console.log('SOLDE', resultData.user.credits);
+
+    };
+    const getSolde = async () => {
+        const resultData = await userProfil(auth.idUser);
+        setsoldeUser(resultData.user.credits)
+
+    };
     const getMessageAll = async () => {
         const dataMessage = await getMessage(auth.idUser, userId)
         console.log('DATA RESPONSE MESSAGE', dataMessage);
         setMessages(dataMessage.chat);
     }
 
-    const handleSend = async () => {
-        // Envoyer l'image si elle est sélectionnée
-        // if (selectedImage) {
-        //     const imageMsg: Message = {
-        //         id: (messages.length + 1).toString(),
-        //         isMe: true,
-        //         seen: '0',
-        //         type: 'image',
-        //         body: selectedImage, // URL de l'image 
-        //         story: '0',
-        //         storyData: [],
-        //         avatar: profilePic,
-        //         gif: '0',
-        //         gift: '0',
-        //         photo: selectedImage,
-        //         timestamp: new Date().toLocaleDateString()
-        //     };
+    const [option, setOption] = useState(false);
 
-        //     // Mettre à jour l'UI avec le message image
-        //     setMessages([...messages, imageMsg]);
-
-        //     // Créer la query pour l'image
-        //     const queryImage = `${auth.idUser}[message]${userId}[message]${selectedImage}[message]image`;
-        //     const responseImage = await sendMessage(queryImage);
-        //     if (responseImage.status !== 200) {
-        //         console.error('Erreur lors de l\'envoi de l\'image');
-        //         return;
-        //     }
-
-        //     // Réinitialiser l'image sélectionnée après l'envoi
-        //     setSelectedImage(undefined);
-        // }
-
-        // Envoyer le texte si présent
-        if (newMessage.trim()) {
-            const textMsg: Message = {
-                id: (messages.length + 1).toString(),
-                isMe: true,
-                seen: '0',
-                type: 'text',
-                body: newMessage,
-                story: '0',
-                storyData: [],
-                avatar: profilePic,
-                gif: '0',
-                gift: '0',
-                photo: '0',
-                timestamp: new Date().toLocaleDateString()
-            };
-
-            // Mettre à jour l'UI avec le message texte
-            setMessages([...messages, textMsg]);
-            scrollToEnd();
-
-            // Créer la query pour le texte
-            const queryText = `${auth.idUser}[message]${userId}[message]${newMessage}[message]text`;
-            console.log('query ', queryText);
-
-            const responseText = await sendMessage(queryText);
-            if (responseText !== 200) {
-                console.error('Erreur lors de l\'envoi du texte');
-            }
-
-            // Réinitialiser le champ de texte après l'envoi
-            setNewMessage('');
-            dispatch(setNewmessage(newMessage))
+    const showOption = () => {
+        if (showGif || showGift) {
+            setShowGif(false);
+            setShowGift(false);
+            setOption(false); // Ensure `option` is turned off if either `showGif` or `showGift` is true
+        } else {
+            setOption((prevOption) => !prevOption); // Toggle `option` only if both `showGif` and `showGift` are false
         }
     };
+
+
+    const handleSend = async () => {
+        if (soldeUser <= 1) {
+            setSoldeUserInsuffisant(true);
+            return;
+        }
+
+        if (!newMessage.trim()) return;
+
+        const createMessage = (): Message => ({
+            id: (messages?.length || 0).toString(),
+            isMe: true,
+            seen: '0',
+            type: 'text',
+            body: newMessage,
+            story: '0',
+            storyData: [],
+            avatar: profilePic,
+            gif: '0',
+            gift: '0',
+            photo: '0',
+            timestamp: new Date().toLocaleDateString(),
+        });
+
+        const textMsg = createMessage();
+
+        // Mettre à jour l'UI avec le message texte
+        setMessages([...(messages || []), textMsg]);
+        scrollToEnd();
+
+        const queryText = `${auth.idUser}[message]${userId}[message]${newMessage}[message]text`;
+        console.log('query ', queryText);
+
+        try {
+            const upDateCredit = await updateCredits(auth.idUser, '10', '1', 'Credits for send chat message');
+
+            if (upDateCredit === 200) {
+                const responseText = await sendMessage(queryText);
+                if (responseText !== 200) {
+                    console.error("Erreur lors de l'envoi du texte");
+                }
+
+                // Réinitialiser le champ de texte après l'envoi
+                setNewMessage('');
+                dispatch(setNewmessage(newMessage));
+            } else {
+                console.error("Erreur lors de la mise à jour des crédits");
+            }
+        } catch (error) {
+            console.error("Erreur : ", error);
+        }
+    };
+
     const scrollToEnd = () => {
         if (flatListRef.current) {
             flatListRef.current.scrollToEnd({ animated: true });
@@ -138,14 +211,19 @@ const ChatScreen: React.FC = () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
-            allowsEditing: true,
+            allowsEditing: false,
             aspect: [4, 3],
-            base64: false,
+            base64: true,
         });
 
         if (!result.canceled) {
-            setSelectedImage(result.assets[0].uri);
+            // console.log("original:", result.assets[0].mimeType);
+
+            const imageType = result.assets[0].mimeType; // Ex : "image/jpeg" ou "image/png"
+            const base64Image = `data:${imageType};base64,${result.assets[0].base64}`;
+            setSelectedImage(base64Image);
         }
+
     };
 
     const renderItem = ({ item }: { item: Message }) => (
@@ -168,6 +246,313 @@ const ChatScreen: React.FC = () => {
         </View>
     );
 
+    const dataImage = [
+        { id: 1, Image: require('../../../assets/images/tarif/img1.png') },
+        { id: 2, Image: require('../../../assets/images/tarif/img2.png') },
+        { id: 3, Image: require('../../../assets/images/tarif/img3.png') },
+        { id: 4, Image: require('../../../assets/images/tarif/img4.png') },
+        { id: 5, Image: require('../../../assets/images/tarif/img5.png') },
+        { id: 6, Image: require('../../../assets/images/tarif/img6.png') },
+        { id: 7, Image: require('../../../assets/images/tarif/img7.png') },
+    ];
+    const dataGifts = [
+        { id: 1, Image: 'https://premiumdatingscript.com/gifts/15.png', prix: '25' },
+        { id: 2, Image: 'https://premiumdatingscript.com/gifts/16.png', prix: '25' },
+        { id: 3, Image: 'https://premiumdatingscript.com/gifts/22.png', prix: '25' },
+        { id: 4, Image: 'https://premiumdatingscript.com/gifts/21.png', prix: '25' },
+        { id: 5, Image: 'https://premiumdatingscript.com/gifts/19.png', prix: '25' },
+
+        { id: 6, Image: 'https://premiumdatingscript.com/gifts/17.png', prix: '50' },
+        { id: 7, Image: 'https://premiumdatingscript.com/gifts/6.png', prix: '50' },
+
+        { id: 8, Image: 'https://premiumdatingscript.com/gifts/1.png', prix: '55' },
+
+        { id: 9, Image: 'https://premiumdatingscript.com/gifts/11.png', prix: '100' },
+        { id: 10, Image: 'https://premiumdatingscript.com/gifts/7.png', prix: '100' },
+
+        { id: 11, Image: 'https://premiumdatingscript.com/gifts/8.png', prix: '150' },
+        { id: 12, Image: 'https://premiumdatingscript.com/gifts/23.png', prix: '150' },
+        { id: 13, Image: 'https://premiumdatingscript.com/gifts/2.png', prix: '150' },
+
+        { id: 14, Image: 'https://premiumdatingscript.com/gifts/14.png', prix: '200' },
+        { id: 15, Image: 'https://premiumdatingscript.com/gifts/3.png', prix: '200' },
+        { id: 16, Image: 'https://premiumdatingscript.com/gifts/5.png', prix: '200' },
+
+        { id: 17, Image: 'https://premiumdatingscript.com/gifts/10.png', prix: '250' },
+        { id: 18, Image: 'https://premiumdatingscript.com/gifts/4.png', prix: '250' },
+
+        { id: 19, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 20, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 21, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 22, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 23, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 24, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 25, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 26, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 27, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 28, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 29, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 30, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 31, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 32, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 33, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '2050' },
+        { id: 34, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 35, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '2100' },
+        { id: 36, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 37, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 38, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 39, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+        { id: 40, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
+
+    ];
+
+    const [valueCredits, setValueCredits] = useState<number | null>(null);
+    const [creditSend, setcreditSend] = useState<number | null>(null);
+
+    const [isAlert, setisAlert] = useState(false);
+    const closeAlert = () => {
+        setisAlert(false);
+    };
+
+    const [showGift, setShowGift] = useState(false);
+    const [showGif, setShowGif] = useState(false);
+    const [giftSelect, setgiftSelect] = useState(false);
+    const selectOption = (type: string) => {
+        type === 'gift' ? setShowGift(true) : setShowGift(false)
+        type === 'gif' ? setShowGif(true) : setShowGif(false)
+        showOption()
+    };
+    const [giftPrix, setGiftPrix] = useState('');
+    const [giftImage, setGiftImage] = useState('');
+
+    const showGiftSelect = (prix: string, image: string) => {
+        setgiftSelect(true);
+        setGiftPrix(prix)
+        setGiftImage(image)
+
+    };
+    const closeGiftSelect = () => {
+        setgiftSelect(false);
+        // setGiftPrix('')
+        // setGiftImage('')
+    };
+
+
+    const sendGiftConfirm = (idReceve: string, prix: string, image: string) => {
+        console.log('idSend:', auth.idUser);
+        console.log('idReceve : ', idReceve);
+        console.log('image : ', image);
+        console.log('prix', prix);
+
+        const prixNumber = parseFloat(prix);
+
+        if (soldeUser <= (10 + prixNumber)) {
+            setSoldeUserInsuffisant(true);
+            return;
+        }
+
+        // Update credit receve 
+        const updateCreditReceve = async () => {
+            try {
+                const upDateCredit = await updateCredits(idReceve, '10', '2', 'Credits for message recieved');
+
+                if (upDateCredit === 200) {
+                    const queryText = `${auth.idUser}[message]${idReceve}[message]${image}[message]gift[message]${prix}`;
+                    const responseText = await sendMessage(queryText);
+                    if (responseText === 200) {
+                        const upDateCredit = await updateCredits(idReceve, prix, '2', 'Credits for like');
+                        if (upDateCredit === 200) {
+                            setcreditSend(prixNumber)
+                            getSoldeChat()
+                            setisAlert(true)
+                            setTimeout(() => {
+                                setisAlert(false)
+                            }, 2000);
+
+                            const query = `${auth.idUser}[rt]${idReceve}[rt]${auth.user.user.profile_photo}[rt]${auth.user.user.name}[rt]${image}[rt]image`
+                            const responseMessage = await message(query)
+                            if (responseMessage === 200) {
+                                console.log('GIT ENVOYER *************');
+                                const createMessage = (): Message => ({
+                                    id: (messages?.length || 0).toString(),
+                                    isMe: true,
+                                    seen: '0',
+                                    type: 'image',
+                                    body: image,
+                                    story: '0',
+                                    storyData: [],
+                                    avatar: profilePic,
+                                    gif: '0',
+                                    gift: '0',
+                                    photo: '0',
+                                    timestamp: new Date().toLocaleDateString(),
+                                });
+
+                                const textMsg = createMessage();
+
+                                // Mettre à jour l'UI avec le message texte
+                                setMessages([...(messages || []), textMsg]);
+                                scrollToEnd();
+                                setShowGift(false)
+
+                            }
+                        }
+
+                    } else {
+                        console.error("Erreur lors de la mise à jour des crédits");
+                    }
+                } else {
+                    console.error("Erreur lors de la mise à jour des crédits");
+                }
+            } catch (error) {
+                console.error("Erreur : ", error);
+            }
+        };
+        updateCreditReceve()
+        closeGiftSelect()
+
+    };
+
+
+    const sendGiftMessage = (idReceve: string, image: string) => {
+        console.log('idSend:', auth.idUser);
+        console.log('idReceve : ', idReceve);
+        console.log('image : ', image);
+        setShowGif(false)
+
+        if (soldeUser < (20)) {
+            console.log('SOLDE E', soldeUser);
+
+            setSoldeUserInsuffisant(true);
+            return;
+        }
+
+        // Update credit receve 
+        const updateCreditReceve = async () => {
+            try {
+                const upDateCredit = await updateCredits(idReceve, '10', '2', 'Credits for message recieved');
+
+                if (upDateCredit === 200) {
+
+                    const upDateCreditSend = await updateCredits(auth.idUser, '10', '1', 'Credits for send chat message');
+                    if (upDateCreditSend === 200) {
+                        const upDateToday = await today(auth.idUser);
+                        if (upDateToday === 200) {
+
+                        }
+                        const queryText = `${auth.idUser}[message]${idReceve}[message]${image}[message]gif`;
+                        const responseText = await sendMessage(queryText);
+                        if (responseText === 200) {
+
+                            const createMessage = (): Message => ({
+                                id: (messages?.length || 0).toString(),
+                                isMe: true,
+                                seen: '0',
+                                type: 'gif',
+                                body: image,
+                                story: '0',
+                                storyData: [],
+                                avatar: profilePic,
+                                gif: '0',
+                                gift: '0',
+                                photo: '0',
+                                timestamp: new Date().toLocaleDateString(),
+                            });
+
+                            const textMsg = createMessage();
+
+                            // Mettre à jour l'UI avec le message texte
+                            // setMessages([...(messages || []), textMsg]);
+                            setShowGif(false)
+                            getMessageAll()
+                            scrollToEnd();
+
+
+                        } else {
+                            console.error("Erreur lors de la mise à jour des crédits");
+                        }
+                    }
+
+
+                } else {
+                    console.error("Erreur lors de la mise à jour des crédits");
+                }
+            } catch (error) {
+                console.error("Erreur : ", error);
+            }
+        };
+        updateCreditReceve()
+        closeGiftSelect()
+
+    };
+
+
+
+    const sendImageMessage = (idReceve: string) => {
+
+        openImagePicker()
+
+        console.log('idSend:', auth.idUser);
+        console.log('idReceve : ', idReceve);
+
+        if (soldeUser < (20)) {
+            console.log('SOLDE E', soldeUser);
+
+            setSoldeUserInsuffisant(true);
+            return;
+        }
+
+
+        // Update credit receve 
+        const updateCreditReceve = async () => {
+            try {
+
+
+                const upDateCredit = await updateCredits(idReceve, '10', '2', 'Credits for message recieved');
+
+                if (upDateCredit === 200) {
+
+                    const upDateCreditSend = await updateCredits(auth.idUser, '10', '1', 'Credits for send chat message');
+                    if (upDateCreditSend === 200) {
+
+                        if (!selectedImage) {
+                            // alert("Aucune image sélectionnée !");
+                            return;
+                        }
+
+                        const responseSendImage = await sendImage(selectedImage, auth.idUser, idReceve);
+
+                        if (responseSendImage === 200) {
+                            getMessageAll()
+                            setOption(false)
+                            setSelectedImage('')
+                            scrollToEnd();
+                        } else {
+                            console.error("Erreur lors de la mise à jour des crédits");
+                        }
+                    }
+
+
+                } else {
+                    console.error("Erreur lors de la mise à jour des crédits");
+                }
+            } catch (error) {
+                console.error("Erreur : ", error);
+            }
+        };
+        if (selectedImage) {
+            console.log('atttttttttt');
+
+            updateCreditReceve()
+        } else {
+            console.log('pppppppppppppp');
+            setSelectedImage('')
+        }
+
+        closeGiftSelect()
+
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -178,9 +563,18 @@ const ChatScreen: React.FC = () => {
                     <Ionicons name="arrow-back" size={24} color={COLORS.white} />
                 </TouchableOpacity>
 
-                <View style={styles.messageCard}>
-                    <Image source={{ uri: profilePic }} style={styles.profilePic} />
-                    <Text style={styles.personName}>{userName}</Text>
+                <View style={styles.between}>
+                    <View style={styles.messageCard}>
+                        <Image source={{ uri: profilePic }} style={styles.profilePic} />
+                        <View>
+                            <Text style={styles.personName}>{userName}</Text>
+                            <ThemedText style={styles.state} type="title">{State !== '0' ? t.on : t.off}</ThemedText>
+                        </View>
+
+                    </View>
+                    <View style={styles.solde} >
+                        <ThemedText style={styles.state} type="title">{soldeChat} {t.credit}</ThemedText>
+                    </View>
                 </View>
             </View>
             <FlatList
@@ -192,8 +586,89 @@ const ChatScreen: React.FC = () => {
                 contentContainerStyle={styles.messagesContainer}
                 onContentSizeChange={scrollToEnd}
             />
+
+            {showGift && <View style={styles.cadeau}>
+                <FlatList
+                    horizontal
+                    data={dataGifts}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+
+                        <TouchableOpacity style={styles.giftContainer} onPress={() => showGiftSelect(item.prix, item.Image)}>
+                            <Image source={{ uri: item.Image }} style={styles.giftImage} />
+                        </TouchableOpacity>
+                    )}
+                    contentContainerStyle={styles.personList}
+                />
+            </View>}
+            <Modal
+                // isVisible={true}
+                isVisible={giftSelect}
+                onBackdropPress={closeGiftSelect}
+                style={styles.modal}
+            >
+
+                <View style={styles.conatinerGift}>
+
+
+                    <Image
+                        source={{ uri: giftImage }}
+                        style={styles.imageGift}
+                        resizeMode="contain"
+                    />
+                    <View style={styles.conatinerGiftText}>
+                        <ThemedText type='subtitle'>{t.sendGift1} {userName}</ThemedText>
+                        <ThemedText>{t.sendGift2} {giftPrix} {t.credit}</ThemedText>
+                    </View>
+
+                    <TouchableOpacity onPress={() => sendGiftConfirm(userId, giftPrix, giftImage)} style={styles.sendGift}>
+                        <Text style={styles.sendGiftText}>{t.send}</Text>
+                    </TouchableOpacity>
+
+
+
+                </View>
+            </Modal>
+
+            {showGif && <View style={styles.cadeau1}>
+                <FlatList
+                    data={dataImages}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onPress={() => { }}
+                            style={styles.cardItem}
+                            activeOpacity={0.7}
+                        >
+                            {item.Image ? (<View>
+                                <TouchableOpacity style={styles.gifContainer} onPress={() => sendGiftMessage(userId, item.Image ?? '')}>
+                                    <Image source={{ uri: item.Image }} style={styles.giftImage} />
+                                </TouchableOpacity>
+                            </View>) : null}
+
+                        </TouchableOpacity>
+                    )}
+                    keyExtractor={(item) => item.id.toString()}
+                    numColumns={getNumColumns()}
+                    columnWrapperStyle={styles.columnWrapper}
+                />
+            </View>}
+            {option && <View style={styles.other}>
+                <TouchableOpacity style={styles.iconButton1} onPress={() => { sendImageMessage(userId) }}>
+                    <MaterialIcons name="photo-library" size={40} color={COLORS.bg1} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton1} onPress={() => { selectOption('gift') }}>
+                    <MaterialIcons name="card-giftcard" size={40} color={COLORS.bg1} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton1} onPress={() => { selectOption('gif') }}>
+                    <MaterialIcons name="gif" size={40} color={COLORS.bg1} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton1} onPress={() => { }}>
+                    <MaterialIcons name="video-chat" size={40} color={COLORS.bg1} />
+                </TouchableOpacity>
+
+            </View>}
             <View style={styles.footer}>
-                {
+                {/* {
                     selectedImage &&
                     <Pressable onPress={() => openImagePicker()}>
                         <Image
@@ -204,9 +679,12 @@ const ChatScreen: React.FC = () => {
                     </Pressable>
 
 
-                }
-                <TouchableOpacity style={styles.iconButton} onPress={() => openImagePicker()}>
+                } */}
+                {/* <TouchableOpacity style={styles.iconButton} onPress={() => openImagePicker()}>
                     <MaterialIcons name="photo-library" size={24} color={COLORS.bg1} />
+                </TouchableOpacity> */}
+                <TouchableOpacity style={styles.iconButton} onPress={() => showOption()}>
+                    <MaterialIcons name="format-list-bulleted" size={24} color={COLORS.bg1} />
                 </TouchableOpacity>
                 <TextInput
                     style={styles.input}
@@ -220,6 +698,67 @@ const ChatScreen: React.FC = () => {
 
 
             </View>
+            <Modal
+                isVisible={SoldeUserInsuffisant}
+                onBackdropPress={closeTarif}
+                style={styles.modal}
+            >
+
+                <View style={styles.filterModalContent1}>
+                    <TouchableOpacity onPress={closeTarif} style={styles.notNowBtn}>
+                        <Text style={styles.notNow}>{t.notNow}</Text>
+                    </TouchableOpacity>
+
+                    <FlatList
+                        data={dataImage}
+                        horizontal
+                        renderItem={({ item }) => (
+                            <View style={styles.containeImage}>
+                                <Image
+                                    source={item.Image} // Directement l'objet require()
+                                    style={styles.stepImage1}
+                                    resizeMode="contain"
+                                />
+                            </View>
+                        )}
+                        keyExtractor={(item) => item.id.toString()}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                    <View style={styles.notNowBtn}>
+                        <Text style={styles.notNow}>{t.pack}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
+                        <Text style={styles.notNow}>1001 Credits</Text>
+                        <Text style={styles.notNow}>4.99Eur</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
+                        <Text style={styles.notNow}>2501 Credits</Text>
+                        <Text style={styles.notNow}>9.99Eur</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
+                        <Text style={styles.notNow}>5000 Credits</Text>
+                        <Text style={styles.notNow}>14.99Eur</Text>
+                    </TouchableOpacity>
+
+
+
+                </View>
+            </Modal>
+            <Modal
+                isVisible={isAlert}
+                onBackdropPress={closeAlert}
+                style={styles.modal}
+            >
+                <View style={styles.modalOverlay}>
+
+                    <View style={styles.modalAlert}>
+                        <Icon name="rocket-outline" size={30} color={COLORS.jaune} />
+                        <ThemedText>{t.spend1} {creditSend} {t.spend2} </ThemedText>
+                    </View>
+                </View>
+
+            </Modal>
         </View>
     );
 };
@@ -257,14 +796,32 @@ const styles = StyleSheet.create({
     },
     personName: {
         marginTop: 5,
-        fontSize: 16,
+        fontSize: 20,
         color: COLORS.white,
         fontWeight: 'bold',
+    },
+    state: {
+        fontSize: 16,
+        color: COLORS.lightGray,
+        // fontWeight: 'bold',
+    },
+    solde: {
+        // backgroundColor: 'red',
+        // width: '20%'
+
     },
     messageCard: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 10,
+    },
+    between: {
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+        width: '85%',
+
     },
     messagesList: {
         flex: 1,
@@ -299,7 +856,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     myMessage: {
-        backgroundColor: COLORS.jaune,
+        backgroundColor: COLORS.white,
         color: COLORS.red,
     },
     otherMessage: {
@@ -309,6 +866,72 @@ const styles = StyleSheet.create({
         width: 150,
         height: 150,
         borderRadius: 10,
+    },
+    columnWrapper: {
+        justifyContent: 'space-between',
+        marginHorizontal: 20,
+    },
+    cardItem: {
+        width: itemWidth,
+        marginBottom: 10,
+    },
+    other: {
+        width: '20%',
+
+        padding: 5,
+        // backgroundColor: 'red',
+        borderRadius: 5,
+        position: 'absolute',
+        bottom: 70
+
+    },
+    cadeau: {
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center'
+
+
+    },
+    cadeau1: {
+        // width: '90%',
+        height: 200,
+
+        // padding: 5,
+        backgroundColor: COLORS.grayOne,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center'
+
+
+    },
+    giftContainer: {
+        width: 100,
+        height: 100,
+        backgroundColor: COLORS.grayOne,
+        marginHorizontal: 5,
+        borderRadius: 5
+
+    },
+    giftImage: {
+        width: '100%',
+        height: '100%'
+    },
+    gifContainer: {
+        width: 50,
+        height: 50,
+        backgroundColor: COLORS.grayOne,
+        marginHorizontal: 5,
+        borderRadius: 5
+    },
+    personList: {
+        paddingVertical: 20,
+        height: 120,
+        elevation: 0.2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1,
+        marginBottom: 5,
     },
     footer: {
         flexDirection: 'row',
@@ -321,12 +944,147 @@ const styles = StyleSheet.create({
     iconButton: {
         marginHorizontal: 10,
     },
+    iconButton1: {
+        backgroundColor: COLORS.grayOne,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 5,
+        borderRadius: 5,
+        marginTop: 5,
+
+
+
+    },
     input: {
         flex: 1,
         backgroundColor: COLORS.lightGray,
         borderRadius: 20,
         padding: 10,
         marginHorizontal: 10,
+    },
+
+    modal: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '95%',
+        height: '90%',
+        backgroundColor: 'transparent',
+        position: 'relative',
+    },
+    filterModalContent1: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+
+        width: '100%'
+        // maxHeight: '80%',
+    },
+    conatinerGift: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        width: '100%',
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+
+    },
+    notNow: {
+        color: 'black',
+        fontSize: 18,
+    },
+    sendGiftText: {
+        color: 'white',
+        fontSize: 18,
+    },
+    notNowBtn: {
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.bg1,
+        paddingBottom: 10,
+        paddingVertical: 10
+    },
+    sendGift: {
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        backgroundColor: COLORS.bg1,
+        marginTop: 20
+
+    },
+    conatinerGiftText: {
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: 10,
+        paddingVertical: 10,
+        // backgroundColor: 'red'
+    },
+    btnPack: {
+        display: 'flex',
+        flexDirection: 'row',
+        textAlign: 'center',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottomWidth: 2,
+        borderBottomColor: COLORS.bg1,
+        paddingBottom: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        marginVertical: 5
+    },
+    stepImage1: {
+
+        width: 360,
+        height: 250,
+        margin: 3
+
+    },
+    imageGift: {
+
+        width: 180,
+        height: 180,
+        margin: 3,
+        // backgroundColor: 'red',
+        marginTop: 10
+
+    },
+    containeImage: {
+
+        // // height: 200,
+        // backgroundColor: 'blue',
+        // justifyContent: 'center', // Centre verticalement
+        // alignItems: 'center',    // Centre horizontalement
+    },
+    modalAlert: {
+        backgroundColor: "#fff",
+        height: 100,
+        width: "100%",
+        borderRadius: 10,
+        padding: 10,
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-around'
+    },
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'space-between',
+        padding: 20,
+        borderRadius: 10,
     },
 });
 

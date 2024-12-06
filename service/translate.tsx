@@ -98,7 +98,17 @@ export const translations: {
         sug3: string,
         sug4: string,
         notNow: string,
-        pack: string
+        pack: string,
+        all: string,
+        notread: string,
+        online: string,
+        send: string,
+        noMessages: string,
+        on: string,
+        off: string,
+        sendGift1: string,
+        sendGift2: string,
+        credit: string,
     };
 } = {
     FR: {
@@ -199,7 +209,17 @@ export const translations: {
         sug3: 'Rechercher des personnes d\'autres âges?',
         sug4: 'Changez vos préférences',
         notNow: 'Pas Maintenant',
-        pack: 'Forfaits de crédits'
+        pack: 'Forfaits de crédits',
+        all: 'Tous',
+        notread: 'Non lu',
+        online: 'En ligne',
+        noMessages: 'Aucun Message',
+        on: 'En ligne',
+        off: 'Hors ligne',
+        send: 'Envoyer',
+        sendGift1: 'J\'ai envoyé ce cadeau à',
+        sendGift2: 'Ce cadeau a coûté',
+        credit: 'Crédits',
     },
     EN: {
         welcome: "WELCOME TO",
@@ -299,7 +319,17 @@ export const translations: {
         sug3: 'Search for people of other ages?',
         sug4: 'Change you preferences',
         notNow: 'Not Now',
-        pack: 'Credits packages'
+        pack: 'Credits packages',
+        all: 'All',
+        notread: 'Not Read',
+        online: 'On Line',
+        noMessages: 'No Message',
+        on: 'Online',
+        off: 'Offline',
+        send: 'Send',
+        sendGift1: 'Sent this gift to',
+        sendGift2: 'This gift cost',
+        credit: 'Credits',
 
     }
 };

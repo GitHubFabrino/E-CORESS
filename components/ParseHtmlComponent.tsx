@@ -61,7 +61,11 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: COLORS.jaune,
+        padding: 10,
+        borderRadius: 5
     }
+
 });
 
 export default ParseHtmlToComponents;

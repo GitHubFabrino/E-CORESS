@@ -20,12 +20,27 @@ const PersonCard: React.FC<PersonCardProps> = ({ id, name, profilePic, lastMessa
         <TouchableOpacity onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}`)} // Utiliser router.push pour naviguer
             style={styles.personCard}>
             <Image source={{ uri: profilePic }} style={styles.profilePic} />
+            <View style={[styles.onlineIndicator, styles.indicator, { backgroundColor: !isOnline ? COLORS.green : '' }, { display: isOnline ? 'flex' : 'none' }]} >
+            </View>
             <Text style={styles.personName}>{name}</Text>
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
+    onlineIndicator: {
+        // width: 12,
+        // height: 12,
+        // borderRadius: 6,
+        padding: 5,
+
+    },
+    indicator: {
+        width: 5,
+        height: 5,
+        marginLeft: 10,
+        borderRadius: 20
+    },
     personCard: {
         width: 80,
         height: 80,

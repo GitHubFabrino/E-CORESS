@@ -13,6 +13,27 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
+const apiClientGif = axios.create({
+    baseURL: 'https://api.giphy.com/v1/gifs/trending',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+
+const apiClientImage = axios.create({
+    baseURL: 'https://www.e-coress.com/assets/sources/appupload.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+
+
 export const fetchUserData = async (
     age: string,
     gender: string,
@@ -314,108 +335,6 @@ export const userProfil = async (userId: string): Promise<any> => {
 
 
 
-export const spotlight = async (userId: string): Promise<any> => {
-    try {
-        const response = await apiClient.get('', {
-            params: {
-                action: 'spotlight',
-                id: userId
-            }
-        });
-        ;
-
-        if (typeof response.data === 'string' && response.data.startsWith('<')) {
-            // Extraire le JSON à partir de la réponse
-            const jsonMatch = response.data.match(/({.*})/);
-            if (jsonMatch && jsonMatch[1]) {
-                try {
-                    const jsonData = JSON.parse(jsonMatch[1]);
-
-                    console.log('JSON spoteeee', jsonData);
-
-                    return jsonData;
-                } catch (e) {
-                    console.error('Erreur de parsing des données JSON extraites:', e);
-                    throw new Error('Réponse inattendue, impossible de parser la chaîne JSON extraite.');
-                }
-            } else {
-                console.error('Aucune donnée JSON trouvée dans la réponse HTML.');
-                throw new Error('Réponse inattendue, aucune donnée JSON trouvée.');
-            }
-        }
-
-        if (typeof response.data === 'string') {
-            try {
-                const jsonData = JSON.parse(response.data);
-                //  console.log('Parsed JSON Data: ', jsonData);
-                return jsonData;
-            } catch (e) {
-                //    console.error('Erreur de parsing des données JSON:', e);
-                throw new Error('Réponse inattendue, impossible de parser la chaîne JSON.');
-            }
-        } else if (typeof response.data === 'object') {
-            //       console.log("RESPONSE QUESTION: ", response.data.user.question);
-            return response.data;
-        } else {
-            throw new Error('Réponse inattendue.');
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération :", error);
-        throw error;
-    }
-};
-
-
-
-export const getChats = async (userId: string): Promise<any> => {
-    try {
-        const response = await apiClient.get('', {
-            params: {
-                action: "getChat",
-                id: userId
-            }
-        });
-        const responseData = response.data
-        console.log('TYPE OF CHAT', typeof responseData);
-        console.log('DATA CHATS ALL', responseData);
-
-
-
-        if (typeof responseData === 'object') {
-            if (responseData.error) {
-                return responseData;
-            } else {
-                return responseData;
-            }
-        } else if (typeof responseData === 'string') {
-            try {
-                const jsonString = formateResponse(response.data)
-
-                try {
-                    const jsonData = JSON.parse(jsonString);
-                    if (jsonData.error) {
-                        console.log("REPONSE API ERROR : ", jsonData);
-                        return jsonData;
-                    } else {
-                        console.log("REPONSE API : ", jsonData);
-                        return jsonData;
-                    }
-                } catch (e) {
-                    console.error('Erreur de parsing des données JSON:', e);
-                    throw e;
-                }
-            } catch (e) {
-                console.error('Erreur de parsing des données JSON:', e);
-                throw new Error('Réponse inattendue, impossible de parser la chaîne JSON.');
-            }
-        } else {
-            throw new Error('Réponse inattendue.');
-        }
-    } catch (error) {
-        console.error('API Error', error);
-        throw error;
-    }
-};
 
 // Fonction pour enregistrer un utilisateur
 export const getMessage = async (userId1: string, userId2: string): Promise<any> => {
@@ -513,7 +432,7 @@ export const updateCredits = async (idUser: string, type: string, credits: strin
         // Vérification du statut de la réponse
         if (response.status === 200) {
             console.log("Mise à jour des crédits réussie:", response.data);
-            return response.data;
+            return response.status;
         } else {
             console.error("Échec de la mise à jour des crédits:", response.status, response.statusText);
             throw new Error(`Erreur ${response.status}: ${response.statusText}`);
@@ -636,13 +555,16 @@ export const cuser = async (uid1: string, uid2: string): Promise<any> => {
     }
 };
 
-export const message = async (idSend: string, idReceve: string, photo: string, name: string, credit: number): Promise<any> => {
+// modifier query
+// export const message = async (idSend: string, idReceve: string, photo: string, name: string, credit: number): Promise<any> => {
+export const message = async (Query: string): Promise<any> => {
+
     try {
         // Effectuer la requête GET avec les paramètres nécessaires
         const response = await apiClient.get('', {
             params: {
                 action: "message",
-                query: `${idSend}[rt]${idReceve}[rt]${photo}[rt]${name}[rt]Credits[rt]credits[rt]${credit}`
+                query: Query
             }
         });
 
@@ -786,3 +708,292 @@ export const game = async (uid1: string): Promise<any> => {
         throw new Error(`Erreur lors de l'action 'game': ${error.message || error}`);
     }
 };
+
+export const unreadMessageCount = async (uid1: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "unreadMessageCount",
+                dID: '',
+                id: uid1
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'unreadMessageCount' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'unreadMessageCount':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'unreadMessageCount':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'unreadMessageCount': ${error.message || error}`);
+    }
+};
+
+
+
+export const getChats = async (userId: string): Promise<any> => {
+    try {
+        const response = await apiClient.get('', {
+            params: {
+                action: "getChat",
+                id: userId
+            }
+        });
+        const responseData = response.data
+        console.log('TYPE OF CHAT', typeof responseData);
+        console.log('DATA CHATS ALL', responseData);
+
+
+
+        if (typeof responseData === 'object') {
+            if (responseData.error) {
+                return responseData;
+            } else {
+                return responseData;
+            }
+        } else if (typeof responseData === 'string') {
+            try {
+                const jsonString = formateResponse(response.data)
+
+                try {
+                    const jsonData = JSON.parse(jsonString);
+                    if (jsonData.error) {
+                        console.log("REPONSE API ERROR : ", jsonData);
+                        return jsonData;
+                    } else {
+                        console.log("REPONSE API : ", jsonData);
+                        return jsonData;
+                    }
+                } catch (e) {
+                    console.error('Erreur de parsing des données JSON:', e);
+                    throw e;
+                }
+            } catch (e) {
+                console.error('Erreur de parsing des données JSON:', e);
+                throw new Error('Réponse inattendue, impossible de parser la chaîne JSON.');
+            }
+        } else {
+            throw new Error('Réponse inattendue.');
+        }
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+};
+
+
+
+export const spotlight = async (userId: string): Promise<any> => {
+    try {
+        const response = await apiClient.get('', {
+            params: {
+                action: 'spotlight',
+                id: userId
+            }
+        });
+        ;
+
+        if (typeof response.data === 'string' && response.data.startsWith('<')) {
+            // Extraire le JSON à partir de la réponse
+            const jsonMatch = response.data.match(/({.*})/);
+            if (jsonMatch && jsonMatch[1]) {
+                try {
+                    const jsonData = JSON.parse(jsonMatch[1]);
+
+                    console.log('JSON spoteeee', jsonData);
+
+                    return jsonData;
+                } catch (e) {
+                    console.error('Erreur de parsing des données JSON extraites:', e);
+                    throw new Error('Réponse inattendue, impossible de parser la chaîne JSON extraite.');
+                }
+            } else {
+                console.error('Aucune donnée JSON trouvée dans la réponse HTML.');
+                throw new Error('Réponse inattendue, aucune donnée JSON trouvée.');
+            }
+        }
+
+        if (typeof response.data === 'string') {
+            try {
+                const jsonData = JSON.parse(response.data);
+                //  console.log('Parsed JSON Data: ', jsonData);
+                return jsonData;
+            } catch (e) {
+                //    console.error('Erreur de parsing des données JSON:', e);
+                throw new Error('Réponse inattendue, impossible de parser la chaîne JSON.');
+            }
+        } else if (typeof response.data === 'object') {
+            //       console.log("RESPONSE QUESTION: ", response.data.user.question);
+            return response.data;
+        } else {
+            throw new Error('Réponse inattendue.');
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération :", error);
+        throw error;
+    }
+};
+
+export const getGif = async (): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClientGif.get('', {
+            params: {
+                api_key: '2n2rOkvKWUwIVyydayTpL52AK4iD9qeo'
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'apiClientGif' réussie :", response.data);
+            return response.data.data;
+        } else {
+            console.error("Échec de l'action 'apiClientGif':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'apiClientGif':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'apiClientGif': ${error.message || error}`);
+    }
+};
+
+export const today = async (uid1: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "today",
+                query: uid1
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'today' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'today':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'today':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'today': ${error.message || error}`);
+    }
+};
+// export const sendImage = async (base: string): Promise<any> => {
+//     try {
+//         // Effectuer la requête POST avec les données nécessaires
+//         const response = await apiClientImage.post('', {
+//             action: 'sendChat',
+//             base64: base
+//         });
+
+//         // Vérification du statut de la réponse
+//         if (response.status === 200) {
+//             console.log("Image envoyée avec succès :", response.data);
+//             return response.status; // Retourner les données de la réponse
+//         } else {
+//             console.error("Échec de l'envoi de l'image:", response.status, response.statusText);
+//             throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+//         }
+//     } catch (error: any) {
+//         console.error("Erreur lors de l'envoi de l'image:", error.message || error);
+//         throw new Error(`Erreur lors de l'envoi de l'image: ${error.message || error}`);
+//     }
+// };
+
+// export const sendImage = async (base64Image: string): Promise<any> => {
+//     try {
+//         const response = await axios.post(
+//             'https://www.e-coress.com/assets/sources/appupload.php',
+//             {
+//                 action: 'sendChat',
+//                 base64: base64Image,
+//             },
+//             {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//             }
+//         );
+
+//         if (response.status === 200) {
+//             console.log('Image envoyée avec succès :', response.data);
+//             return response.status;
+//         } else {
+//             console.error('Erreur lors de l\'envoi :', response.status, response.statusText);
+//             throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+//         }
+//     } catch (error: any) {
+//         console.error('Erreur lors de l\'envoi de l\'image :', error);
+//         throw error;
+//     }
+// };
+// export const sendImage = async (base64Image: string): Promise<any> => {
+//     try {
+//         const formData = new FormData();
+//         formData.append('action', 'sendChat');
+//         formData.append('base64', base64Image);
+
+//         const response = await axios.post(
+//             'https://www.e-coress.com/assets/sources/appupload.php',
+//             formData,
+//             {
+//                 headers: {
+//                     'Content-Type': 'multipart/form-data',
+//                 },
+//             }
+//         );
+
+//         if (response.status === 200) {
+//             console.log('Image envoyée avec succès :', response.data);
+//             return response.data;
+//         } else {
+//             console.error('Erreur lors de l\'envoi :', response.status, response.statusText);
+//             throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+//         }
+//     } catch (error: any) {
+//         console.error('Erreur lors de l\'envoi de l\'image :', error);
+//         throw error;
+//     }
+// };
+
+export const sendImage = async (base64Image: string, uid: string, rid: string): Promise<any> => {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'sendChat');
+        formData.append('base64', base64Image);
+        formData.append('uid', uid);
+        formData.append('rid', rid);
+
+        const response = await axios.post(
+            'https://www.e-coress.com/assets/sources/appupload.php',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+
+        if (response.status === 200) {
+            console.log('Image envoyée avec succès :', response.data);
+            return response.status;
+        } else {
+            console.error('Erreur lors de l\'envoi :', response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error('Erreur lors de l\'envoi de l\'image :', error);
+        throw error;
+    }
+};
+

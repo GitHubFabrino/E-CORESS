@@ -274,10 +274,6 @@ export default function AproximiteScreen() {
     const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
     const [dataMeet, setDataMeet] = useState<CardData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
-
-
-
     const [gender, setGender] = useState('');
     const [maxAge, setMaxAge] = useState<number>(18);
     const [email, setEmail] = useState('');
@@ -512,7 +508,14 @@ export default function AproximiteScreen() {
         } else {
             const messageSend = async () => {
                 if (valueCredits) {
-                    const responseMessage = await message(auth.idUser, idReceve, auth.user.user.profile_photo, auth.user.user.name, valueCredits)
+
+
+                    // Modif    
+                    const query = `${auth.idUser}[rt]${idReceve}[rt]${auth.user.user.profile_photo}[rt]${auth.user.user.name}[rt]Credits[rt]credits[rt]${valueCredits}`
+
+                    // const responseMessage = await message(auth.idUser, idReceve, auth.user.user.profile_photo, auth.user.user.name, valueCredits)
+                    const responseMessage = await message(query)
+
                     if (responseMessage === 200) {
 
                         const responseSendMessage = await sendMessageCredit(auth.idUser, idReceve, valueCredits)
