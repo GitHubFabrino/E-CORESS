@@ -343,6 +343,8 @@ export const userProfil = async (userId: string): Promise<any> => {
                 id: userId
             }
         });
+        console.log('USER DATA ', response.data);
+
         if (typeof response.data === 'string') {
             try {
                 const jsonData = JSON.parse(response.data);
@@ -1274,5 +1276,49 @@ export const messageChat = async (Query: string): Promise<any> => {
     } catch (error: any) {
         console.error("Erreur lors de l'action 'message':", error.message || error);
         throw new Error(`Erreur lors de l'action 'message': ${error.message || error}`);
+    }
+};
+
+
+export const manageImage = async (
+    uid: string,
+    pid: string,
+    profile: string,
+    block: string,
+    unblock: string,
+    story: string,
+    del: string,
+): Promise<any> => {
+    try {
+        // Création de l'objet FormData
+        const formData = new FormData();
+        formData.append('action', 'manage');
+        formData.append('uid', uid);
+        formData.append('pid', pid);
+        formData.append('profile', profile);
+        formData.append('block', block);
+        formData.append('unblock', unblock);
+        formData.append('story', story);
+        formData.append('del', del);
+
+
+        // Effectuer la requête POST avec FormData
+        const response = await apiClient.post('', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("UPDATE envoyée avec succès :", response.data);
+            return response.status; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'UPDATE:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'UPDATE:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'UPDATE: ${error.message || error}`);
     }
 };

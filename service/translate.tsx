@@ -110,7 +110,12 @@ export const translations: {
         sendGift2: string,
         credit: string,
         Langue: string,
-        langage: string
+        langage: string,
+        logOut: string,
+        profil: string,
+        story: string,
+
+        delete: string,
     };
 } = {
     FR: {
@@ -223,7 +228,12 @@ export const translations: {
         sendGift2: 'Ce cadeau a coûté',
         credit: 'Crédits',
         Langue: 'Francais',
-        langage: 'Langue'
+        langage: 'Langue',
+        logOut: 'Voulez-vous vraiment se déconnécter ?',
+        profil: 'Profile',
+        story: 'Storie',
+
+        delete: 'Supprimer'
     },
     EN: {
         welcome: "WELCOME TO",
@@ -335,7 +345,11 @@ export const translations: {
         sendGift2: 'This gift cost',
         credit: 'Credits',
         Langue: 'English',
-        langage: 'Language'
+        langage: 'Language',
+        logOut: "Do you really want to log out?",
+        profil: 'Profil',
+        story: 'Story',
+        delete: 'Delete'
 
     }
 };

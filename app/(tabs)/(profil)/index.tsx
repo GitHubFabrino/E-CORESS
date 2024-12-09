@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
-import { getAllInterests, logoutUser, updateProfilAll, updateUserBio, updateUserExtendeds, uploadBase64Image, uploadImage, uploadMedia, userProfil } from '@/request/ApiRest';
+import { getAllInterests, logoutUser, manageImage, updateProfilAll, updateUserBio, updateUserExtendeds, uploadBase64Image, uploadImage, uploadMedia, userProfil } from '@/request/ApiRest';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/store/userSlice';
@@ -94,8 +94,19 @@ export default function ProfilScreen() {
     const [alertOk, setAlertOk] = useState(false);
 
     const closeImageselect = () => { setisImageSelect(!isImageSelect) }
+    const [isViewImage, setisViewImage] = useState(false);
 
 
+    const [selectImageView, setselectImageView] = useState<string | undefined>();
+    const [selectImageViewId, setselectImageViewId] = useState<string | undefined>();
+
+    const [selectedImageViewPublic, setSelectedImageViewPublic] = useState<string | undefined>();
+    const [optionIsSelect, setOptionIsSelect] = useState(false);
+
+    const closeViewImage = () => {
+        setisViewImage(!isViewImage)
+        setOptionIsSelect(false)
+    }
     useEffect(() => {
         if (auth.idUser) {
             promeseAll()
@@ -501,7 +512,47 @@ export default function ProfilScreen() {
         setisImageSelect(false)
 
     }
+    const sendManage = async (p: string, s: string, d: string, b: string, u: string) => {
+        try {
+            if (selectImageViewId) {
+                const response = await manageImage(auth.idUser, selectImageViewId, p, b, u, s, d);
+                if (response === 200) {
+                    console.log(/********************oeeeeee************* */);
+                    getProfils()
+                    closeViewImage()
+                    setselectImageView(''); setselectImageViewId('')
 
+                }
+            }
+
+
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }
+
+    const optionImageFunc = (option: string) => {
+
+        if (option === 'profil') {
+            sendManage('1', '0', '0', '0', '0')
+        }
+        if (option === 'story') {
+            sendManage('0', '1', '0', '0', '0')
+        }
+        if (option === 'delete') {
+            sendManage('0', '0', '1', '0', '0')
+        }
+        if (option === 'private') {
+            if (selectedImageViewPublic === '1') {
+
+                sendManage('0', '0', '0', '0', '1')
+            } else {
+                sendManage('0', '0', '0', '1', '0')
+            }
+
+        }
+
+    }
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
@@ -550,7 +601,9 @@ export default function ProfilScreen() {
                                 keyExtractor={(item) => item.photoId.toString()}  // Conversion de l'id en chaîne
                                 renderItem={({ item }) => (
                                     <ThemedView style={styles.containerImage}>
-                                        <TouchableOpacity onPress={() => { }}>
+                                        <TouchableOpacity onPress={() => {
+                                            setselectImageView(item.image); setselectImageViewId(item.photoId); setSelectedImageViewPublic(item.private); console.log('ici'); closeViewImage()
+                                        }}>
                                             <Image source={{ uri: item.image }} style={styles.cardGalleryImage} />
                                         </TouchableOpacity>
                                     </ThemedView>
@@ -562,6 +615,78 @@ export default function ProfilScreen() {
 
                     </View>)
                 }
+
+
+
+
+
+
+
+
+
+                <Modal
+                    isVisible={isViewImage}
+                    onBackdropPress={closeViewImage}
+                    style={styles.modal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalOverlay}>
+
+                            {
+                                selectImageView && <View style={styles.modalContent1}>
+                                    <Image
+                                        source={{ uri: selectImageView }}
+                                        style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            }
+                            <TouchableOpacity onPress={() => { setOptionIsSelect(!optionIsSelect) }} style={styles.optionImage}>
+                                <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.white} />
+                            </TouchableOpacity>
+                            {optionIsSelect && <View style={styles.optionImageDesicion}>
+                                <TouchableOpacity onPress={() => optionImageFunc('private')} style={[styles.sendAction,]}>
+                                    <Icon name={selectedImageViewPublic === '1' ? "lock-open-outline" : "lock-closed-outline"} size={25} color={COLORS.bg1} />
+                                    <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => optionImageFunc('profil')} style={[styles.sendAction,]}>
+                                    <Icon name="person-circle-outline" size={25} color={COLORS.bg1} />
+                                    <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => optionImageFunc('story')} style={[styles.sendAction,]}>
+                                    <Icon name="add-circle-outline" size={25} color={COLORS.jaune} />
+                                    <Text style={[styles.sendActionText, { color: COLORS.jaune }]}>{t.story}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => optionImageFunc('delete')} style={[styles.sendAction,]}>
+                                    <Icon name="trash-bin-outline" size={25} color={COLORS.red} />
+                                    <Text style={[styles.sendActionText, { color: 'red' }]}>{t.delete}</Text>
+                                </TouchableOpacity>
+                            </View>}
+
+
+                        </View>
+
+
+                    </View>
+
+                </Modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 {
                     isModalParam && (
@@ -749,7 +874,7 @@ export default function ProfilScreen() {
                         </ThemedView>
                     )
                 }
-
+                {/* IMAGE SELECT */}
                 <Modal
                     isVisible={isImageSelect}
                     onBackdropPress={closeImageselect}
@@ -776,6 +901,8 @@ export default function ProfilScreen() {
                     </View>
 
                 </Modal>
+
+
                 <ThemedView style={styles.containerOption}>
                     <TouchableOpacity onPress={() => { }} >
                         <View style={styles.cardItem}>
@@ -814,7 +941,7 @@ export default function ProfilScreen() {
 
                 </ThemedView>
 
-
+                {/* ABOUT */}
                 <ThemedView style={styles.containerInfo}>
                     <View style={styles.itemTitre}>
                         <ThemedText type='defaultSemiBold'>{t.about}</ThemedText>
@@ -839,7 +966,7 @@ export default function ProfilScreen() {
                         }
                     </View>
                 </ThemedView>
-
+                {/* UBICATION */}
                 <ThemedView style={styles.containerInfo}>
                     <View style={styles.itemTitre}>
                         <ThemedText type='defaultSemiBold'>{t.ubication}</ThemedText>
@@ -914,6 +1041,8 @@ export default function ProfilScreen() {
 
                             </View>
                         </ThemedView>
+
+                        {/* QUESTIONS */}
                         {profil?.question.map((item) => (
                             <View key={item.id}>
                                 {modifInfo ? (
@@ -954,7 +1083,7 @@ export default function ProfilScreen() {
                     userId={auth.idUser}
                     profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
                 />
-
+                {/* LANGUAGE */}
                 <ThemedView style={styles.containerInfo}>
                     <View style={styles.itemTitre}>
                         <ThemedText type='defaultSemiBold'>{t.langage}</ThemedText>
@@ -990,7 +1119,7 @@ export default function ProfilScreen() {
                         }
                     </View>
                 </ThemedView>
-
+                {/* Option */}
                 <Modal
                     isVisible={isModalOption}
                     onBackdropPress={closeModal}
@@ -1019,7 +1148,7 @@ export default function ProfilScreen() {
 
                     </View>
                 </Modal>
-
+                {/* Log OUT */}
 
                 <Modal
                     isVisible={isModalDeconnexion}
@@ -1027,14 +1156,14 @@ export default function ProfilScreen() {
                     style={styles.modal}
                 >
                     <View style={styles.modalContentDeconex}>
-                        <ThemedText>Voulez-vous vraiment se déconnécter ?</ThemedText>
+                        <ThemedText>{t.logOut}</ThemedText>
                         <View style={styles.btn}>
                             <ThemedButton text={'Annuler'} style={styles.annuler} styleText={styles.textAnnuller} onClick={() => setIsModalDec(!isModalDeconnexion)} />
                             <ThemedButton text={'Confirmer'} onClick={confirmLogOut} />
                         </View>
                     </View>
                 </Modal>
-
+                {/* reload */}
                 <Modal
                     isVisible={litlemodal}
                     onBackdropPress={() => !litlemodal}
@@ -1067,9 +1196,55 @@ const styles = StyleSheet.create({
         marginTop: 20
 
     },
+    sendAction: {
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 10,
+        shadowColor: COLORS.bg1,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        backgroundColor: COLORS.white,
+        width: '100%',
+        margin: 2
+
+    },
+    sendActionText: {
+        color: COLORS.bg1,
+        fontSize: 18,
+        fontWeight: 'bold'
+    },
     sendGiftText: {
         color: 'white',
         fontSize: 18,
+    },
+    optionImageDesicion: {
+        width: '60%',
+        borderRadius: 5,
+        // backgroundColor: COLORS.white,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        padding: 10,
+        // opacity: 0.9
+    },
+    optionImage: {
+        width: 60,
+        height: 60,
+        backgroundColor: COLORS.bg1,
+        borderRadius: 100,
+        position: 'relative',
+        // right: 100,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     titleContainer: {
         flexDirection: 'row',
