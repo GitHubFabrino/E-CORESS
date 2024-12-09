@@ -49,7 +49,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ id, name, profilePic, lastMes
                     </View>
                 </View>
                 <Text style={styles.messageText}>
-                    {lastMessage.length > 10 ? `${lastMessage.slice(0, 10)}...` : lastMessage}
+                    {lastMessage.length > 20 ? `${lastMessage.slice(0, 20)}...` : lastMessage}
                 </Text>
 
             </View>

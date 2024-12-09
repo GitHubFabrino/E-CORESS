@@ -783,7 +783,12 @@ export default function AproximiteScreen() {
                                         <Icon name="heart" size={30} color={COLORS.white} />
                                     </TouchableOpacity>)}
                                     <TouchableOpacity style={styles.messageButton} onPress={handleTransfer}>
-                                        <Icon name="chatbubble-outline" size={30} color={COLORS.white} />
+
+                                        <Image
+                                            source={{ uri: 'https://www.e-coress.com/themes/default/images/icon-coins.png' }}
+                                            style={styles.or}
+                                            resizeMode="cover"
+                                        />
                                     </TouchableOpacity>
 
                                     <TouchableOpacity style={styles.navButtonRight} onPress={handleNextImage}>
@@ -1191,6 +1196,10 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.bg1,
         borderRadius: 50,
         padding: 20,
+    },
+    or: {
+        width: 30,
+        height: 30
     },
     filterButton: {
         padding: 10,

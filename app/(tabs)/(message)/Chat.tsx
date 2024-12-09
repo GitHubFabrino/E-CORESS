@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, FlatList, Image, Pressable } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, FlatList, Image, Pressable, Button } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { COLORS } from '@/assets/style/style.color';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
-import { getGif, getMessage, message, sendImage, sendMessage, today, updateCredits, userProfil } from '@/request/ApiRest';
+import { getGif, getMessage, message, sendImage, sendMessage, today, updateCredits, uploadBase64Image, userProfil } from '@/request/ApiRest';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
@@ -66,6 +66,10 @@ const ChatScreen: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | undefined>();
+
+    const [isImageSelect, setisImageSelect] = useState(false);
+
+    const closeImageselect = () => { setisImageSelect(!isImageSelect) }
     const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
@@ -222,6 +226,7 @@ const ChatScreen: React.FC = () => {
             const imageType = result.assets[0].mimeType; // Ex : "image/jpeg" ou "image/png"
             const base64Image = `data:${imageType};base64,${result.assets[0].base64}`;
             setSelectedImage(base64Image);
+            setisImageSelect(true)
         }
 
     };
@@ -486,14 +491,20 @@ const ChatScreen: React.FC = () => {
 
     };
 
-
+    const [idReceveMessage, setidReceveMessage] = useState('');
 
     const sendImageMessage = (idReceve: string) => {
 
+        setidReceveMessage(idReceve)
+
         openImagePicker()
 
+    };
+
+    const sendImageMessageConfirm = () => {
+
         console.log('idSend:', auth.idUser);
-        console.log('idReceve : ', idReceve);
+        console.log('idReceve : ', idReceveMessage);
 
         if (soldeUser < (20)) {
             console.log('SOLDE E', soldeUser);
@@ -508,7 +519,7 @@ const ChatScreen: React.FC = () => {
             try {
 
 
-                const upDateCredit = await updateCredits(idReceve, '10', '2', 'Credits for message recieved');
+                const upDateCredit = await updateCredits(idReceveMessage, '10', '2', 'Credits for message recieved');
 
                 if (upDateCredit === 200) {
 
@@ -520,7 +531,39 @@ const ChatScreen: React.FC = () => {
                             return;
                         }
 
-                        const responseSendImage = await sendImage(selectedImage, auth.idUser, idReceve);
+
+
+
+                        // ICI 
+                        console.log(selectedImage);
+
+                        const send = async () => {
+                            const responseSendImage = await uploadBase64Image(selectedImage);
+                            console.log('reponse Upload ', responseSendImage);
+                            if (responseSendImage && responseSendImage.path && responseSendImage.thumb) {
+
+                                // 49[rt]32[rt]y[rt]ManManayy[rt]t[rt]image
+                                const image = `https://www.e-coress.com/assets/sources/${responseSendImage.path}`
+
+
+                                const query = `${auth.idUser}[rt]${idReceveMessage}[rt]${auth.user.user.profile_photo}[rt]${auth.user.user.name}[rt]${image}[rt]image`
+                                const responseMessage = await message(query)
+                                if (responseMessage === 200) {
+
+                                    const queryText = `${auth.idUser}[message]${idReceveMessage}[message]${image}[message]image`;
+                                    const responseText = await sendMessage(queryText);
+                                    if (responseText === 200) {
+                                        getMessageAll()
+                                    }
+                                }
+
+
+
+                            }
+                        }
+                        send()
+
+                        const responseSendImage = await sendImage(selectedImage, auth.idUser, idReceveMessage);
 
                         if (responseSendImage === 200) {
                             getMessageAll()
@@ -550,6 +593,8 @@ const ChatScreen: React.FC = () => {
         }
 
         closeGiftSelect()
+        setidReceveMessage('')
+        setisImageSelect(false)
 
     };
 
@@ -759,11 +804,40 @@ const ChatScreen: React.FC = () => {
                 </View>
 
             </Modal>
+
+            <Modal
+                isVisible={isImageSelect}
+                onBackdropPress={closeImageselect}
+                style={styles.modal}
+            >
+                <View style={styles.modalOverlay}>
+
+                    <View style={styles.modalContent}>
+                        <Image
+                            source={{ uri: selectedImage }}
+                            style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                            resizeMode="contain"
+                        />
+                    </View>
+                    <TouchableOpacity onPress={() => sendImageMessageConfirm()} style={styles.sendGift}>
+                        <Text style={styles.sendGiftText}>{t.send}</Text>
+                    </TouchableOpacity>
+
+
+                </View>
+
+            </Modal>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    modalContent: {
+        width: '100%',
+        height: '90%',
+        backgroundColor: 'transparent',
+        position: 'relative',
+    },
     container: {
         flex: 1,
         backgroundColor: COLORS.white,
@@ -967,12 +1041,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    modalContent: {
-        width: '95%',
-        height: '90%',
-        backgroundColor: 'transparent',
-        position: 'relative',
-    },
+
     filterModalContent1: {
         backgroundColor: 'white',
         borderRadius: 10,

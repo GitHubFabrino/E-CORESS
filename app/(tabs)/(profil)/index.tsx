@@ -1,12 +1,12 @@
 // import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform, TouchableOpacity, View, ScrollView, FlatList, Text } from 'react-native';
+import { StyleSheet, Image, Platform, TouchableOpacity, View, ScrollView, FlatList, Text, ActivityIndicator, Button } from 'react-native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import ThemedButton from '@/components/button/Button';
 import { COLORS } from '@/assets/style/style.color';
-import { logoutUser, userProfil } from '@/request/ApiRest';
+import { getAllInterests, logoutUser, updateProfilAll, updateUserBio, updateUserExtendeds, uploadBase64Image, uploadImage, uploadMedia, userProfil } from '@/request/ApiRest';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/store/userSlice';
@@ -19,7 +19,22 @@ import InputSelector from '@/components/input/InputSelector';
 import { UserProfileInterface } from './interfaceProfile';
 import InputSelectorA from '@/components/input/InputSelectorA';
 import { translations } from '@/service/translate';
+import * as ImagePicker from 'expo-image-picker';
 import InterestList from '@/components/input/InteretList';
+import * as FileSystem from 'expo-file-system';
+import InputText from '@/components/input/InputText';
+interface InterestsData {
+    id: string; // Identifiant unique de l'intérêt
+    name: string; // Nom de l'intérêt
+    icon: string; // URL de l'icône
+    count: string; // Nombre d'éléments associés
+}
+// Déclarez un type pour l'image
+type ImageFile = {
+    uri: string;
+    name?: string;
+    type?: string;
+};
 
 export default function ProfilScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -33,61 +48,189 @@ export default function ProfilScreen() {
     const [isModalGallery, setIsModalGallery] = useState(true);
     const [isModalDeconnexion, setIsModalDec] = useState(false);
     const [isProfil, setisProfil] = useState(true);
-
-    const [apropos, setapropos] = useState<string>('');
     const [modifApropos, setmodifApropos] = useState(true);
-
-    const [placevalue, setplaceValue] = useState<string>('');
-    const [modifiPlace, setmodifPlace] = useState(true);
-
-    const [username, setusername] = useState<string>('');
-    const [modifusername, setmodifusername] = useState(true);
-
-    const [name, setplacename] = useState<string>('');
     const [modifiname, setmodifname] = useState(true);
-
-    const [email, setemail] = useState<string>('');
-    const [modifiemail, setmodifemail] = useState(true);
-
     const [birthday, setbirthday] = useState<string>('');
     const [modifbirthday, setmodifbirthday] = useState(true);
-
-    const [genre, setgenre] = useState<string>('');
     const [modifigenre, setmodifgenre] = useState(true);
 
     const [profil, setProfil] = useState<UserProfileInterface | null>(null);
     const [option, setoption] = useState(['']);
-
-
-    //  const [placevalue, setplaceValue] = useState<string>('');
     const [modifInfo, setmodifInfo] = useState(true);
-
     const [selectedOption, setSelectedOption] = useState<string>('Option 1');
     const options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+    const [loading, setLoading] = useState(true);
+    const [modifierBio, setmodifierBio] = useState(false);
+    const [bio, setBio] = useState(profil?.bio || '');
+    const [bioOld, setOldBio] = useState(bio);
+    const [modifierubication, setmodifierubication] = useState(false);
+    const [ubication, setubication] = useState(profil?.city || '');
+    const [ubicationold, ubicationOld] = useState(ubication);
+    const [modifierlangue, setmodifierlangue] = useState(false);
+    const [modifierusername, setmodifierusername] = useState(false);
+    const [modifieremail, setmodifieremail] = useState(false);
 
+    const [usernameUser, setUsernameUser] = useState<string>('');
+    const [emailUser, setEmailUser] = useState<string>('');
+    const [nameUser, setNameUser] = useState<string>('');
+    const [day, setDay] = useState<string>('');
+    const [month, setMonth] = useState<string>('');
+    const [year, setYear] = useState<string>('');
+    const [gender, setGender] = useState<string>('');
+    const [langUser, setlangUser] = useState<string>('');
+    const [action, setAction] = useState<string>('');
+    const [city, setCity] = useState<string>('');
+    const [country, setCountry] = useState<string>('');
+    const [lat, setLat] = useState<string>('');
+    const [lng, setLng] = useState<string>('');
+    const [editEmail, setEditEmail] = useState<string>('');
+    const [editUsername, setEditUsername] = useState<string>('');
+    const [usernameOld, setusernameOld] = useState(usernameUser);
+    const [emailOld, setemailOld] = useState(emailUser);
+
+    const [nameOld, setnameOld] = useState(nameUser);
+    const [selectedImage, setSelectedImage] = useState<string | undefined>();
+    const [isImageSelect, setisImageSelect] = useState(false);
+    const [alertOk, setAlertOk] = useState(false);
+
+    const closeImageselect = () => { setisImageSelect(!isImageSelect) }
+
+
+    useEffect(() => {
+        if (auth.idUser) {
+            promeseAll()
+        }
+    }, [auth.newM]);
 
     useFocusEffect(
         useCallback(() => {
             // Réinitialiser l'état des modals
+            getProfils()
             setIsModalOption(false);
             setIsModalParam(false);
             setIsModalGallery(false);
         }, [])
     );
 
-    useEffect(() => {
-        if (auth?.idUser) {
-            getProfils();
-        }
-    }, [auth.newM]);
+    const promeseAll = async () => {
+        setLoading(true);
 
+        try {
+
+            await Promise.all([
+                getProfils(),
+                getInterestsAll()
+            ]);
+        } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateDataProfil = async (idQuestion: string, answer: string) => {
+        try {
+            const queryText = `${auth.idUser}[divider]${idQuestion}[divider]${answer}`;
+
+            const response = await updateUserExtendeds(queryText);
+            if (response === 200) {
+                setAlertOk(true)
+                setTimeout(() => {
+                    setAlertOk(false)
+                }, 2000);
+                console.log('queryText', queryText);
+                getProfils()
+
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+
+    };
+
+
+
+    const splitBirthday = (birthday: string) => {
+        // Utilisation d'une expression régulière pour extraire les parties de la date
+        const dateParts = birthday.match(/(\w+)\s(\d{2}),\s(\d{4})/);
+
+        if (!dateParts) {
+            console.error("Invalid birthday format:", birthday);
+            return { day: "Invalid", month: "Invalid", year: "Invalid" };
+        }
+
+        const monthName = dateParts[1];
+        const day = dateParts[2];
+        const year = dateParts[3];
+
+        // Convertir le nom du mois en un numéro de mois
+        const months = {
+            January: "01",
+            February: "02",
+            March: "03",
+            April: "04",
+            May: "05",
+            June: "06",
+            July: "07",
+            August: "08",
+            September: "09",
+            October: "10",
+            November: "11",
+            December: "12",
+        };
+
+        const month = months[monthName as keyof typeof months];
+
+        if (!month) {
+            console.error("Invalid month name:", monthName);
+            return { day: "Invalid", month: "Invalid", year: "Invalid" };
+        }
+
+        return { day, month, year };
+    };
+    const [litlemodal, setLitlemodal] = useState(false);
     const getProfils = async () => {
         try {
+            setLitlemodal(true)
             const response = await userProfil(auth.idUser);
             console.log("RESPONSE QUESTION: ", response);
+            console.log("******************birth", response.user.birthday);
+            console.log("******************lang", response.user.lang);
+
+
+            const { day, month, year } = splitBirthday(response.user.birthday);
+            setDay(day);
+            setMonth(month);
+            setYear(year);
             setProfil(response.user)
+            setBio(response.user.bio)
+            setubication(response.user.city)
+            setUsernameUser(response.user.username)
+            setEmailUser(response.user.email)
+            setNameUser(response.user.name)
+            setGender(response.user.gender)
+            setlangUser(response.user.lang)
+            setCity(response.user.city)
+            setCountry(response.user.country)
+            setLat(response.user.lat)
+            setLng(response.user.lng)
+            setEditEmail(response.user.email)
+            setEditUsername(response.user.username)
 
             console.log('SETPROFILE : ', profil?.ip);
+            setLitlemodal(false)
+
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+    const [allInterestSite, setAllInterestSite] = useState<InterestsData[] | null>(null);
+
+    const getInterestsAll = async () => {
+        try {
+            const response = await getAllInterests();
+            console.log("RESPONSE Interest: ", response);
+            setAllInterestSite(response)
 
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -146,6 +289,219 @@ export default function ProfilScreen() {
         }
     }, [lang]);
 
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={COLORS.jaune} />
+            </View>
+        );
+    }
+    const updateTest = () => {
+        console.log('testeeeeee');
+
+    };
+
+
+    const updateInterests = () => {
+        console.log('testeeeeee');
+        getProfils()
+    };
+
+
+
+    const sendUpdateProfile = () => {
+        console.log('Bio', bio);
+        console.log('Bio', bio);
+        const update = async () => {
+            try {
+                const response = await updateUserBio(auth?.idUser, bio);
+
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+        update()
+        getProfils()
+    };
+    const sendUpdateProfileAll = () => {
+        console.log("Day:", day);
+        console.log("Month:", month);
+        console.log("Year:", year);
+
+        console.log("UsernameUser:", usernameUser);
+        console.log("EmailUser:", emailUser);
+        console.log("NameUser:", nameUser);
+
+        console.log("Gender:", gender);
+        console.log("LangUser:", langUser);
+        console.log("City:", city);
+        console.log("City ubi:", ubication);
+        console.log("Country:", country);
+        console.log("Lat:", lat);
+        console.log("Lng:", lng);
+        console.log("EditEmail:", editEmail);
+        console.log("EditUsername:", editUsername);
+        console.log("editId:", auth.idUser);
+
+        const update = async () => {
+            try {
+                const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                if (response === 200) {
+                    console.log(/********************oeeeeee************* */);
+
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+        update()
+        // getProfils()
+    };
+    const sendUpdateProfileAllLang = (idlang: string) => {
+        console.log("Day:", day);
+        console.log("Month:", month);
+        console.log("Year:", year);
+
+        console.log("UsernameUser:", usernameUser);
+        console.log("EmailUser:", emailUser);
+        console.log("NameUser:", nameUser);
+
+        console.log("Gender:", gender);
+        console.log("LangUser:", idlang);
+        console.log("City:", city);
+        console.log("City ubi:", ubication);
+        console.log("Country:", country);
+        console.log("Lat:", lat);
+        console.log("Lng:", lng);
+        console.log("EditEmail:", editEmail);
+        console.log("EditUsername:", editUsername);
+        console.log("editId:", auth.idUser);
+
+        const update = async () => {
+            try {
+
+                const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, idlang, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                console.log('response : ', response);
+
+                if (response === 200) {
+                    console.log(/********************oeeeeee************* */);
+
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+        update()
+        // getProfils()
+    };
+    const sendUpdateProfileAllGender = (idGender: string) => {
+        console.log("Day:", day);
+        console.log("Month:", month);
+        console.log("Year:", year);
+
+        console.log("UsernameUser:", usernameUser);
+        console.log("EmailUser:", emailUser);
+        console.log("NameUser:", nameUser);
+
+        console.log("Gender:", idGender);
+        console.log("LangUser:", langUser);
+        console.log("City:", city);
+        console.log("City ubi:", ubication);
+        console.log("Country:", country);
+        console.log("Lat:", lat);
+        console.log("Lng:", lng);
+        console.log("EditEmail:", editEmail);
+        console.log("EditUsername:", editUsername);
+        console.log("editId:", auth.idUser);
+
+        const update = async () => {
+            try {
+
+                const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, idGender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                console.log('response : ', response);
+
+                if (response === 200) {
+                    console.log(/********************oeeeeee************* */);
+
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+        update()
+        // getProfils()
+    };
+
+
+
+    const closeModif = () => {
+        setmodifgenre(false)
+    };
+
+
+
+    const correctedFile = async (file: { uri: string; name: string; type: string }) => {
+        const localUri = FileSystem.documentDirectory + file.name;
+
+        await FileSystem.copyAsync({
+            from: file.uri,
+            to: localUri,
+        });
+
+        return {
+            uri: localUri,
+            name: file.name,
+            type: file.type,
+        };
+    };
+
+
+
+    const openImagePicker = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Désolé, nous avons besoin des permissions pour accéder à vos photos !');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+            allowsEditing: false,
+            aspect: [4, 3],
+            base64: true,
+        });
+
+        if (!result.canceled) {
+            const imageType = result.assets[0].mimeType; // Ex : "image/jpeg" ou "image/png"
+            const base64Image = `data:${imageType};base64,${result.assets[0].base64}`;
+            setSelectedImage(base64Image);
+            setisImageSelect(true)
+        }
+
+    };
+
+    const sendImageMessage = () => {
+        if (!selectedImage) {
+            return;
+        }
+        console.log(selectedImage);
+
+        const send = async () => {
+            const responseSendImage = await uploadBase64Image(selectedImage);
+            console.log('reponse Upload ', responseSendImage);
+            if (responseSendImage && responseSendImage.path && responseSendImage.thumb) {
+                const uploadMediaresponse = await uploadMedia(responseSendImage.path, responseSendImage.thumb);
+                console.log('response ipmedia : ', uploadMediaresponse);
+                getProfils()
+
+            }
+        }
+        send()
+        setisImageSelect(false)
+
+    }
+
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
@@ -163,6 +519,8 @@ export default function ProfilScreen() {
                     </TouchableOpacity>
                 </ThemedView>
 
+                {alertOk && <View style={styles.alertOk}><Icon name="trophy" size={30} color={COLORS.green} /></View>}
+
             </ThemedView>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <ThemedView>
@@ -177,9 +535,14 @@ export default function ProfilScreen() {
                 </ThemedView>
                 {
                     !isModalGallery && (<View  >
-                        <TouchableOpacity onPress={() => { }} style={styles.addimage}>
+                        <TouchableOpacity onPress={() => { openImagePicker() }} style={styles.addimage}>
                             <Icon name="camera-outline" size={30} color={COLORS.bg1} />
                         </TouchableOpacity>
+                        {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                            {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />}
+                            <Button title="Choisir une Image" onPress={pickImage} />
+                            
+                        </View> */}
                         <View style={styles.cardGallery}>
                             <FlatList
                                 horizontal
@@ -204,29 +567,103 @@ export default function ProfilScreen() {
                     isModalParam && (
                         <ThemedView>
                             <ThemedView style={styles.containerInfo1}>
-                                <AboutSection
+                                {/* <AboutSection
                                     titre={t.username}
                                     aproposValue={profil?.username || ''}
                                     setAproposValue={setusername}
                                     modifApropos={modifusername}
                                     setModifApropos={setmodifusername}
-                                />
+                                /> */}
 
-                                <AboutSection
+                                <ThemedView style={styles.containerInfo}>
+                                    <View style={styles.itemTitre}>
+                                        <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
+                                        <TouchableOpacity onPress={() => {
+                                            setmodifierusername(!modifierusername)
+                                            if (usernameOld !== usernameUser) {
+                                                console.log('mofiddidid');
+                                                sendUpdateProfileAll()
+                                            }
+
+
+                                        }}>
+                                            <Icon name={!modifierusername ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.infoCard}>
+                                        {!modifierusername ? (
+                                            <ThemedText>{usernameUser}</ThemedText>
+                                        ) : (
+                                            <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
+                                        )
+                                        }
+                                    </View>
+                                </ThemedView>
+
+                                {/* <AboutSection
                                     titre={t.email}
                                     aproposValue={profil?.email || ''}
                                     setAproposValue={setemail}
                                     modifApropos={modifiemail}
                                     setModifApropos={setmodifemail}
-                                />
+                                /> */}
+                                <ThemedView style={styles.containerInfo}>
+                                    <View style={styles.itemTitre}>
+                                        <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
+                                        <TouchableOpacity onPress={() => {
+                                            setmodifieremail(!modifieremail)
+                                            if (emailOld !== emailUser) {
+                                                console.log('mofiddidid');
+                                                sendUpdateProfileAll()
+                                            }
 
-                                <AboutSection
+
+                                        }}>
+                                            <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.infoCard}>
+                                        {!modifieremail ? (
+                                            <ThemedText>{emailUser}</ThemedText>
+                                        ) : (
+                                            <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
+                                        )
+                                        }
+                                    </View>
+                                </ThemedView>
+
+                                {/* <AboutSection
                                     titre={t.Name}
                                     aproposValue={profil?.name || ''}
                                     setAproposValue={setusername}
                                     modifApropos={modifiname}
                                     setModifApropos={setmodifname}
-                                />
+                                /> */}
+
+                                <ThemedView style={styles.containerInfo}>
+                                    <View style={styles.itemTitre}>
+                                        <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
+                                        <TouchableOpacity onPress={() => {
+                                            setmodifname(!modifiname)
+                                            if (nameOld !== nameUser) {
+                                                console.log('mofiddidid');
+                                                sendUpdateProfileAll()
+                                            }
+
+
+                                        }}>
+                                            <Icon name={modifiname ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.infoCard}>
+                                        {modifiname ? (
+                                            <ThemedText>{nameUser}</ThemedText>
+                                        ) : (
+                                            <InputText value={nameUser} onChangeText={(text) => setNameUser(text)} />
+                                        )
+                                        }
+                                    </View>
+                                </ThemedView>
 
                                 <AboutSection
                                     titre={t.birthday}
@@ -235,6 +672,33 @@ export default function ProfilScreen() {
                                     modifApropos={modifbirthday}
                                     setModifApropos={setmodifbirthday}
                                 />
+                                {/* 
+                                <ThemedView style={styles.containerInfo}>
+                                    <View style={styles.itemTitre}>
+                                        <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
+                                        <TouchableOpacity onPress={() => {
+                                            setmodifieremail(!modifieremail)
+                                            if (emailOld !== emailUser) {
+                                                console.log('mofiddidid');
+                                                sendUpdateProfileAll()
+                                            }
+
+
+                                        }}>
+                                            <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.infoCard}>
+                                        {!modifieremail ? (
+                                            <ThemedText>{emailUser}</ThemedText>
+                                        ) : (
+                                            <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
+                                        )
+                                        }
+                                    </View>
+                                </ThemedView> */}
+
+                                {/* 
                                 <AboutSection
                                     titre={t.genderLabel}
                                     aproposValue={profil?.gender || ''}
@@ -243,13 +707,75 @@ export default function ProfilScreen() {
                                     setModifApropos={setmodifgenre}
                                     isSelector={true}
                                     options={option}
-                                />
+                                /> */}
+
+                                <ThemedView style={styles.containerInfo}>
+                                    <View style={styles.itemTitre}>
+                                        <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
+                                        <TouchableOpacity onPress={() => {
+                                            setmodifgenre(!modifigenre)
+                                        }}>
+                                            <Icon name={modifigenre ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.infoCard}>
+                                        {modifigenre ? (
+                                            <ThemedText>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
+                                        ) : (<InputSelectorA
+                                            titre={t.genderLabel}
+                                            options={[{ 'id': '1', 'gender': `${t.male}` }, { 'id': '2', 'gender': `${t.femelle}` }, { 'id': '3', 'gender': `${t.lesbienne}` }, { 'id': '4', 'gender': `${t.gay}` }].map(item => ({
+                                                value: item.id,
+                                                label: item.gender
+                                            }))}
+                                            selectedValue={selectedOption}
+                                            onValueChange={(value) => {
+
+
+                                                console.log('id  : ', value);
+                                                getProfils()
+
+
+                                                // sendUpdateProfileAll()
+                                                sendUpdateProfileAllGender(value)
+
+                                            }}
+                                        />
+                                        )
+                                        }
+                                    </View>
+                                </ThemedView>
+
                             </ThemedView>
                         </ThemedView>
                     )
                 }
 
+                <Modal
+                    isVisible={isImageSelect}
+                    onBackdropPress={closeImageselect}
+                    style={styles.modal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalOverlay}>
 
+                            <View style={styles.modalContent1}>
+                                <Image
+                                    source={{ uri: selectedImage }}
+                                    style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                    resizeMode="contain"
+                                />
+                            </View>
+                            <TouchableOpacity onPress={() => sendImageMessage()} style={styles.sendGift}>
+                                <Text style={styles.sendGiftText}>{t.send}</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+
+
+                    </View>
+
+                </Modal>
                 <ThemedView style={styles.containerOption}>
                     <TouchableOpacity onPress={() => { }} >
                         <View style={styles.cardItem}>
@@ -288,21 +814,56 @@ export default function ProfilScreen() {
 
                 </ThemedView>
 
-                <AboutSection
-                    titre={t.about}
-                    aproposValue={profil?.bio || ''}
-                    setAproposValue={setapropos}
-                    modifApropos={modifApropos}
-                    setModifApropos={setmodifApropos}
-                />
 
-                <AboutSection
-                    titre={t.ubication}
-                    aproposValue={profil?.city || ''}
-                    setAproposValue={setplaceValue}
-                    modifApropos={modifiPlace}
-                    setModifApropos={setmodifPlace}
-                />
+                <ThemedView style={styles.containerInfo}>
+                    <View style={styles.itemTitre}>
+                        <ThemedText type='defaultSemiBold'>{t.about}</ThemedText>
+                        <TouchableOpacity onPress={() => {
+                            setmodifierBio(!modifierBio)
+                            if (bioOld !== bio) {
+                                console.log('mofiddidid');
+                                sendUpdateProfile()
+                            }
+
+
+                        }}>
+                            <Icon name={!modifierBio ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.infoCard}>
+                        {!modifierBio ? (
+                            <ThemedText>{bio}</ThemedText>
+                        ) : (
+                            <InputText value={bio} onChangeText={(text) => setBio(text)} />
+                        )
+                        }
+                    </View>
+                </ThemedView>
+
+                <ThemedView style={styles.containerInfo}>
+                    <View style={styles.itemTitre}>
+                        <ThemedText type='defaultSemiBold'>{t.ubication}</ThemedText>
+                        <TouchableOpacity onPress={() => {
+                            setmodifierubication(!modifierubication)
+                            if (ubicationold !== ubication) {
+                                console.log('mofiddidid');
+                                sendUpdateProfileAll()
+                            }
+
+
+                        }}>
+                            <Icon name={!modifierubication ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.infoCard}>
+                        {!modifierubication ? (
+                            <ThemedText>{ubication}</ThemedText>
+                        ) : (
+                            <InputText value={ubication} onChangeText={(text) => setubication(text)} />
+                        )
+                        }
+                    </View>
+                </ThemedView>
 
                 <ThemedView style={styles.containerInfo}>
                     <View style={styles.itemTitre}>
@@ -371,6 +932,10 @@ export default function ProfilScreen() {
                                         onValueChange={(value) => {
                                             setSelectedOption(value);
                                             item.userAnswer = value;
+                                            console.log('id question : ', item.id);
+                                            console.log('reponse  : ', value);
+                                            updateDataProfil(item.id, value)
+
                                         }}
                                     />
                                 )}
@@ -381,32 +946,50 @@ export default function ProfilScreen() {
 
                 </ThemedView>
 
-                {/* <AboutSection
-                    titre={t.interest}
-                    aproposValue={profil?.bio || ''}
-                    setAproposValue={setapropos}
-                    modifApropos={modifApropos}
-                    setModifApropos={setmodifApropos}
-                /> */}
-
 
                 <InterestList
                     title={t.interest}
+                    dataAllInterest={allInterestSite || []}
+                    update={updateInterests}
+                    userId={auth.idUser}
                     profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
                 />
 
-                <AboutSection
-                    titre='Languages'
-                    aproposValue={profil?.language || ''}
-                    setAproposValue={setapropos}
-                    modifApropos={modifApropos}
-                    setModifApropos={setmodifApropos}
-                    isSelector={true}
-                    options={['Englais', 'Francais']}
-                />
+                <ThemedView style={styles.containerInfo}>
+                    <View style={styles.itemTitre}>
+                        <ThemedText type='defaultSemiBold'>{t.langage}</ThemedText>
+                        <TouchableOpacity onPress={() => {
+                            setmodifierlangue(!modifierlangue)
+                        }}>
+                            <Icon name={!modifierlangue ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.infoCard}>
+                        {!modifierlangue ? (
+                            <ThemedText>{langUser === "1" ? ('Francais') : ('Anglais')}</ThemedText>
+                        ) : (<InputSelectorA
+                            titre={t.langage}
+                            options={[{ 'id': '94', 'lng': 'Englais' }, { 'id': '1', 'lng': 'Francais' }].map(item => ({
+                                value: item.id,
+                                label: item.lng
+                            }))}
+                            selectedValue={selectedOption}
+                            onValueChange={(value) => {
 
+                                setlangUser(value)
+                                console.log('id  : ', value);
+                                console.log(langUser);
+                                getProfils()
 
+                                sendUpdateProfileAll()
+                                sendUpdateProfileAllLang(value)
 
+                            }}
+                        />
+                        )
+                        }
+                    </View>
+                </ThemedView>
 
                 <Modal
                     isVisible={isModalOption}
@@ -451,6 +1034,15 @@ export default function ProfilScreen() {
                         </View>
                     </View>
                 </Modal>
+
+                <Modal
+                    isVisible={litlemodal}
+                    onBackdropPress={() => !litlemodal}
+                    style={styles.modal}
+                >
+
+                </Modal>
+
             </ScrollView>
         </ThemedView>
     );
@@ -460,6 +1052,24 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 10,
+    },
+    sendGift: {
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        backgroundColor: COLORS.bg1,
+        marginTop: 20
+
+    },
+    sendGiftText: {
+        color: 'white',
+        fontSize: 18,
     },
     titleContainer: {
         flexDirection: 'row',
@@ -486,6 +1096,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
+
+    },
+    alertOk: {
+        position: 'absolute',
+        width: 30,
+        height: 30,
+        top: 50,
+        right: 10,
+        zIndex: 1000
 
     },
     containerOption: {
@@ -562,7 +1181,16 @@ const styles = StyleSheet.create({
         shadowRadius: 1,
         marginBottom: 5,
     },
-
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'space-between',
+        padding: 20,
+        borderRadius: 10,
+    },
     icon: {
         width: 50,
         height: 50,
@@ -715,6 +1343,12 @@ const styles = StyleSheet.create({
         width: '55%',
 
     },
+    modalContent1: {
+        width: '100%',
+        height: '90%',
+        backgroundColor: 'transparent',
+        position: 'relative',
+    },
     modalContentDeconex: {
         backgroundColor: 'white',
         borderRadius: 10,
@@ -737,3 +1371,9 @@ const styles = StyleSheet.create({
     }
 
 });
+
+
+function launchImageLibrary(arg0: { mediaType: string; }, arg1: (response: any) => Promise<void>) {
+    throw new Error('Function not implemented.');
+}
+

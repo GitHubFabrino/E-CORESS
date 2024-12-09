@@ -22,6 +22,37 @@ const apiClientGif = axios.create({
     },
     withCredentials: true,
 });
+const apiClientUser = axios.create({
+    baseURL: 'https://www.e-coress.com/requests/user.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+
+const apiClientBello = axios.create({
+    baseURL: 'https://www.e-coress.com/requests/belloo.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+
+
+const apiClientInterests = axios.create({
+    baseURL: 'https://www.e-coress.com/requests/apiInterests.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+
 
 const apiClientImage = axios.create({
     baseURL: 'https://www.e-coress.com/assets/sources/appupload.php',
@@ -888,27 +919,6 @@ export const today = async (uid1: string): Promise<any> => {
         throw new Error(`Erreur lors de l'action 'today': ${error.message || error}`);
     }
 };
-// export const sendImage = async (base: string): Promise<any> => {
-//     try {
-//         // Effectuer la requête POST avec les données nécessaires
-//         const response = await apiClientImage.post('', {
-//             action: 'sendChat',
-//             base64: base
-//         });
-
-//         // Vérification du statut de la réponse
-//         if (response.status === 200) {
-//             console.log("Image envoyée avec succès :", response.data);
-//             return response.status; // Retourner les données de la réponse
-//         } else {
-//             console.error("Échec de l'envoi de l'image:", response.status, response.statusText);
-//             throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-//         }
-//     } catch (error: any) {
-//         console.error("Erreur lors de l'envoi de l'image:", error.message || error);
-//         throw new Error(`Erreur lors de l'envoi de l'image: ${error.message || error}`);
-//     }
-// };
 
 // export const sendImage = async (base64Image: string): Promise<any> => {
 //     try {
@@ -997,3 +1007,272 @@ export const sendImage = async (base64Image: string, uid: string, rid: string): 
     }
 };
 
+
+export const updateUserExtendeds = async (query: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "updateUserExtended",
+                query: query
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'updateUserExtended' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'updateUserExtended':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'updateUserExtended':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'updateUserExtended': ${error.message || error}`);
+    }
+};
+
+export const getAllInterests = async (): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClientInterests.get('', {
+            params: {
+                action: "getInterests",
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'getInterests' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'getInterests':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'getInterests':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'getInterests': ${error.message || error}`);
+    }
+};
+
+
+
+export const add_interest = async (uid: string, uidInteret: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "add_interest",
+                query: `${uid},${uidInteret}`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'add_interest' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'add_interest':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'add_interest':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'add_interest': ${error.message || error}`);
+    }
+};
+
+
+export const updateUserBio = async (uid: string, bio: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "updateUserBio",
+                query: `${uid}[divider]${bio}[divider]** message **`
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'updateUserBio' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'updateUserBio':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'updateUserBio':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'updateUserBio': ${error.message || error}`);
+    }
+};
+
+export const updateProfilAll = async (
+    username: string,
+    email: string,
+    name: string,
+    day: string,
+    month: string,
+    year: string,
+    gender: string,
+    lang: string,
+    city: string,
+    country: string,
+    lat: string,
+    lng: string,
+    editEmail: string,
+    editUsername: string,
+    editId: string
+): Promise<any> => {
+    try {
+        // Création de l'objet FormData
+        const formData = new FormData();
+        formData.append('action', 'update');
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('name', name);
+        formData.append('day', day);
+        formData.append('month', month);
+        formData.append('year', year);
+        formData.append('gender', gender);
+        formData.append('lang', lang);
+        formData.append('city', city);
+        formData.append('country', country);
+        formData.append('lat', lat);
+        formData.append('lng', lng);
+        formData.append('editEmail', editEmail);
+        formData.append('editUsername', editUsername);
+        formData.append('editId', editId);
+
+        // Effectuer la requête POST avec FormData
+        const response = await apiClientUser.post('', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("UPDATE envoyée avec succès :", response.data);
+            return response.status; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'UPDATE:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'UPDATE:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'UPDATE: ${error.message || error}`);
+    }
+};
+
+export const uploadImage = async (file: { uri: string; name: string; type: string }) => {
+    const formData = new FormData();
+
+    formData.append('file', {
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+    } as any);
+
+    try {
+        const response = await axios.post('https://www.e-coress.com/assets/sources/upload.php', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+            },
+        });
+
+        console.log('Image uploadée avec succès:', response.data);
+    } catch (error: any) {
+        console.error('Erreur lors de l\'envoi de l\'image:', error.response?.data || error.message);
+    }
+};
+
+
+export const uploadBase64Image = async (base64Image: string) => {
+    try {
+        const response = await axios.post('https://www.e-coress.com/assets/sources/appBase64upload.php', {
+            base64: base64Image,
+        }, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        console.log('Upload response:', response.data);
+        if (response.data.status === 'ok') {
+            console.log('Image URL:', response.data.path);
+            console.log('Thumbnail URL:', response.data.thumb);
+            return response.data
+        } else {
+            console.error('Upload failed:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+    }
+};
+
+
+export const uploadMedia = async (
+    path: string,
+    thumb: string,
+): Promise<any> => {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'uploadMedia');
+        formData.append('media[0][status]', 'ok');
+        formData.append('media[0][video]', '0');
+        formData.append('media[0][path]', `https://www.e-coress.com/assets/sources/${path}`);
+        formData.append('media[0][thumb]', `https://www.e-coress.com/assets/sources/${thumb}`);
+
+
+        // Effectuer la requête POST avec FormData
+        const response = await apiClientBello.post('', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("uploadMedia envoyée avec succès :", response.data);
+            return response.data; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'uploadMedia:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'uploadMedia:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'uploadMedia: ${error.message || error}`);
+    }
+};
+
+export const messageChat = async (Query: string): Promise<any> => {
+
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "message",
+                query: Query
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'message' réussie :", response.data);
+            return response.status;
+        } else {
+            console.error("Échec de l'action 'message':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'message':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'message': ${error.message || error}`);
+    }
+};

@@ -109,6 +109,8 @@ export const translations: {
         sendGift1: string,
         sendGift2: string,
         credit: string,
+        Langue: string,
+        langage: string
     };
 } = {
     FR: {
@@ -220,6 +222,8 @@ export const translations: {
         sendGift1: 'J\'ai envoyé ce cadeau à',
         sendGift2: 'Ce cadeau a coûté',
         credit: 'Crédits',
+        Langue: 'Francais',
+        langage: 'Langue'
     },
     EN: {
         welcome: "WELCOME TO",
@@ -330,6 +334,8 @@ export const translations: {
         sendGift1: 'Sent this gift to',
         sendGift2: 'This gift cost',
         credit: 'Credits',
+        Langue: 'English',
+        langage: 'Language'
 
     }
 };

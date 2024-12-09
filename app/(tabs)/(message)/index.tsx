@@ -225,10 +225,10 @@ const MessageScreen: React.FC = () => {
             <ThemedView style={styles.type}>
                 <View style={styles.center}>
                     <TouchableOpacity onPress={() => selectType('all')} style={styles.filterButton}>
-                        <ThemedText type="defaultSemiBold2">{t.all}</ThemedText>
+                        <ThemedText type="defaultSemiBold">{t.all}</ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => selectType('notread')} style={styles.filterButton}>
-                        <ThemedText type="defaultSemiBold2">{t.notread}</ThemedText>
+                        <ThemedText type="defaultSemiBold">{t.notread}</ThemedText>
 
                         {unread && unread !== '0' && <View style={styles.unreadBadge}>
                             <Text style={styles.unreadCount}>{unread}</Text>
@@ -237,7 +237,7 @@ const MessageScreen: React.FC = () => {
 
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => selectType('online')} style={styles.filterButton}>
-                        <ThemedText type="defaultSemiBold2">{t.online}</ThemedText>
+                        <ThemedText type="defaultSemiBold">{t.online}</ThemedText>
                     </TouchableOpacity>
                 </View>
 
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     },
     center: {
         // backgroundColor: 'red',
-        width: '60%',
+        width: '65%',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',

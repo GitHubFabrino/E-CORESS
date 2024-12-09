@@ -192,6 +192,7 @@ export default function HomeScreen() {
   };
   const handleHeartPress = (uid1: string, uid2: string) => {
     if (!liked) {
+
       if (setSolde > 0) {
         setLiked(true);
 
@@ -210,6 +211,7 @@ export default function HomeScreen() {
           }),
         ]).start(() => setHeartShown(false));  // Cacher le cœur après animation
         setTimeout(() => {
+          setLiked(false)
           setcreditSend(1)
 
           const gameLikeFunc = async () => {
@@ -224,10 +226,12 @@ export default function HomeScreen() {
               }, 1500);
             }
 
+
           };
           gameLikeFunc()
           handleNextCard()
         }, 2000);
+
       } else {
         setSoldeInsuffisant(true)
       }

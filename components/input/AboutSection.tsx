@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import InputText from './InputText';
@@ -16,7 +15,8 @@ interface AboutSectionProps {
     setModifApropos?: (value: boolean) => void;
     isSelector?: boolean;
     options?: string[];
-    see?: boolean
+    see?: boolean,
+    updateApropos?: () => void;
 }
 
 const AboutSection: React.FC<AboutSectionProps> = ({
@@ -27,31 +27,56 @@ const AboutSection: React.FC<AboutSectionProps> = ({
     setModifApropos,
     isSelector = false,
     options = [],
-    see = true
+    see = true,
+    updateApropos
 }) => {
+
+    const [modifier, setmodifier] = useState(true);
+    const [dataInitial, setdataInitial] = useState(aproposValue);  // Initialize with aproposValue
+    const [newData, setnewData] = useState('');
+
+    useEffect(() => {
+        // If aproposValue changes externally, update dataInitial to reflect the changes
+        setdataInitial(aproposValue);
+    }, [aproposValue]);
+
+    const handleSave = () => {
+        if (newData && setAproposValue) {
+            setAproposValue(newData); // Update aproposValue with newData
+        }
+        setmodifier(true); // Switch back to view mode
+    };
+
     return (
         <ThemedView style={styles.containerInfo}>
             <View style={styles.itemTitre}>
                 <ThemedText type='defaultSemiBold'>{titre}</ThemedText>
-                {see && <TouchableOpacity onPress={() => setModifApropos!(!modifApropos)}>
-                    <Icon name={modifApropos ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                {see && <TouchableOpacity onPress={() => {
+                    setmodifier(false)
+                    if (modifier) {
+                        // In edit mode, save the new data
+                        handleSave();
+                    } else {
+                        setmodifier(!modifier);
+                    }
+                }}>
+                    <Icon name={modifier ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
                 </TouchableOpacity>}
             </View>
             <View style={styles.infoCard}>
-                {modifApropos ? (
-                    <ThemedText>{aproposValue}</ThemedText>
+                {modifier ? (
+                    <ThemedText>{dataInitial}</ThemedText> // Display the initial value
                 ) : (
                     isSelector ? (
                         <InputSelector
                             options={options}
                             selectedValue={aproposValue}
                             onValueChange={(itemValue) => {
-                                console.log("Selected Value:", itemValue); // Débogage
-                                setAproposValue!(itemValue);
+                                setAproposValue!(itemValue); // Update aproposValue on selection
                             }}
                         />
                     ) : (
-                        <InputText value={aproposValue} onChangeText={setAproposValue!} />
+                        <InputText value={newData || dataInitial} onChangeText={(text) => setnewData(text)} />
                     )
                 )}
             </View>
@@ -78,6 +103,5 @@ const styles = StyleSheet.create({
     infoCard: {
         width: '100%',
         padding: 10,
-
     },
 });
