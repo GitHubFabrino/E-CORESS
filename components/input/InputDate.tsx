@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '@/assets/style/style.color';
 
 interface DatePickerProps {
-    label: string;
+    label?: string;
     value: Date;
     onChange: (date: Date) => void;
     error?: string;

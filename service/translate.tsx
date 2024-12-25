@@ -26,6 +26,7 @@ export const translations: {
         meetingPreferenceLabel: string;
         termsText: string;
         createAccountButton: string;
+        raise: string,
         errors: {
             required: string;
             nameRequired: string;
@@ -69,6 +70,7 @@ export const translations: {
         profile: String
         years: String
         about: String
+        pop: string
         ubication: String
         infoPer: String
         partenaire: String
@@ -78,7 +80,7 @@ export const translations: {
         noAnswer: String
         username: String
         Name: String
-        birthday: String
+        birthday: string
         noData: String
         suggestion: String
         All: string
@@ -116,6 +118,53 @@ export const translations: {
         story: string,
 
         delete: string,
+        locked: string,
+        unlocked: string,
+        raiseText: string,
+        increase: string,
+        increaseText: string,
+        Highlights: string,
+        HighlightsText: string,
+        textModalRaise: string,
+        textModalRaise2: string,
+        textModalRaise3: string,
+        textModalIncrease: string,
+        textModalIncrease2: string,
+        textModalIncrease3: string,
+
+        textModalHightlight: string,
+        textModalHightlight2: string,
+        textModalHightlight3: string,
+
+        matches: string,
+        visited: string,
+        likes: string,
+        likesMe: string,
+        becomePremium: string,
+        textpremium: string,
+        noCorrespondance: string,
+        offre: string,
+        interactions: string,
+        dec: string,
+        day: string,
+        durring: string,
+        textpay: string,
+        securtyText: string,
+        selectPayText: string,
+        selectPayText1: string,
+        selectPayText2: string,
+        saveOffre: string,
+        textp: string,
+        aproximite1: string,
+        aboutme: string,
+        curentLocal: string,
+        byeCredit: string,
+        activation: string,
+        Increase: string,
+        yes: string,
+        no: string,
+        notAct: string,
+        Act: string,
     };
 } = {
     FR: {
@@ -137,9 +186,9 @@ export const translations: {
         invalidEmail: "L'email est requis et doit être valide",
         requiredPassword: "Le mot de passe est requis",
         createAccount: "Créez votre compte",
-        male: "home",
-        femelle: "femme",
-        lesbian: "lesbienne",
+        male: "Home",
+        femelle: "Femme",
+        lesbian: "Lesbienne",
         name: "Nom ou pseudo",
         namePlaceholder: "Votre nom ou pseudo",
         firstName: "Prénom",
@@ -232,8 +281,57 @@ export const translations: {
         logOut: 'Voulez-vous vraiment se déconnécter ?',
         profil: 'Profile',
         story: 'Storie',
+        yes: 'Oui',
+        no: 'Non',
 
-        delete: 'Supprimer'
+        delete: 'Supprimer',
+        locked: 'Privée',
+        unlocked: 'Public',
+        Highlights: 'Points forts',
+        HighlightsText: 'être vu par toutes les filles de',
+        raise: 'Lever',
+        raiseText: 'Allez en haut et faites en sorte que plus de personnes voient votre profil.'
+        , increase: 'Augmentez votre visibilité',
+        increaseText: 'Faites en sorte que davantage de filles votent pour vous en montrant votre photo lors des réunions.',
+        textModalRaise: 'Faites-vous voir par plus de gens !',
+        textModalRaise2: 'Montez à la première place dans Personnes à proximité et obtenez des visiteurs comme Vanesa, Anna et 15 616 autres personnes de votre région',
+        textModalRaise3: 'Coût du service : 150 crédits',
+
+        textModalIncrease: 'Soyez vu 100 fois dans Discover!',
+        textModalIncrease2: 'Vous souhaitez connaître un moyen vraiment simple d\'obtenir rapidement de nouveaux matchs? Nous pouvons vous présenter 100 fois dans Discover, afin que d\'autres puissent facilement vous trouver !',
+        textModalIncrease3: 'Coût du service : 200 crédits',
+
+        textModalHightlight: 'Faits saillants instantanés!',
+        textModalHightlight2: 'Mettez votre photo au premier plan et faites en sorte que Fernanda, Tamara Mendina et 25.178 filles vous voient dans votre région.',
+        textModalHightlight3: 'Coût du service : 182 crédits',
+        matches: 'Mes matches',
+        visited: 'J\'ai visité mon profil',
+        likes: 'M\'aime',
+        likesMe: 'Mes gouts',
+        becomePremium: 'Devenez Premium',
+        textpremium: 'Devenez premium pour voir qui vous aime et obtenez des super pouvoirs dans E-coress',
+        noCorrespondance: 'Vous n\'avez pas encore de correspondances',
+        offre: 'Offres',
+        interactions: 'Interactions',
+        dec: 'Déconnexion',
+        day: 'Jours',
+        durring: 'Pendant',
+        textpay: 'Choisissez votre mode de paiement',
+        securtyText: 'Paiement sécurisé crypté 256 bits',
+        selectPayText: 'Vous avez sélectionné l\'offre',
+        selectPayText1: 'pour',
+        aproximite1: 'A proximité',
+        selectPayText2: 'mois',
+        saveOffre: 'Enregistrer l\'offre',
+        aboutme: 'A Propos de Moi',
+        curentLocal: 'Actuel Localisation',
+        byeCredit: 'Acheter Crédits',
+        Increase: 'Améliorer',
+        pop: 'Popularité',
+        activation: 'Activation',
+        notAct: 'Non activé',
+        Act: 'Activé',
+        textp: 'Finalisation sécurisée de l\'achat.Vendu et fabriqué par E- coress, un distributeur agréé et un commerçant enregistré.E-coress utilise des problèmes courants de l\'industrie en matière de cryptage pour protéger la confidentialité de vos informations personnelles.'
     },
     EN: {
         welcome: "WELCOME TO",
@@ -254,9 +352,9 @@ export const translations: {
         invalidEmail: "Email is required and must be valid",
         requiredPassword: "Password is required",
         createAccount: "Create your account",
-        male: "male",
-        femelle: "female",
-        lesbian: "lesbian",
+        male: "Male",
+        femelle: "Female",
+        lesbian: "Lesbian",
         name: "Name or Nickname",
         firstName: "First Name",
         namePlaceholder: "Your name or nickname",
@@ -349,7 +447,59 @@ export const translations: {
         logOut: "Do you really want to log out?",
         profil: 'Profil',
         story: 'Story',
-        delete: 'Delete'
+        delete: 'Delete',
+        locked: 'Private',
+        unlocked: 'Public',
+        Highlights: 'Highlights',
+        HighlightsText: 'get seen by all the girls of',
+        raise: 'Raise Up',
+        raiseText: 'Go to the top and make more people see your profile.',
+        increase: 'Increase your visibility',
+        increaseText: 'Make more girls vote for you by showing your photo on meetings.',
+        textModalRaise: 'Get seen by more people!',
+        textModalRaise2: 'Rise up to first place in People nearby and get visitors like Vanesa, Anna and 15,616 other people in your area',
+        textModalRaise3: 'Service cost: 150 Credits',
+
+        textModalIncrease: 'Get seen 100 times in Discover !',
+        textModalIncrease2: 'Want to know a really easy way to get new matches fast? We can feature you 100 times in Discover, so others can easily find you!',
+        textModalIncrease3: 'Service cost: 200 Credits',
+
+        textModalHightlight: 'Instant Highlights!',
+        textModalHightlight2: 'Put your photo in the foreground and make Fernanda, Tamara Mendina y 25.178 girls see you in your area .',
+        textModalHightlight3: 'Service cost: 182 Credits',
+
+        matches: 'My matches',
+        visited: 'Visited my profile',
+        likes: 'Likes me',
+        likesMe: 'My likes',
+        becomePremium: 'Become Premium',
+        textpremium: 'Become premium for see who likes you and get super powers in E-coress',
+        noCorrespondance: 'You don\'t have any matches yet',
+        offre: 'Offers',
+        interactions: 'Interactions',
+        dec: 'Logout',
+        day: 'Days',
+        durring: 'Durring',
+        textpay: 'Choose your payment method',
+        securtyText: 'Secure 256-bit encrypted payment',
+        selectPayText: 'You have selected the',
+        selectPayText1: 'offer for',
+        selectPayText2: 'months',
+        aproximite1: 'Near',
+        saveOffre: 'Save Offer',
+        aboutme: 'About me',
+        curentLocal: 'Current Location',
+        byeCredit: 'Buy credits',
+        Increase: 'Increase',
+        pop: 'Popularity',
+        activation: 'Activation',
+        notAct: 'No activite',
+        Act: 'Activeted',
+        yes: 'Yes',
+        no: 'No',
+        textp: 'Secure completion of the purchase. Sold and made by  E-coress  an authorized distributor and registration trader. E- coress uses common industry problems in encryption to protect the confidentiality of your personal information.'
+
+
 
     }
 };

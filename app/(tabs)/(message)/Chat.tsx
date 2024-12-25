@@ -6,7 +6,7 @@ import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
-import { getGif, getMessage, message, sendImage, sendMessage, today, updateCredits, uploadBase64Image, userProfil } from '@/request/ApiRest';
+import { getGif, getGifts, getMessage, message, rt, sendImage, sendMessage, today, updateCredits, uploadBase64Image, userProfil } from '@/request/ApiRest';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,7 +17,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { translations } from '@/service/translate';
 import Modal from 'react-native-modal/dist/modal';
 import { Dimensions } from 'react-native';
-
+import { useRouter } from 'expo-router';
 const { width } = Dimensions.get('window');
 const itemWidth = 60;
 const getNumColumns = () => Math.floor(width / itemWidth);
@@ -54,6 +54,8 @@ type DataImage = {
 }[];
 
 const ChatScreen: React.FC = () => {
+
+    const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
     const auth = useSelector((state: RootState) => state.user);
     const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
@@ -61,7 +63,7 @@ const ChatScreen: React.FC = () => {
     const [dataImages, setdataImages] = useState<DataImage>([]);
     const route = useRoute();
     const navigation = useNavigation();
-    const { userId, userName, profilePic } = route.params as { userId: string; userName: string; profilePic: any };
+    const { userId, userName, profilePic, premium } = route.params as { userId: string; userName: string; profilePic: any; premium: string };
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
@@ -70,6 +72,7 @@ const ChatScreen: React.FC = () => {
     const [isImageSelect, setisImageSelect] = useState(false);
 
     const closeImageselect = () => { setisImageSelect(!isImageSelect) }
+    const [dataGifts, setDataGifts] = useState();
     const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
@@ -77,12 +80,14 @@ const ChatScreen: React.FC = () => {
         getSolde()
         getSoldeChat()
         getAllGift()
+        getAllGifts()
     }, [auth.idUser, userId]);
 
     useFocusEffect(
         useCallback(() => {
             getSolde()
             getSoldeChat()
+            getAllGifts()
         }, [])
     );
 
@@ -112,6 +117,18 @@ const ChatScreen: React.FC = () => {
 
         // Afficher le résultat
         console.log(result);
+    };
+
+    const getAllGifts = async () => {
+        try {
+            const resultData = await getGifts();
+            setDataGifts(resultData.gifts)
+        } catch (error) {
+
+        }
+
+
+
     };
 
 
@@ -168,6 +185,8 @@ const ChatScreen: React.FC = () => {
             photo: '0',
             timestamp: new Date().toLocaleDateString(),
         });
+        setNewMessage('');
+
 
         const textMsg = createMessage();
 
@@ -183,13 +202,24 @@ const ChatScreen: React.FC = () => {
 
             if (upDateCredit === 200) {
                 const responseText = await sendMessage(queryText);
-                if (responseText !== 200) {
-                    console.error("Erreur lors de l'envoi du texte");
+                console.log('idrecev', userId);
+                console.log('idsend', auth.idUser);
+
+
+                if (responseText === 200) {
+                    const query = `${auth.idUser}[rt]${userId}[rt]${auth.user.user.profile_photo}[rt]${auth.user.user.name}[rt]${newMessage}[rt]text`
+
+                    const response = await rt(query);
+                    if (response === 200) {
+                        // Réinitialiser le champ de texte après l'envoi
+                        setNewMessage('');
+                        dispatch(setNewmessage(newMessage));
+                        getMessageAll()
+                    }
+
                 }
 
-                // Réinitialiser le champ de texte après l'envoi
-                setNewMessage('');
-                dispatch(setNewmessage(newMessage));
+
             } else {
                 console.error("Erreur lors de la mise à jour des crédits");
             }
@@ -260,58 +290,7 @@ const ChatScreen: React.FC = () => {
         { id: 6, Image: require('../../../assets/images/tarif/img6.png') },
         { id: 7, Image: require('../../../assets/images/tarif/img7.png') },
     ];
-    const dataGifts = [
-        { id: 1, Image: 'https://premiumdatingscript.com/gifts/15.png', prix: '25' },
-        { id: 2, Image: 'https://premiumdatingscript.com/gifts/16.png', prix: '25' },
-        { id: 3, Image: 'https://premiumdatingscript.com/gifts/22.png', prix: '25' },
-        { id: 4, Image: 'https://premiumdatingscript.com/gifts/21.png', prix: '25' },
-        { id: 5, Image: 'https://premiumdatingscript.com/gifts/19.png', prix: '25' },
 
-        { id: 6, Image: 'https://premiumdatingscript.com/gifts/17.png', prix: '50' },
-        { id: 7, Image: 'https://premiumdatingscript.com/gifts/6.png', prix: '50' },
-
-        { id: 8, Image: 'https://premiumdatingscript.com/gifts/1.png', prix: '55' },
-
-        { id: 9, Image: 'https://premiumdatingscript.com/gifts/11.png', prix: '100' },
-        { id: 10, Image: 'https://premiumdatingscript.com/gifts/7.png', prix: '100' },
-
-        { id: 11, Image: 'https://premiumdatingscript.com/gifts/8.png', prix: '150' },
-        { id: 12, Image: 'https://premiumdatingscript.com/gifts/23.png', prix: '150' },
-        { id: 13, Image: 'https://premiumdatingscript.com/gifts/2.png', prix: '150' },
-
-        { id: 14, Image: 'https://premiumdatingscript.com/gifts/14.png', prix: '200' },
-        { id: 15, Image: 'https://premiumdatingscript.com/gifts/3.png', prix: '200' },
-        { id: 16, Image: 'https://premiumdatingscript.com/gifts/5.png', prix: '200' },
-
-        { id: 17, Image: 'https://premiumdatingscript.com/gifts/10.png', prix: '250' },
-        { id: 18, Image: 'https://premiumdatingscript.com/gifts/4.png', prix: '250' },
-
-        { id: 19, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 20, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 21, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 22, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 23, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 24, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 25, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 26, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 27, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 28, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 29, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 30, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 31, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 32, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 33, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '2050' },
-        { id: 34, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 35, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '2100' },
-        { id: 36, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 37, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 38, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 39, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-        { id: 40, Image: 'https://premiumdatingscript.com/gifts/18.png', prix: '200' },
-
-    ];
-
-    const [valueCredits, setValueCredits] = useState<number | null>(null);
     const [creditSend, setcreditSend] = useState<number | null>(null);
 
     const [isAlert, setisAlert] = useState(false);
@@ -603,7 +582,7 @@ const ChatScreen: React.FC = () => {
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.push('/(message)/')}
                 >
                     <Ionicons name="arrow-back" size={24} color={COLORS.white} />
                 </TouchableOpacity>
@@ -612,7 +591,10 @@ const ChatScreen: React.FC = () => {
                     <View style={styles.messageCard}>
                         <Image source={{ uri: profilePic }} style={styles.profilePic} />
                         <View>
-                            <Text style={styles.personName}>{userName}</Text>
+                            <View style={styles.flex}>
+                                <Text style={styles.personName}>{userName}</Text>
+                                {premium === '1' && <Icon name="medal-outline" size={15} color={COLORS.jaune} />}
+                            </View>
                             <ThemedText style={styles.state} type="title">{State !== '0' ? t.on : t.off}</ThemedText>
                         </View>
 
@@ -632,7 +614,7 @@ const ChatScreen: React.FC = () => {
                 onContentSizeChange={scrollToEnd}
             />
 
-            {showGift && <View style={styles.cadeau}>
+            {showGift && dataGifts && <View style={styles.cadeau}>
                 <FlatList
                     horizontal
                     data={dataGifts}
@@ -713,21 +695,7 @@ const ChatScreen: React.FC = () => {
 
             </View>}
             <View style={styles.footer}>
-                {/* {
-                    selectedImage &&
-                    <Pressable onPress={() => openImagePicker()}>
-                        <Image
-                            source={{ uri: selectedImage }}
-                            style={{ width: 250, height: 250, borderRadius: 125, }}
-                            resizeMode="cover"
-                        />
-                    </Pressable>
 
-
-                } */}
-                {/* <TouchableOpacity style={styles.iconButton} onPress={() => openImagePicker()}>
-                    <MaterialIcons name="photo-library" size={24} color={COLORS.bg1} />
-                </TouchableOpacity> */}
                 <TouchableOpacity style={styles.iconButton} onPress={() => showOption()}>
                     <MaterialIcons name="format-list-bulleted" size={24} color={COLORS.bg1} />
                 </TouchableOpacity>
@@ -873,6 +841,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: COLORS.white,
         fontWeight: 'bold',
+        marginRight: 10
+    },
+    flex: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     state: {
         fontSize: 16,

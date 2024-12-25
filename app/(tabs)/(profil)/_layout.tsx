@@ -10,9 +10,14 @@ export default function RootLayout() {
     return (
         <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="Credit" options={{ headerShown: true }} />
-            <Stack.Screen name="MostPopular" options={{ headerShown: true }} />
+            <Stack.Screen name="Credit" options={{ headerShown: false }} />
+            <Stack.Screen name="MostPopular" options={{ headerShown: false }} />
             <Stack.Screen name="Interaction" options={{ headerShown: false }} />
+            <Stack.Screen name="Payement" options={{ headerShown: false }} />
+            <Stack.Screen name="PaymentScreen" options={{ headerShown: false }} />
+            <Stack.Screen name="ProfilDetail" options={{ headerShown: false }} />
+
+
         </Stack>
     );
 }

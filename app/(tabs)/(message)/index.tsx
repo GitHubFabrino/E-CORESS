@@ -57,9 +57,7 @@ type DataImage = {
     id: number;
     Image: string | null;
 }[];
-const { width } = Dimensions.get('window');
-const itemWidth = 150;
-const getNumColumns = () => Math.floor(width / itemWidth);
+
 
 const MessageScreen: React.FC = () => {
 
@@ -73,10 +71,6 @@ const MessageScreen: React.FC = () => {
 
     useEffect(() => {
         if (auth.idUser) {
-            // getMessage();
-            // getunreadMessageCount()
-            // getSolde()
-            // getAllGift()
             promeseAll()
         }
     }, [auth.newM]);
@@ -258,6 +252,7 @@ const MessageScreen: React.FC = () => {
                                 unreadCount={item.unreadCount}
                                 lastM={item.last_m_t}
                                 dataImages={dataImage}
+                                premium={item.premium}
                             />
                         )}
                         showsVerticalScrollIndicator={true}

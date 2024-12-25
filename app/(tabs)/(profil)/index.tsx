@@ -1,5 +1,5 @@
 // import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform, TouchableOpacity, View, ScrollView, FlatList, Text, ActivityIndicator, Button } from 'react-native';
+import { StyleSheet, Image, TouchableOpacity, View, ScrollView, FlatList, Text, ActivityIndicator, Button } from 'react-native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
@@ -9,13 +9,11 @@ import { COLORS } from '@/assets/style/style.color';
 import { getAllInterests, logoutUser, manageImage, updateProfilAll, updateUserBio, updateUserExtendeds, uploadBase64Image, uploadImage, uploadMedia, userProfil } from '@/request/ApiRest';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '@/store/userSlice';
+import { logout, setLanguage } from '@/store/userSlice';
 import { router } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-import AboutSection from '@/components/input/AboutSection';
-import InputSelector from '@/components/input/InputSelector';
 import { UserProfileInterface } from './interfaceProfile';
 import InputSelectorA from '@/components/input/InputSelectorA';
 import { translations } from '@/service/translate';
@@ -23,18 +21,14 @@ import * as ImagePicker from 'expo-image-picker';
 import InterestList from '@/components/input/InteretList';
 import * as FileSystem from 'expo-file-system';
 import InputText from '@/components/input/InputText';
+import ThemedDatePicker from '@/components/input/InputDate';
 interface InterestsData {
     id: string; // Identifiant unique de l'intérêt
     name: string; // Nom de l'intérêt
     icon: string; // URL de l'icône
     count: string; // Nombre d'éléments associés
 }
-// Déclarez un type pour l'image
-type ImageFile = {
-    uri: string;
-    name?: string;
-    type?: string;
-};
+
 
 export default function ProfilScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -67,7 +61,7 @@ export default function ProfilScreen() {
     const [ubication, setubication] = useState(profil?.city || '');
     const [ubicationold, ubicationOld] = useState(ubication);
     const [modifierlangue, setmodifierlangue] = useState(false);
-    const [modifierusername, setmodifierusername] = useState(false);
+    const [modifierusername, setmodifierusername] = useState(true);
     const [modifieremail, setmodifieremail] = useState(false);
 
     const [usernameUser, setUsernameUser] = useState<string>('');
@@ -102,7 +96,12 @@ export default function ProfilScreen() {
 
     const [selectedImageViewPublic, setSelectedImageViewPublic] = useState<string | undefined>();
     const [optionIsSelect, setOptionIsSelect] = useState(false);
+    const [newBirthDay, setNewBirthDay] = useState<Date>(new Date());
+    const [ageUser, setAgeUser] = useState<string>();
+    const [photoProfilUser, setPhotoProfilUser] = useState<string>();
+    const [birthDayOriginal, setBirthDayOriginal] = useState('');
 
+    const [usernamemodifier, setusernamemodifier] = useState('');
     const closeViewImage = () => {
         setisViewImage(!isViewImage)
         setOptionIsSelect(false)
@@ -110,6 +109,7 @@ export default function ProfilScreen() {
     useEffect(() => {
         if (auth.idUser) {
             promeseAll()
+
         }
     }, [auth.newM]);
 
@@ -120,7 +120,7 @@ export default function ProfilScreen() {
             setIsModalOption(false);
             setIsModalParam(false);
             setIsModalGallery(false);
-        }, [])
+        }, [birthDayOriginal, gender, usernamemodifier, langUser, lang])
     );
 
     const promeseAll = async () => {
@@ -210,15 +210,23 @@ export default function ProfilScreen() {
 
 
             const { day, month, year } = splitBirthday(response.user.birthday);
+            setBirthDayOriginal(response.user.birthday)
             setDay(day);
             setMonth(month);
             setYear(year);
             setProfil(response.user)
+
             setBio(response.user.bio)
             setubication(response.user.city)
             setUsernameUser(response.user.username)
             setEmailUser(response.user.email)
             setNameUser(response.user.name)
+            console.log("nameuser", nameUser);
+
+            setAgeUser(response.user.age)
+            setPhotoProfilUser(response.user.profile_photo)
+
+
             setGender(response.user.gender)
             setlangUser(response.user.lang)
             setCity(response.user.city)
@@ -230,6 +238,19 @@ export default function ProfilScreen() {
 
             console.log('SETPROFILE : ', profil?.ip);
             setLitlemodal(false)
+
+            console.log('response login ', response.user.lang_prefix);
+            if (langUser === '1') {
+                dispatch(setLanguage('EN'))
+
+                setLang('EN')
+                console.log(lang);
+
+            } else {
+                dispatch(setLanguage('FR'))
+                setLang('FR')
+                console.log(lang);
+            }
 
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -267,9 +288,9 @@ export default function ProfilScreen() {
         setIsModalGallery(false)
     };
 
-    const handelProfil = () => {
-        setisProfil(!isProfil)
-    };
+    // const handelProfil = () => {
+    //     setisProfil(!isProfil)
+    // };
 
     const handelParam = () => {
         setIsModalGallery(true)
@@ -300,17 +321,17 @@ export default function ProfilScreen() {
         }
     }, [lang]);
 
-    if (loading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={COLORS.jaune} />
-            </View>
-        );
-    }
-    const updateTest = () => {
-        console.log('testeeeeee');
+    // if (loading) {
+    //     return (
+    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //             <ActivityIndicator size="large" color={COLORS.jaune} />
+    //         </View>
+    //     );
+    // }
+    // const updateTest = () => {
+    //     console.log('testeeeeee');
 
-    };
+    // };
 
 
     const updateInterests = () => {
@@ -334,6 +355,25 @@ export default function ProfilScreen() {
         update()
         getProfils()
     };
+    const splitDate = (isoDate: Date) => {
+        // Convertir la date ISO en objet Date
+        const date = new Date(isoDate);
+
+        if (isNaN(date.getTime())) {
+            console.error("Invalid ISO date format:", isoDate);
+            return { day: "Invalid", month: "Invalid", year: "Invalid" };
+        }
+
+        // Extraire le jour, le mois (ajouter 1 car les mois commencent à 0) et l'année
+        const days = String(date.getUTCDate()).padStart(2, "0");
+        const months = String(date.getUTCMonth() + 1).padStart(2, "0");
+        const years = String(date.getUTCFullYear());
+
+        return { days, months, years };
+    };
+
+
+
     const sendUpdateProfileAll = () => {
         console.log("Day:", day);
         console.log("Month:", month);
@@ -354,6 +394,8 @@ export default function ProfilScreen() {
         console.log("EditUsername:", editUsername);
         console.log("editId:", auth.idUser);
 
+        setusernamemodifier(usernameUser)
+
         const update = async () => {
             try {
                 const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
@@ -366,7 +408,25 @@ export default function ProfilScreen() {
             }
         };
         update()
-        // getProfils()
+        getProfils()
+    };
+
+    const sendUpdateProfileAllBithDay = (day: string, month: string, year: string) => {
+
+
+        const update = async () => {
+            try {
+                const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                if (response === 200) {
+                    console.log(/********************oeeeeee************* */);
+
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
+        update()
+        getProfils()
     };
     const sendUpdateProfileAllLang = (idlang: string) => {
         console.log("Day:", day);
@@ -424,6 +484,7 @@ export default function ProfilScreen() {
         console.log("EditEmail:", editEmail);
         console.log("EditUsername:", editUsername);
         console.log("editId:", auth.idUser);
+        setmodifgenre(!modifigenre)
 
         const update = async () => {
             try {
@@ -440,30 +501,7 @@ export default function ProfilScreen() {
             }
         };
         update()
-        // getProfils()
-    };
-
-
-
-    const closeModif = () => {
-        setmodifgenre(false)
-    };
-
-
-
-    const correctedFile = async (file: { uri: string; name: string; type: string }) => {
-        const localUri = FileSystem.documentDirectory + file.name;
-
-        await FileSystem.copyAsync({
-            from: file.uri,
-            to: localUri,
-        });
-
-        return {
-            uri: localUri,
-            name: file.name,
-            type: file.type,
-        };
+        getProfils()
     };
 
 
@@ -484,7 +522,7 @@ export default function ProfilScreen() {
         });
 
         if (!result.canceled) {
-            const imageType = result.assets[0].mimeType; // Ex : "image/jpeg" ou "image/png"
+            const imageType = result.assets[0].mimeType;
             const base64Image = `data:${imageType};base64,${result.assets[0].base64}`;
             setSelectedImage(base64Image);
             setisImageSelect(true)
@@ -553,460 +591,498 @@ export default function ProfilScreen() {
         }
 
     }
+
+    // Fonction pour formater les crédits
+    const formatCredits = (credits: string): string => {
+        // Conversion en nombre si nécessaire
+        const creditValue = typeof credits === 'string' ? parseFloat(credits) : credits;
+
+        // Si la conversion échoue ou si la valeur est indéfinie, retourne 0
+        if (isNaN(creditValue) || creditValue === undefined) {
+            return '0';
+        }
+
+        // Formatage en fonction de la valeur
+        if (creditValue >= 1_000_000_000) {
+            return (creditValue / 1_000_000_000).toFixed(1).replace('.0', '') + 'B'; // Billion
+        }
+        if (creditValue >= 1_000_000) {
+            return (creditValue / 1_000_000).toFixed(1).replace('.0', '') + 'M'; // Million
+        }
+        if (creditValue >= 1_000) {
+            return (creditValue / 1_000).toFixed(1).replace('.0', '') + 'K'; // Millier
+        }
+        return creditValue.toString(); // Inférieur à 1 000, affiche normalement
+    };
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">{t.profile}</ThemedText>
+                <ThemedText type="title" style={{ color: COLORS.bg1 }}>{t.profile}</ThemedText>
                 <ThemedView style={styles.containerIcon}>
 
                     <TouchableOpacity onPress={handelGallery} style={styles.filterButton}>
-                        <Icon name="images-outline" size={25} color={COLORS.darkBlue} />
+                        <Icon name="images" size={25} color={COLORS.darkBlue} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handelParam} style={styles.filterButton}>
-                        <Icon name="settings-outline" size={25} color={COLORS.darkBlue} />
+                        <Icon name="settings" size={25} color={COLORS.darkBlue} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handledeEllips} style={styles.filterButton}>
-                        <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.darkBlue} />
+                        <Icon name="ellipsis-vertical" size={25} color={COLORS.darkBlue} />
                     </TouchableOpacity>
                 </ThemedView>
 
                 {alertOk && <View style={styles.alertOk}><Icon name="trophy" size={30} color={COLORS.green} /></View>}
 
             </ThemedView>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <ThemedView>
-                    <View style={styles.cardProfilItem}>
-                        <Image source={{ uri: profil?.profile_photo }} style={styles.cardProfil} />
 
-                        <View>
-                            <ThemedText type="subtitle" style={styles.cardProfilName}>{profil?.name}</ThemedText>
-                            <ThemedText type="defaultSemiBold" style={styles.cardProfilName}>{profil?.age} {t.years}</ThemedText>
-                        </View>
+            {loading ?
+                (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color={COLORS.jaune} />
                     </View>
-                </ThemedView>
-                {
-                    !isModalGallery && (<View  >
-                        <TouchableOpacity onPress={() => { openImagePicker() }} style={styles.addimage}>
-                            <Icon name="camera-outline" size={30} color={COLORS.bg1} />
-                        </TouchableOpacity>
-                        {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />}
-                            <Button title="Choisir une Image" onPress={pickImage} />
-                            
-                        </View> */}
-                        <View style={styles.cardGallery}>
-                            <FlatList
-                                horizontal
-                                data={profil?.galleria}
-                                keyExtractor={(item) => item.photoId.toString()}  // Conversion de l'id en chaîne
-                                renderItem={({ item }) => (
-                                    <ThemedView style={styles.containerImage}>
-                                        <TouchableOpacity onPress={() => {
-                                            setselectImageView(item.image); setselectImageViewId(item.photoId); setSelectedImageViewPublic(item.private); console.log('ici'); closeViewImage()
-                                        }}>
-                                            <Image source={{ uri: item.image }} style={styles.cardGalleryImage} />
-                                        </TouchableOpacity>
-                                    </ThemedView>
-                                )}
-                                contentContainerStyle={styles.personList}
-                            />
+                ) : (
+                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
 
-                        </View>
+                        <ThemedView>
+                            <View style={styles.cardProfilItem}>
+                                <Image source={{ uri: photoProfilUser }} style={styles.cardProfil} />
+                                {profil?.premium === 1 && <Image source={require('@/assets/images/icon3.png')} style={styles.premium} />}
 
-                    </View>)
-                }
+                                <View style={styles.cardInfo}>
+                                    <ThemedText type="subtitle" style={styles.cardProfilName}>{profil?.name}</ThemedText>
+
+                                    <View style={[styles.flex, { position: 'absolute', bottom: 50, left: 10 }]}>
+                                        <Icon name="watch" size={15} color={COLORS.bg1} />
+                                        <ThemedText type="defaultSemiBold" style={[styles.cardProfilName, { marginLeft: 10, color: '#7a7979', fontSize: 12 }]}>{ageUser} {t.years}</ThemedText>
+                                    </View>
+
+                                    <View style={[styles.flex, { position: 'absolute', bottom: 30, left: 10 }]}>
+                                        <Icon name="location" size={15} color={COLORS.bg1} />
+                                        <ThemedText type="defaultSemiBold" style={[styles.cardProfilName, { marginLeft: 10, color: COLORS.text2, fontSize: 12 }]}>{profil?.city}</ThemedText>
+                                    </View>
+                                    <View style={[styles.flex, { position: 'absolute', bottom: 10, left: 10 }]}>
+                                        <Icon name="diamond" size={15} color={COLORS.jaune} />
+                                        <ThemedText type="defaultSemiBold" style={[styles.cardProfilName, { marginLeft: 10, color: '#7a7979', fontSize: 12 }]}> Premium {profil?.premium === 1 ? t.yes : t.no}</ThemedText>
+                                    </View>
 
 
-
-
-
-
-
-
-
-                <Modal
-                    isVisible={isViewImage}
-                    onBackdropPress={closeViewImage}
-                    style={styles.modal}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalOverlay}>
-
-                            {
-                                selectImageView && <View style={styles.modalContent1}>
-                                    <Image
-                                        source={{ uri: selectImageView }}
-                                        style={{ width: '100%', height: '100%', borderRadius: 10, }}
-                                        resizeMode="contain"
-                                    />
                                 </View>
-                            }
-                            <TouchableOpacity onPress={() => { setOptionIsSelect(!optionIsSelect) }} style={styles.optionImage}>
-                                <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.white} />
-                            </TouchableOpacity>
-                            {optionIsSelect && <View style={styles.optionImageDesicion}>
-                                <TouchableOpacity onPress={() => optionImageFunc('private')} style={[styles.sendAction,]}>
-                                    <Icon name={selectedImageViewPublic === '1' ? "lock-open-outline" : "lock-closed-outline"} size={25} color={COLORS.bg1} />
-                                    <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => optionImageFunc('profil')} style={[styles.sendAction,]}>
-                                    <Icon name="person-circle-outline" size={25} color={COLORS.bg1} />
-                                    <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => optionImageFunc('story')} style={[styles.sendAction,]}>
-                                    <Icon name="add-circle-outline" size={25} color={COLORS.jaune} />
-                                    <Text style={[styles.sendActionText, { color: COLORS.jaune }]}>{t.story}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => optionImageFunc('delete')} style={[styles.sendAction,]}>
-                                    <Icon name="trash-bin-outline" size={25} color={COLORS.red} />
-                                    <Text style={[styles.sendActionText, { color: 'red' }]}>{t.delete}</Text>
-                                </TouchableOpacity>
-                            </View>}
-
-
-                        </View>
-
-
-                    </View>
-
-                </Modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                {
-                    isModalParam && (
-                        <ThemedView>
-                            <ThemedView style={styles.containerInfo1}>
-                                {/* <AboutSection
-                                    titre={t.username}
-                                    aproposValue={profil?.username || ''}
-                                    setAproposValue={setusername}
-                                    modifApropos={modifusername}
-                                    setModifApropos={setmodifusername}
-                                /> */}
-
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
-                                        <TouchableOpacity onPress={() => {
-                                            setmodifierusername(!modifierusername)
-                                            if (usernameOld !== usernameUser) {
-                                                console.log('mofiddidid');
-                                                sendUpdateProfileAll()
-                                            }
-
-
-                                        }}>
-                                            <Icon name={!modifierusername ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        {!modifierusername ? (
-                                            <ThemedText>{usernameUser}</ThemedText>
-                                        ) : (
-                                            <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
-                                        )
-                                        }
-                                    </View>
-                                </ThemedView>
-
-                                {/* <AboutSection
-                                    titre={t.email}
-                                    aproposValue={profil?.email || ''}
-                                    setAproposValue={setemail}
-                                    modifApropos={modifiemail}
-                                    setModifApropos={setmodifemail}
-                                /> */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
-                                        <TouchableOpacity onPress={() => {
-                                            setmodifieremail(!modifieremail)
-                                            if (emailOld !== emailUser) {
-                                                console.log('mofiddidid');
-                                                sendUpdateProfileAll()
-                                            }
-
-
-                                        }}>
-                                            <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        {!modifieremail ? (
-                                            <ThemedText>{emailUser}</ThemedText>
-                                        ) : (
-                                            <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
-                                        )
-                                        }
-                                    </View>
-                                </ThemedView>
-
-                                {/* <AboutSection
-                                    titre={t.Name}
-                                    aproposValue={profil?.name || ''}
-                                    setAproposValue={setusername}
-                                    modifApropos={modifiname}
-                                    setModifApropos={setmodifname}
-                                /> */}
-
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
-                                        <TouchableOpacity onPress={() => {
-                                            setmodifname(!modifiname)
-                                            if (nameOld !== nameUser) {
-                                                console.log('mofiddidid');
-                                                sendUpdateProfileAll()
-                                            }
-
-
-                                        }}>
-                                            <Icon name={modifiname ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        {modifiname ? (
-                                            <ThemedText>{nameUser}</ThemedText>
-                                        ) : (
-                                            <InputText value={nameUser} onChangeText={(text) => setNameUser(text)} />
-                                        )
-                                        }
-                                    </View>
-                                </ThemedView>
-
-                                <AboutSection
-                                    titre={t.birthday}
-                                    aproposValue={profil?.birthday || ''}
-                                    setAproposValue={setbirthday}
-                                    modifApropos={modifbirthday}
-                                    setModifApropos={setmodifbirthday}
-                                />
-                                {/* 
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
-                                        <TouchableOpacity onPress={() => {
-                                            setmodifieremail(!modifieremail)
-                                            if (emailOld !== emailUser) {
-                                                console.log('mofiddidid');
-                                                sendUpdateProfileAll()
-                                            }
-
-
-                                        }}>
-                                            <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        {!modifieremail ? (
-                                            <ThemedText>{emailUser}</ThemedText>
-                                        ) : (
-                                            <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
-                                        )
-                                        }
-                                    </View>
-                                </ThemedView> */}
-
-                                {/* 
-                                <AboutSection
-                                    titre={t.genderLabel}
-                                    aproposValue={profil?.gender || ''}
-                                    setAproposValue={setgenre}
-                                    modifApropos={modifigenre}
-                                    setModifApropos={setmodifgenre}
-                                    isSelector={true}
-                                    options={option}
-                                /> */}
-
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
-                                        <TouchableOpacity onPress={() => {
-                                            setmodifgenre(!modifigenre)
-                                        }}>
-                                            <Icon name={modifigenre ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        {modifigenre ? (
-                                            <ThemedText>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
-                                        ) : (<InputSelectorA
-                                            titre={t.genderLabel}
-                                            options={[{ 'id': '1', 'gender': `${t.male}` }, { 'id': '2', 'gender': `${t.femelle}` }, { 'id': '3', 'gender': `${t.lesbienne}` }, { 'id': '4', 'gender': `${t.gay}` }].map(item => ({
-                                                value: item.id,
-                                                label: item.gender
-                                            }))}
-                                            selectedValue={selectedOption}
-                                            onValueChange={(value) => {
-
-
-                                                console.log('id  : ', value);
-                                                getProfils()
-
-
-                                                // sendUpdateProfileAll()
-                                                sendUpdateProfileAllGender(value)
-
-                                            }}
-                                        />
-                                        )
-                                        }
-                                    </View>
-                                </ThemedView>
-
-                            </ThemedView>
+                            </View>
                         </ThemedView>
-                    )
-                }
-                {/* IMAGE SELECT */}
-                <Modal
-                    isVisible={isImageSelect}
-                    onBackdropPress={closeImageselect}
-                    style={styles.modal}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalOverlay}>
+                        {
+                            !isModalGallery && (<View  >
+                                <TouchableOpacity onPress={() => { openImagePicker() }} style={styles.addimage}>
+                                    <Icon name="camera-outline" size={30} color={COLORS.bg1} />
+                                </TouchableOpacity>
 
-                            <View style={styles.modalContent1}>
-                                <Image
-                                    source={{ uri: selectedImage }}
-                                    style={{ width: '100%', height: '100%', borderRadius: 10, }}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <TouchableOpacity onPress={() => sendImageMessage()} style={styles.sendGift}>
-                                <Text style={styles.sendGiftText}>{t.send}</Text>
-                            </TouchableOpacity>
+                                <View style={styles.cardGallery}>
+                                    <FlatList
+                                        horizontal
+                                        data={profil?.photos}
+                                        keyExtractor={(item) => item.id.toString()}  // Conversion de l'id en chaîne
+                                        renderItem={({ item }) => (
+                                            <ThemedView style={styles.containerImage}>
+                                                <TouchableOpacity onPress={() => {
+                                                    setselectImageView(item.photo); setselectImageViewId(item.id); setSelectedImageViewPublic(item.private); console.log('ici'); closeViewImage()
+                                                }}>
+                                                    <Image source={{ uri: item.photo }} style={styles.cardGalleryImage} />
+                                                    <View style={[styles.sendActionTextPrivateDiv,]}>
+                                                        <Icon name={item.private === '1' ? "lock-closed-outline" : "lock-open-outline"} size={15} color={COLORS.bg1} />
+                                                        <Text style={[styles.sendActionTextPrivate, { color: COLORS.bg1 }]}>{item.private === '1' ? t.locked : t.unlocked}</Text>
 
-
-                        </View>
+                                                    </View>
 
 
-                    </View>
+                                                </TouchableOpacity>
+                                            </ThemedView>
+                                        )}
+                                        contentContainerStyle={styles.personList}
+                                    />
 
-                </Modal>
+                                </View>
 
-
-                <ThemedView style={styles.containerOption}>
-                    <TouchableOpacity onPress={() => { }} >
-                        <View style={styles.cardItem}>
-                            <View style={styles.icon}>
-                                <Image source={require('@/assets/images/icon1.png')} style={styles.iconItem} />
-                            </View>
-                            <View style={styles.textItem}>
-                                <ThemedText type='defaultSemiBold'>Popularité</ThemedText>
-                                <ThemedText type='defaultSemiBold' style={styles.text}>Increase</ThemedText>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }} >
-                        <View style={styles.cardItem}>
-                            <View style={styles.icon}>
-                                <Image source={require('@/assets/images/icon2.png')} style={styles.iconItem} />
-                            </View>
-                            <View style={styles.textItem}>
-                                <ThemedText type='defaultSemiBold'>{profil?.credits} crédits</ThemedText>
-                                <ThemedText type='defaultSemiBold' style={styles.text}>Acheter Crédits</ThemedText>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }} >
-                        <View style={styles.cardItem}>
-                            <View style={styles.icon}>
-                                <Image source={require('@/assets/images/icon3.png')} style={styles.iconItem} />
-                            </View>
-                            <View style={styles.textItem}>
-                                <ThemedText type='defaultSemiBold'>Popularité</ThemedText>
-                                <ThemedText type='defaultSemiBold' style={styles.text}>Increase</ThemedText>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-
-                </ThemedView>
-
-                {/* ABOUT */}
-                <ThemedView style={styles.containerInfo}>
-                    <View style={styles.itemTitre}>
-                        <ThemedText type='defaultSemiBold'>{t.about}</ThemedText>
-                        <TouchableOpacity onPress={() => {
-                            setmodifierBio(!modifierBio)
-                            if (bioOld !== bio) {
-                                console.log('mofiddidid');
-                                sendUpdateProfile()
-                            }
-
-
-                        }}>
-                            <Icon name={!modifierBio ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.infoCard}>
-                        {!modifierBio ? (
-                            <ThemedText>{bio}</ThemedText>
-                        ) : (
-                            <InputText value={bio} onChangeText={(text) => setBio(text)} />
-                        )
+                            </View>)
                         }
-                    </View>
-                </ThemedView>
-                {/* UBICATION */}
-                <ThemedView style={styles.containerInfo}>
-                    <View style={styles.itemTitre}>
-                        <ThemedText type='defaultSemiBold'>{t.ubication}</ThemedText>
-                        <TouchableOpacity onPress={() => {
-                            setmodifierubication(!modifierubication)
-                            if (ubicationold !== ubication) {
-                                console.log('mofiddidid');
-                                sendUpdateProfileAll()
-                            }
+
+                        <Modal
+                            isVisible={isViewImage}
+                            onBackdropPress={closeViewImage}
+                            style={styles.modal}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalOverlay}>
+
+                                    {
+                                        selectImageView && <View style={styles.modalContent1}>
+                                            <Image
+                                                source={{ uri: selectImageView }}
+                                                style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                                resizeMode="contain"
+                                            />
+                                        </View>
+                                    }
+                                    <TouchableOpacity onPress={() => { setOptionIsSelect(!optionIsSelect) }} style={styles.optionImage}>
+                                        <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.white} />
+                                    </TouchableOpacity>
+                                    {optionIsSelect && <View style={styles.optionImageDesicion}>
+                                        <TouchableOpacity onPress={() => optionImageFunc('private')} style={[styles.sendAction,]}>
+                                            <Icon name={selectedImageViewPublic === '1' ? "lock-closed-outline" : "lock-open-outline"} size={25} color={COLORS.bg1} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{selectedImageViewPublic === '1' ? t.locked : t.unlocked}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('profil')} style={[styles.sendAction,]}>
+                                            <Icon name="person-circle-outline" size={25} color={COLORS.bg1} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('story')} style={[styles.sendAction,]}>
+                                            <Icon name="add-circle-outline" size={25} color={COLORS.jaune} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.jaune }]}>{t.story}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('delete')} style={[styles.sendAction,]}>
+                                            <Icon name="trash-bin-outline" size={25} color={COLORS.red} />
+                                            <Text style={[styles.sendActionText, { color: 'red' }]}>{t.delete}</Text>
+                                        </TouchableOpacity>
+                                    </View>}
 
 
-                        }}>
-                            <Icon name={!modifierubication ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.infoCard}>
-                        {!modifierubication ? (
-                            <ThemedText>{ubication}</ThemedText>
-                        ) : (
-                            <InputText value={ubication} onChangeText={(text) => setubication(text)} />
-                        )
+                                </View>
+
+
+                            </View>
+
+                        </Modal>
+
+
+                        {
+                            isModalParam && (
+                                <ThemedView>
+                                    <ThemedView style={styles.containerInfo1}>
+                                        {/* UserName */}
+                                        <ThemedView style={styles.containerInfo}>
+                                            <View style={styles.itemTitre}>
+                                                <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
+
+                                                {
+                                                    modifierusername && <TouchableOpacity onPress={() => {
+                                                        setmodifierusername(!modifierusername)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>
+                                                }
+                                                {!modifierusername && <TouchableOpacity onPress={() => {
+                                                    sendUpdateProfileAll()
+                                                    setmodifierusername(!modifierusername)
+                                                }}>
+                                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                </TouchableOpacity>}
+                                            </View>
+                                            <View style={styles.infoCard}>
+                                                {modifierusername ? (
+                                                    <ThemedText>{usernameUser}</ThemedText>
+                                                ) : (
+                                                    <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
+                                                )
+                                                }
+                                            </View>
+                                        </ThemedView>
+                                        {/* Email User */}
+                                        <ThemedView style={styles.containerInfo}>
+                                            <View style={styles.itemTitre}>
+                                                <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
+                                                <TouchableOpacity onPress={() => {
+                                                    setmodifieremail(!modifieremail)
+                                                    if (emailOld !== emailUser) {
+                                                        console.log('mofiddidid');
+                                                        sendUpdateProfileAll()
+                                                    }
+
+
+                                                }}>
+                                                    <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                                </TouchableOpacity>
+                                            </View>
+                                            <View style={styles.infoCard}>
+                                                {!modifieremail ? (
+                                                    <ThemedText>{emailUser}</ThemedText>
+                                                ) : (
+                                                    <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
+                                                )
+                                                }
+                                            </View>
+                                        </ThemedView>
+                                        {/* Name */}
+                                        <ThemedView style={styles.containerInfo}>
+                                            <View style={styles.itemTitre}>
+                                                <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
+
+                                                {
+                                                    modifiname ? (<TouchableOpacity onPress={() => {
+                                                        setmodifname(!modifiname)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>) : (<TouchableOpacity onPress={() => {
+                                                        sendUpdateProfileAll()
+                                                        setmodifname(!modifiname)
+                                                    }}>
+                                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                    </TouchableOpacity>)
+                                                }
+
+                                            </View>
+                                            <View style={styles.infoCard}>
+                                                {modifiname ? (
+                                                    <ThemedText>{nameUser}</ThemedText>
+                                                ) : (
+                                                    <InputText value={nameUser} onChangeText={(text) => setNameUser(text)} />
+                                                )
+                                                }
+                                            </View>
+                                        </ThemedView>
+                                        {/* BirthDay */}
+                                        <ThemedView style={styles.containerInfo}>
+                                            <View style={styles.itemTitre}>
+                                                <ThemedText type='defaultSemiBold'>{t.birthday}</ThemedText>
+                                                {
+                                                    modifbirthday && <TouchableOpacity onPress={() => {
+                                                        setmodifbirthday(!modifbirthday)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>
+                                                }
+                                                {!modifbirthday && <TouchableOpacity onPress={() => {
+                                                    console.log(splitDate(newBirthDay));
+                                                    const { days, months, years } = splitDate(newBirthDay)
+                                                    if (days && months && years) {
+
+                                                        sendUpdateProfileAllBithDay(days, months, years)
+                                                        setmodifbirthday(!modifbirthday)
+                                                        console.log("New date ", newBirthDay);
+
+                                                        const monthL = {
+                                                            "01": "January",
+                                                            "02": "February",
+                                                            "03": "March",
+                                                            "04": "April",
+                                                            "05": "May",
+                                                            "06": "June",
+                                                            "07": "July",
+                                                            "08": "August",
+                                                            "09": "September",
+                                                            "10": "October",
+                                                            "11": "November",
+                                                            "12": "December",
+                                                        };
+
+                                                        const monthnew = monthL[months as keyof typeof monthL];
+                                                        console.log('test mois ', monthnew);
+                                                        const monthString = `${monthnew} ${days}, ${years}`
+                                                        setBirthDayOriginal(monthString)
+
+
+
+
+                                                    }
+                                                }}>
+                                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                </TouchableOpacity>}
+                                            </View>
+                                            <View style={styles.infoCard}>
+                                                {modifbirthday ? (
+                                                    <ThemedText>{birthDayOriginal}</ThemedText>
+                                                ) : (
+                                                    <ThemedDatePicker
+                                                        value={newBirthDay || new Date()}
+                                                        onChange={setNewBirthDay}
+
+                                                    />)
+                                                }
+                                            </View>
+                                        </ThemedView>
+
+                                        {/* GENRE */}
+                                        <ThemedView style={styles.containerInfo}>
+                                            <View style={styles.itemTitre}>
+                                                <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
+                                                <TouchableOpacity onPress={() => {
+                                                    setmodifgenre(!modifigenre)
+                                                }}>
+                                                    <Icon name={modifigenre ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
+                                                </TouchableOpacity>
+                                            </View>
+                                            <View style={styles.infoCard}>
+                                                {modifigenre ? (
+                                                    <ThemedText>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
+                                                ) : (<InputSelectorA
+                                                    titre={t.genderLabel}
+                                                    options={[{ 'id': '1', 'gender': `${t.male}` }, { 'id': '2', 'gender': `${t.femelle}` }, { 'id': '3', 'gender': `${t.lesbienne}` }, { 'id': '4', 'gender': `${t.gay}` }].map(item => ({
+                                                        value: item.id,
+                                                        label: item.gender
+                                                    }))}
+                                                    selectedValue={selectedOption}
+                                                    onValueChange={(value) => {
+
+
+                                                        console.log('id  : ', value);
+                                                        setGender(value)
+                                                        getProfils()
+
+
+                                                        // sendUpdateProfileAll()
+                                                        sendUpdateProfileAllGender(value)
+
+                                                    }}
+                                                />
+                                                )
+                                                }
+                                            </View>
+                                        </ThemedView>
+
+                                    </ThemedView>
+                                </ThemedView>
+                            )
                         }
-                    </View>
-                </ThemedView>
+                        {/* IMAGE SELECT */}
+                        <Modal
+                            isVisible={isImageSelect}
+                            onBackdropPress={closeImageselect}
+                            style={styles.modal}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalOverlay}>
 
-                <ThemedView style={styles.containerInfo}>
-                    <View style={styles.itemTitre}>
-                        <ThemedText type='defaultSemiBold'>{t.infoPer}</ThemedText>
-                        {modifInfo ? (
-                            <TouchableOpacity onPress={() => setmodifInfo(!modifInfo)}>
-                                <Icon name="create-outline" size={25} color={COLORS.darkBlue} />
+                                    <View style={styles.modalContent1}>
+                                        <Image
+                                            source={{ uri: selectedImage }}
+                                            style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+                                    <TouchableOpacity onPress={() => sendImageMessage()} style={styles.sendGift}>
+                                        <Text style={styles.sendGiftText}>{t.send}</Text>
+                                    </TouchableOpacity>
+
+
+                                </View>
+
+
+                            </View>
+
+                        </Modal>
+
+
+                        <ThemedView style={styles.containerOption}>
+                            <TouchableOpacity onPress={() => { }} >
+                                <View style={styles.cardItem}>
+                                    <View style={styles.icon}>
+                                        {/* <Image source={require('@/assets/images/icon1.png')} style={styles.iconItem} /> */}
+                                        <Icon name="battery-half" size={25} color={COLORS.bg1} />
+                                    </View>
+                                    <View style={styles.textItem}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.pop}</ThemedText>
+                                        <ThemedText type='defaultSemiBold' style={styles.text}>{t.Increase}</ThemedText>
+                                    </View>
+                                </View>
                             </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity onPress={() => setmodifInfo(!modifInfo)}>
-                                <Icon name="checkmark-done-outline" size={25} color={COLORS.green} />
+                            <TouchableOpacity onPress={() => { }} >
+                                <View style={styles.cardItem}>
+                                    <View style={styles.icon}>
+                                        <Image source={require('@/assets/images/icon2.png')} style={styles.iconItem} />
+                                    </View>
+                                    <View style={styles.textItem}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }} >{formatCredits(profil?.credits || '0')} {t.credit}</ThemedText>
+                                        <ThemedText type='defaultSemiBold' style={styles.text}>{t.byeCredit}</ThemedText>
+                                    </View>
+                                </View>
                             </TouchableOpacity>
-                        )}
-                    </View>
-                    <View style={styles.infoCard}>
-                        <ThemedView>
+                            <TouchableOpacity onPress={() => { }} >
+                                <View style={styles.cardItem}>
+                                    <View style={styles.icon}>
+                                        {/* <Image source={require('@/assets/images/icon3.png')} style={styles.iconItem} /> */}
+                                        <Icon name="diamond-sharp" size={25} color={COLORS.bg1} />
+                                    </View>
+                                    <View style={styles.textItem}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.activation}</ThemedText>
+                                        <ThemedText type='defaultSemiBold' style={styles.text}>{profil?.verified === '1' ? t.Act : t.notAct}</ThemedText>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+
+
+                        </ThemedView>
+
+                        {/* ABOUT */}
+                        <ThemedView style={styles.containerInfo}>
+                            <View style={styles.itemTitre}>
+                                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.about}</ThemedText>
+                                {!modifierBio ? (<TouchableOpacity onPress={() => { setmodifierBio(!modifierBio) }}>
+                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                </TouchableOpacity>) :
+                                    (<TouchableOpacity onPress={() => {
+                                        setmodifierBio(!modifierBio)
+                                        if (bioOld !== bio) {
+                                            console.log('mofiddidid');
+                                            sendUpdateProfile()
+                                        }
+                                    }}>
+                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                    </TouchableOpacity>)}
+                            </View>
+                            <View style={styles.infoCard}>
+                                {!modifierBio ? (
+                                    <ThemedText style={{ color: COLORS.text1 }}>{bio}</ThemedText>
+                                ) : (
+                                    <InputText value={bio} onChangeText={(text) => setBio(text)} />
+                                )
+                                }
+                            </View>
+                        </ThemedView>
+                        {/* UBICATION */}
+                        <ThemedView style={styles.containerInfo}>
+                            <View style={styles.itemTitre}>
+                                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.ubication}</ThemedText>
+                                {!modifierubication ? (<TouchableOpacity onPress={() => {
+                                    setmodifierubication(!modifierubication)
+
+                                }}>
+                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                </TouchableOpacity>) : (<TouchableOpacity onPress={() => {
+                                    setmodifierubication(!modifierubication)
+                                    if (ubicationold !== ubication) {
+                                        console.log('mofiddidid');
+                                        sendUpdateProfileAll()
+                                    }
+
+
+                                }}>
+                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                </TouchableOpacity>)}
+                            </View>
+                            <View style={styles.infoCard}>
+                                {!modifierubication ? (
+                                    <ThemedText style={{ color: COLORS.text1 }}>{ubication}</ThemedText>
+                                ) : (
+                                    <InputText value={ubication} onChangeText={(text) => setubication(text)} />
+                                )
+                                }
+                            </View>
+                        </ThemedView>
+
+                        <ThemedView style={styles.containerInfo}>
+                            <View style={styles.itemTitre}>
+                                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.infoPer}</ThemedText>
+                                {modifInfo ? (
+                                    <TouchableOpacity onPress={() => setmodifInfo(!modifInfo)}>
+                                        <Icon name="create-outline" size={25} color={COLORS.darkBlue} />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={() => setmodifInfo(!modifInfo)}>
+                                        <Icon name="checkmark-done-outline" size={25} color={COLORS.green} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                            <View style={styles.infoCard}>
+
+                                {/* Mbola ts complet */}
+                                {/* <ThemedView>
                             <ThemedText type='default'>{t.partenaire} :</ThemedText>
                             <View style={styles.item}>
                                 <InputSelector
@@ -1040,139 +1116,153 @@ export default function ProfilScreen() {
                                 </View>
 
                             </View>
+                        </ThemedView> */}
+
+                                {/* QUESTIONS */}
+                                {profil?.question.map((item) => (
+                                    <View key={item.id}>
+                                        {modifInfo ? (
+                                            <ThemedView style={styles.containerText}>
+                                                <View style={styles.textContainer}>
+                                                    <ThemedText style={{ color: COLORS.bg1, fontWeight: 'bold' }}>{item.question}</ThemedText>
+                                                </View>
+
+                                                <View style={styles.textContainer}>
+                                                    <ThemedText style={{ color: COLORS.text1 }}>{item.userAnswer || 'Pas de réponse'}</ThemedText>
+                                                </View>
+                                            </ThemedView>
+                                        ) : (
+                                            <InputSelectorA
+                                                titre={item.question}
+                                                options={item.answers.map(answer => ({
+                                                    value: answer.answer,
+                                                    label: answer.text
+                                                }))}
+                                                selectedValue={selectedOption}
+                                                onValueChange={(value) => {
+                                                    setSelectedOption(value);
+                                                    item.userAnswer = value;
+                                                    console.log('id question : ', item.id);
+                                                    console.log('reponse  : ', value);
+                                                    updateDataProfil(item.id, value)
+
+                                                }}
+                                            />
+                                        )}
+                                    </View>
+                                ))}
+
+                            </View>
+
                         </ThemedView>
 
-                        {/* QUESTIONS */}
-                        {profil?.question.map((item) => (
-                            <View key={item.id}>
-                                {modifInfo ? (
-                                    <ThemedView style={styles.containerText}>
-                                        <ThemedText>{item.question}</ThemedText>
-                                        <ThemedText>{item.userAnswer || 'Pas de réponse'}</ThemedText>
-                                    </ThemedView>
-                                ) : (
-                                    <InputSelectorA
-                                        titre={item.question}
-                                        options={item.answers.map(answer => ({
-                                            value: answer.answer,
-                                            label: answer.text
-                                        }))}
-                                        selectedValue={selectedOption}
-                                        onValueChange={(value) => {
-                                            setSelectedOption(value);
-                                            item.userAnswer = value;
-                                            console.log('id question : ', item.id);
-                                            console.log('reponse  : ', value);
-                                            updateDataProfil(item.id, value)
 
-                                        }}
-                                    />
-                                )}
-                            </View>
-                        ))}
-
-                    </View>
-
-                </ThemedView>
-
-
-                <InterestList
-                    title={t.interest}
-                    dataAllInterest={allInterestSite || []}
-                    update={updateInterests}
-                    userId={auth.idUser}
-                    profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
-                />
-                {/* LANGUAGE */}
-                <ThemedView style={styles.containerInfo}>
-                    <View style={styles.itemTitre}>
-                        <ThemedText type='defaultSemiBold'>{t.langage}</ThemedText>
-                        <TouchableOpacity onPress={() => {
-                            setmodifierlangue(!modifierlangue)
-                        }}>
-                            <Icon name={!modifierlangue ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.infoCard}>
-                        {!modifierlangue ? (
-                            <ThemedText>{langUser === "1" ? ('Francais') : ('Anglais')}</ThemedText>
-                        ) : (<InputSelectorA
-                            titre={t.langage}
-                            options={[{ 'id': '94', 'lng': 'Englais' }, { 'id': '1', 'lng': 'Francais' }].map(item => ({
-                                value: item.id,
-                                label: item.lng
-                            }))}
-                            selectedValue={selectedOption}
-                            onValueChange={(value) => {
-
-                                setlangUser(value)
-                                console.log('id  : ', value);
-                                console.log(langUser);
-                                getProfils()
-
-                                sendUpdateProfileAll()
-                                sendUpdateProfileAllLang(value)
-
-                            }}
+                        <InterestList
+                            title={t.interest}
+                            dataAllInterest={allInterestSite || []}
+                            update={updateInterests}
+                            userId={auth.idUser}
+                            profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
                         />
-                        )
-                        }
-                    </View>
-                </ThemedView>
-                {/* Option */}
-                <Modal
-                    isVisible={isModalOption}
-                    onBackdropPress={closeModal}
-                    style={styles.modalRight}
-                    animationIn="slideInRight"
-                    animationOut="slideOutRight"
-                >
-                    <View style={styles.modalContent}>
-                        <TouchableOpacity onPress={handelCredit} style={styles.filterButton}>
-                            <Icon name="card-outline" size={25} color={COLORS.darkBlue} />
-                            <ThemedText type='defaultSemiBold' style={styles.option}>Credits</ThemedText>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handelMostPopular} style={styles.filterButton}>
-                            <Icon name="rocket-outline" size={25} color={COLORS.darkBlue} />
+                        {/* LANGUAGE */}
+                        <ThemedView style={styles.containerInfo}>
+                            <View style={styles.itemTitre}>
+                                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.langage}</ThemedText>
+                                {!modifierlangue ? (<TouchableOpacity onPress={() => {
+                                    setmodifierlangue(!modifierlangue)
+                                }}>
+                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                </TouchableOpacity>) : (<TouchableOpacity onPress={() => {
+                                    setmodifierlangue(!modifierlangue)
+                                }}>
+                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                </TouchableOpacity>)}
+                            </View>
+                            <View style={styles.infoCard}>
+                                {!modifierlangue ? (
+                                    <ThemedText style={{ color: COLORS.text1 }}>{langUser === "94" ? ('Francais') : ('Anglais')}</ThemedText>
+                                ) : (<InputSelectorA
+                                    titre={t.langage}
+                                    options={[{ 'id': '1', 'lng': 'Englais' }, { 'id': '94', 'lng': 'Francais' }].map(item => ({
+                                        value: item.id,
+                                        label: item.lng
+                                    }))}
+                                    selectedValue={selectedOption}
+                                    onValueChange={(value) => {
 
-                            <ThemedText type='defaultSemiBold' style={styles.option}>Très Populaire</ThemedText>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handelInteraction} style={styles.filterButton}>
-                            <Icon name="card-outline" size={25} color={COLORS.darkBlue} />
-                            <ThemedText type='defaultSemiBold' style={styles.option}>Interactions</ThemedText>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handledeConnect} style={styles.filterButton}>
-                            <Icon name="log-out-outline" size={25} color={COLORS.darkBlue} />
-                            <ThemedText type='defaultSemiBold' style={styles.option}>Déconnexion</ThemedText>
-                        </TouchableOpacity>
+                                        setlangUser(value)
+                                        console.log('id  : ', value);
+                                        console.log(langUser);
+                                        getProfils()
+                                        setmodifierlangue(!modifierlangue)
 
-                    </View>
-                </Modal>
-                {/* Log OUT */}
+                                        sendUpdateProfileAll()
+                                        sendUpdateProfileAllLang(value)
 
-                <Modal
-                    isVisible={isModalDeconnexion}
-                    onBackdropPress={closeModal}
-                    style={styles.modal}
-                >
-                    <View style={styles.modalContentDeconex}>
-                        <ThemedText>{t.logOut}</ThemedText>
-                        <View style={styles.btn}>
-                            <ThemedButton text={'Annuler'} style={styles.annuler} styleText={styles.textAnnuller} onClick={() => setIsModalDec(!isModalDeconnexion)} />
-                            <ThemedButton text={'Confirmer'} onClick={confirmLogOut} />
-                        </View>
-                    </View>
-                </Modal>
-                {/* reload */}
-                <Modal
-                    isVisible={litlemodal}
-                    onBackdropPress={() => !litlemodal}
-                    style={styles.modal}
-                >
+                                    }}
+                                />
+                                )
+                                }
+                            </View>
+                        </ThemedView>
+                        {/* Option */}
+                        <Modal
+                            isVisible={isModalOption}
+                            onBackdropPress={closeModal}
+                            style={styles.modalRight}
+                            animationIn="slideInRight"
+                            animationOut="slideOutRight"
+                        >
+                            <View style={styles.modalContent}>
+                                <TouchableOpacity onPress={handelCredit} style={styles.filterButton}>
+                                    <Icon name="card-outline" size={25} color={COLORS.darkBlue} />
+                                    <ThemedText type='defaultSemiBold' style={styles.option}>{t.credit}</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handelMostPopular} style={styles.filterButton}>
+                                    <Icon name="rocket-outline" size={25} color={COLORS.darkBlue} />
 
-                </Modal>
+                                    <ThemedText type='defaultSemiBold' style={styles.option}>{t.offre}</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handelInteraction} style={styles.filterButton}>
+                                    <Icon name="git-network-outline" size={25} color={COLORS.darkBlue} />
+                                    <ThemedText type='defaultSemiBold' style={styles.option}>{t.interactions}</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handledeConnect} style={styles.filterButton}>
+                                    <Icon name="log-out-outline" size={25} color={COLORS.darkBlue} />
+                                    <ThemedText type='defaultSemiBold' style={styles.option}>{t.dec}</ThemedText>
+                                </TouchableOpacity>
 
-            </ScrollView>
+                            </View>
+                        </Modal>
+                        {/* Log OUT */}
+
+                        <Modal
+                            isVisible={isModalDeconnexion}
+                            onBackdropPress={closeModal}
+                            style={styles.modal}
+                        >
+                            <View style={styles.modalContentDeconex}>
+                                <ThemedText>{t.logOut}</ThemedText>
+                                <View style={styles.btn}>
+                                    <ThemedButton text={'Annuler'} style={styles.annuler} styleText={styles.textAnnuller} onClick={() => setIsModalDec(!isModalDeconnexion)} />
+                                    <ThemedButton text={'Confirmer'} onClick={confirmLogOut} />
+                                </View>
+                            </View>
+                        </Modal>
+                        {/* reload */}
+                        <Modal
+                            isVisible={litlemodal}
+                            onBackdropPress={() => !litlemodal}
+                            style={styles.modal}
+                        >
+
+                        </Modal>
+
+
+                    </ScrollView>
+                )
+            }
+
         </ThemedView>
     );
 }
@@ -1219,6 +1309,26 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold'
     },
+    sendActionTextPrivate: {
+        color: COLORS.bg1,
+        fontSize: 12,
+        fontWeight: 'bold',
+        zIndex: 100
+    },
+    sendActionTextPrivateDiv: {
+        position: 'absolute',
+        right: 5,
+        top: 5,
+        display: 'flex',
+        flexDirection: 'row',
+        backgroundColor: COLORS.white,
+        padding: 2,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        width: 80,
+        zIndex: 1000
+    },
     sendGiftText: {
         color: 'white',
         fontSize: 18,
@@ -1251,7 +1361,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         marginTop: 50,
-        marginBottom: 20,
+        marginBottom: 10,
         justifyContent: 'space-between',
     },
     containerIcon: {
@@ -1283,7 +1393,7 @@ const styles = StyleSheet.create({
 
     },
     containerOption: {
-        marginVertical: 10,
+        marginVertical: 50,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -1301,23 +1411,49 @@ const styles = StyleSheet.create({
         borderColor: COLORS.lightGray,
     },
     cardProfilItem: {
-        marginHorizontal: 20,
+        width: '100%',
+        paddingHorizontal: 20,
         paddingVertical: 10,
         borderBottomColor: COLORS.bg1,
+        backgroundColor: COLORS.bg1,
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'center',
+        borderRadius: 20
+    },
+    cardInfo: {
+        backgroundColor: 'white',
+        width: '50%',
+        height: 140,
+        borderRadius: 20,
+        padding: 20,
+        paddingTop: 20
+    },
+    flex: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
     },
     cardProfil: {
-        width: 140,
-        height: 140,
+        width: 120,
+        height: 120,
         borderRadius: 70,
-        marginRight: 10,
+        margin: 20,
         borderWidth: 2,
         borderColor: COLORS.lightGray,
     },
+    premium: {
+        width: 50,
+        height: 50,
+        position: 'absolute',
+        bottom: 0,
+        left: 80,
+
+
+    },
     cardProfilName: {
+        color: COLORS.bg1
 
     },
     containerImage: {
@@ -1327,13 +1463,13 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     cardGallery: {
-        backgroundColor: COLORS.bg2
+        backgroundColor: COLORS.bg6
     },
     addimage: {
-        margin: 2,
+        margin: 5,
         backgroundColor: COLORS.jaune,
         alignSelf: 'flex-end',
-        marginRight: 10,
+
         elevation: 2,
         shadowColor: '#000',
         width: 40,
@@ -1372,12 +1508,15 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 10,
+        borderRadius: 50,
+        backgroundColor: '#2d377440'
     },
     iconItem: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+        // backgroundColor: 'red',
+        padding: 10
     },
     textItem: {
         width: '100%',
@@ -1388,11 +1527,16 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 12,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: COLORS.text2
     },
     containerInfo: {
         width: '100%',
-        marginBottom: 10
+        marginVertical: 10,
+        backgroundColor: COLORS.bg6
+    },
+    textContainer: {
+        width: '45%'
     },
     itemTitre: {
         display: 'flex',
@@ -1401,7 +1545,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5,
         padding: 10,
-        backgroundColor: COLORS.bg3
+        backgroundColor: COLORS.bg5,
+        borderRadius: 5
     },
     infoCard: {
         width: '100%',
@@ -1439,7 +1584,7 @@ const styles = StyleSheet.create({
     },
     containerInfo1: {
         padding: 10,
-        backgroundColor: COLORS.lightGray,
+        backgroundColor: COLORS.bg6,
         borderRadius: 10,
         marginBottom: 20
     },
@@ -1489,7 +1634,8 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: 10
+        marginVertical: 10,
+        backgroundColor: COLORS.transparence
     },
 
     annuler: {
@@ -1546,9 +1692,4 @@ const styles = StyleSheet.create({
     }
 
 });
-
-
-function launchImageLibrary(arg0: { mediaType: string; }, arg1: (response: any) => Promise<void>) {
-    throw new Error('Function not implemented.');
-}
 

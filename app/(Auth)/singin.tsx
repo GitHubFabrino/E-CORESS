@@ -24,7 +24,7 @@ export default function SignInScreen() {
 
     const t = translations[lang];
 
-    const [emailUser, setEmailUser] = useState('andry@gmail.com');
+    const [emailUser, setEmailUser] = useState('faly@gmail.com');
     const [phoneUser, setPhoneUser] = useState('');
     const [fbUser, setFbUser] = useState('');
     const [passwordUser, setPasswordUser] = useState('123456789');

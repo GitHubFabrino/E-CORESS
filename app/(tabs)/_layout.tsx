@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { userProfil, spotlight, getChats } from '@/request/ApiRest';
 import { setAllChats, setSpotlight } from '@/store/userSlice';
+import { translations } from '@/service/translate';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,6 +21,9 @@ export default function TabLayout() {
   const [loading, setLoading] = useState(true);
   const [spotlightLoaded, setSpotlightLoaded] = useState(false);
   const [chatsLoaded, setChatsLoaded] = useState(false);
+
+  const [lang, setLang] = useState<'FR' | 'EN'>(auth.lang);
+  const t = translations[lang];
 
   useEffect(() => {
     if (auth.idUser) {
@@ -84,7 +88,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="aproximite"
         options={{
-          title: 'A proximité',
+          title: `${t.aproximite1}`,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'location' : 'location-outline'} color={color} />
           ),
@@ -93,7 +97,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Rencontre',
+          title: `${t.meeting}`,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'people' : 'people-outline'} color={color} />
           ),
@@ -122,7 +126,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="(profil)"
         options={{
-          title: 'Profil',
+          title: `${t.profil}`,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
           ),

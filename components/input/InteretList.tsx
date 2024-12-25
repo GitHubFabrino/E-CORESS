@@ -30,9 +30,10 @@ interface InterestListProps {
     dataAllInterest: InterestsData[],
     userId: string,
     update: () => void;
+    profilDetail?: boolean
 }
 
-const InterestList: React.FC<InterestListProps> = ({ title, profileInfo, dataAllInterest, userId, update }) => {
+const InterestList: React.FC<InterestListProps> = ({ title, profileInfo, dataAllInterest, profilDetail, userId, update }) => {
 
     const [modifApropos, setmodifApropos] = useState(false);
 
@@ -52,53 +53,66 @@ const InterestList: React.FC<InterestListProps> = ({ title, profileInfo, dataAll
         <View>
 
             <View style={styles.itemTitre}>
-                <ThemedText type='defaultSemiBold'>{title}</ThemedText>
-                <TouchableOpacity onPress={() => setmodifApropos(!modifApropos)}>
+                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{title}</ThemedText>
+                {!profilDetail && <TouchableOpacity onPress={() => setmodifApropos(!modifApropos)}>
                     <Icon name={!modifApropos ? "create-outline" : "checkmark-done-outline"} size={25} color={!modifApropos ? COLORS.darkBlue : COLORS.green} />
-                </TouchableOpacity>
+                </TouchableOpacity>}
             </View>
-            <ThemedView style={styles.containerInterest}>
-                {modifApropos !== true ? (
-                    // Affichage des anciens intérêts présents dans profileInfo.interest
-                    Object.values(profileInfo.interest).map((item) => (
+            {profilDetail ? (
+                <ThemedView style={styles.containerInterest}>
+                    {Object.values(profileInfo.interest).map((item) => (
                         <View style={styles.cardInterest} key={item.id}>
                             <Image
                                 source={{ uri: item.icon }}
                                 style={styles.profilePic}
                             />
-                            <ThemedText>{item.name}</ThemedText>
+                            <ThemedText style={{ color: COLORS.text1 }}>{item.name}</ThemedText>
                         </View>
-                    ))
-                ) : (
-                    // Affichage des nouveaux intérêts à partir de dataAllInterest
-                    dataAllInterest?.length > 0 ? (
-                        dataAllInterest.map((item) => {
-                            // Vérifier si l'intérêt est déjà présent dans profileInfo.interest
-                            const isExistingInterest = profileInfo.interest.hasOwnProperty(item.id);
-                            return (
-                                <TouchableOpacity key={item.id} onPress={() => { setSelectedInterest(item.id); addInterest(userId, item.id) }}>
-                                    <View style={[styles.cardInterest]} >
-                                        <Image
-                                            source={{ uri: item.icon }}
-                                            style={styles.profilePic}
-                                        />
-                                        {(selectedInterest === item.id || profileInfo.interest.hasOwnProperty(item.id)) && (
-                                            <Icon style={styles.exist} name="checkmark-circle-outline" size={25} color={COLORS.jaune} />
-                                        )}
-
-
-                                        <ThemedText>{item.name}</ThemedText>
-
-                                    </View>
-                                </TouchableOpacity>
-
-                            );
-                        })
+                    ))}
+                </ThemedView>
+            ) :
+                (<ThemedView style={styles.containerInterest}>
+                    {modifApropos !== true ? (
+                        // Affichage des anciens intérêts présents dans profileInfo.interest
+                        Object.values(profileInfo.interest).map((item) => (
+                            <View style={styles.cardInterest} key={item.id}>
+                                <Image
+                                    source={{ uri: item.icon }}
+                                    style={styles.profilePic}
+                                />
+                                <ThemedText style={{ color: COLORS.text1 }}>{item.name}</ThemedText>
+                            </View>
+                        ))
                     ) : (
-                        <ThemedText>Aucune donnée d'intérêt disponible.</ThemedText>
-                    )
-                )}
-            </ThemedView>
+                        // Affichage des nouveaux intérêts à partir de dataAllInterest
+                        dataAllInterest?.length > 0 ? (
+                            dataAllInterest.map((item) => {
+                                // Vérifier si l'intérêt est déjà présent dans profileInfo.interest
+                                const isExistingInterest = profileInfo.interest.hasOwnProperty(item.id);
+                                return (
+                                    <TouchableOpacity key={item.id} onPress={() => { setSelectedInterest(item.id); addInterest(userId, item.id) }}>
+                                        <View style={[styles.cardInterest]} >
+                                            <Image
+                                                source={{ uri: item.icon }}
+                                                style={styles.profilePic}
+                                            />
+                                            {(selectedInterest === item.id || profileInfo.interest.hasOwnProperty(item.id)) && (
+                                                <Icon style={styles.exist} name="checkmark-circle-outline" size={25} color={COLORS.jaune} />
+                                            )}
+
+
+                                            <ThemedText>{item.name}</ThemedText>
+
+                                        </View>
+                                    </TouchableOpacity>
+
+                                );
+                            })
+                        ) : (
+                            <ThemedText>Aucune donnée d'intérêt disponible.</ThemedText>
+                        )
+                    )}
+                </ThemedView>)}
 
         </View>
     );
@@ -121,8 +135,8 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         padding: 10,
-        // backgroundColor: "red",
-        width: 370
+        backgroundColor: COLORS.bg6,
+        width: "100%"
     },
     itemTitre: {
         display: 'flex',
@@ -131,7 +145,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5,
         padding: 10,
-        backgroundColor: COLORS.bg3
+        backgroundColor: COLORS.bg5,
+        width: "100%"
     },
     infoCard: {
         width: '100%',

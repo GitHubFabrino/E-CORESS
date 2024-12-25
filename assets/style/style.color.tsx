@@ -11,5 +11,11 @@ export const COLORS = {
     red: 'red',
     green: 'green',
     bg2: '#e6e4e47d',
-    bg3: '#e6e4e444'
+    bg3: '#e6e4e444',
+    bg4: '#2d377440',
+    bg5: '#2d367414',
+    bg6: '#96969610',
+    text1: '#5d6072',
+    transparence: '#96969600',
+    text2: '#7a7979'
 }

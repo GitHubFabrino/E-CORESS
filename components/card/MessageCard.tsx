@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '@/assets/style/style.color';
 import { useRouter } from 'expo-router'; // Utiliser useRouter pour expo-router
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface GifImage {
     url: string;
@@ -29,22 +30,29 @@ interface MessageCardProps {
     isOnline: boolean;
     unreadCount: string;
     lastM: string;
-    dataImages: DataImage
+    dataImages: DataImage;
+    premium: string
 
 }
 
-const MessageCard: React.FC<MessageCardProps> = ({ id, name, profilePic, lastMessage, isOnline, unreadCount, lastM, dataImages }) => {
+const MessageCard: React.FC<MessageCardProps> = ({ id, name, profilePic, lastMessage, isOnline, unreadCount, lastM, dataImages, premium }) => {
     const router = useRouter(); // Utiliser useRouter
+
+    console.log('unreadCount', unreadCount);
 
     return (
         <TouchableOpacity
             style={styles.messageCard}
-            onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}&dataImages=${dataImages}`)} // Utiliser router.push pour naviguer
+            onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}&dataImages=${dataImages}&premium=${premium}`)} // Utiliser router.push pour naviguer
         >
             <Image source={{ uri: profilePic }} style={styles.messageProfilePic} />
+            {unreadCount !== '0' && unreadCount !== undefined && <View style={styles.unreadBadge}>
+                <Text style={styles.unreadCount}>{unreadCount}</Text>
+            </View>}
             <View style={styles.messageContent}>
                 <View style={styles.indic}>
                     <Text style={styles.messageName}>{name}</Text>
+                    {premium === '1' && <Icon name="medal-outline" size={15} color={COLORS.jaune} />}
                     <View style={[styles.onlineIndicator, styles.indicator, { backgroundColor: isOnline ? COLORS.green : '' }, { display: isOnline ? 'flex' : 'none' }]} >
                     </View>
                 </View>
@@ -98,6 +106,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: COLORS.bg1,
         fontWeight: 'bold',
+        marginRight: 10
     },
     messageText: {
         fontSize: 14,
@@ -111,15 +120,15 @@ const styles = StyleSheet.create({
 
     },
     indicator: {
-        width: 5,
-        height: 5,
+        width: 3,
+        height: 3,
         marginLeft: 10,
         borderRadius: 20
     },
     unreadBadge: {
         position: 'absolute',
-        top: -5,
-        right: -5,
+        bottom: 10,
+        left: 45,
         width: 20,
         height: 20,
         borderRadius: 10,
@@ -129,7 +138,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     unreadCount: {
-        fontSize: 12,
+        fontSize: 10,
         color: COLORS.white,
         fontWeight: 'bold',
     },

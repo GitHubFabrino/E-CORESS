@@ -31,6 +31,7 @@ export default function HomeScreenAcceuil() {
 
     useEffect(() => {
         setLang('FR')
+        dispatch(setLanguage('FR'));
         const interval = setInterval(() => {
             Animated.timing(fadeAnim, {
                 toValue: 0,
@@ -177,7 +178,8 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 15,
         alignSelf: 'center',
-        color: COLORS.bg1
+        color: COLORS.bg1,
+        textAlign: 'center'
     },
 
     reactLogo: {

@@ -47,6 +47,8 @@ interface UserData {
     stories: string;
     fan: number;
     match: number;
+    premium: string
+    verified: string
 }
 
 interface Game {
@@ -306,14 +308,29 @@ export default function AproximiteScreen() {
         getDataMeet();
         getData();
         getSolde()
-
+        setLang(auth.lang)
 
     }, []);
     useFocusEffect(
         useCallback(() => {
             getDataMeet();
             getSolde()
+            setLang(auth.lang)
         }, [])
+    );
+    useEffect(() => {
+        getDataMeet();
+        getData();
+        getSolde()
+        setLang(auth.lang)
+
+    }, [auth.lang]);
+    useFocusEffect(
+        useCallback(() => {
+            getDataMeet();
+            getSolde()
+            setLang(auth.lang)
+        }, [auth.lang])
     );
     useEffect(() => {
         const sendUpdate = async (field: string, value: string | number) => {
@@ -350,16 +367,16 @@ export default function AproximiteScreen() {
 
 
 
-    const getDataAlluser = async () => {
+    // const getDataAlluser = async () => {
 
-        console.log('aaaaaa', gender);
+    //     console.log('aaaaaa', gender);
 
 
-        setIsLoading(true)
-        const result = await fetchUserData(`18,${maxAge}`, gender, distance.toString(), "0", "0", "");
-        setDataMeet(result.data || []);
-        setIsLoading(false)
-    };
+    //     setIsLoading(true)
+    //     const result = await fetchUserData(`18,${maxAge}`, gender, distance.toString(), "0", "0", "");
+    //     setDataMeet(result.data || []);
+    //     setIsLoading(false)
+    // };
 
     const getAllDatauser = async () => {
 
@@ -374,12 +391,12 @@ export default function AproximiteScreen() {
         setIsLoading(false)
     };
 
-    const getDataOneLigne = async () => {
-        setIsLoading(true)
-        const result = await fetchUserData("18,57", "2", "100", "1", "0", "");
-        setDataMeet(result.data || []);
-        setIsLoading(false)
-    };
+    // const getDataOneLigne = async () => {
+    //     setIsLoading(true)
+    //     const result = await fetchUserData("18,57", "2", "100", "1", "0", "");
+    //     setDataMeet(result.data || []);
+    //     setIsLoading(false)
+    // };
 
 
 
@@ -467,13 +484,13 @@ export default function AproximiteScreen() {
         setIsModalVisibleCuser(false);
         setnameReceveMessage('')
     };
-    const closeModal = () => {
-        setIsModalVisible(false);
-        setprofil1(true);
-        setprofil2(false);
-        setSelectedItem(null);
-        setProfileInfo(null)
-    };
+    // const closeModal = () => {
+    //     setIsModalVisible(false);
+    //     setprofil1(true);
+    //     setprofil2(false);
+    //     setSelectedItem(null);
+    //     setProfileInfo(null)
+    // };
 
     // const showProfilFunc = () => {
     //     setprofil1(!profil1);
@@ -504,7 +521,8 @@ export default function AproximiteScreen() {
     const handleSendCredit = (idReceve: string) => {
         setcreditSend(valueCredits)
         if (valueCredits && valueCredits > Solde) {
-            setSoldeInsuffisant(true)
+            // setSoldeInsuffisant(true)
+            router.navigate('/(profil)/MostPopular')
         } else {
             const messageSend = async () => {
                 if (valueCredits) {
@@ -559,7 +577,8 @@ export default function AproximiteScreen() {
 
     const handleHeartLike = (uid1: string, uid2: string) => {
         if (Solde < 0) {
-            setSoldeInsuffisant(true)
+            // setSoldeInsuffisant(true)
+            router.navigate('/(profil)/MostPopular')
         } else {
             setcreditSend(1)
 
@@ -607,8 +626,15 @@ export default function AproximiteScreen() {
     const toggleFilterModal = () => {
         setIsFilterModalVisible(!isFilterModalVisible);
         // getDataAlluser()
+        // getAllDatauser()
+    };
+    const toggleFilterModalSend = () => {
+        setIsFilterModalVisible(!isFilterModalVisible);
+        // getDataAlluser()
         getAllDatauser()
     };
+
+
 
 
     const [valueCredits, setValueCredits] = useState<number | null>(null);
@@ -642,9 +668,9 @@ export default function AproximiteScreen() {
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">{t.aproximite}</ThemedText>
+                <ThemedText type="title" style={{ color: COLORS.bg1 }}>{t.aproximite}</ThemedText>
                 <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
-                    <Icon name="options-outline" size={30} color={COLORS.darkBlue} />
+                    <Icon name="options" size={30} color={COLORS.bg1} />
                 </TouchableOpacity>
             </ThemedView>
 
@@ -680,6 +706,9 @@ export default function AproximiteScreen() {
                                     address={item.city}
                                     age={item.age}
                                     fan={item.fan}
+                                    premium={item.premium}
+                                    verified={item.verified}
+
                                 />
                             </View>
                         </TouchableOpacity>
@@ -737,9 +766,9 @@ export default function AproximiteScreen() {
 
                             <View >
                                 {isTransferCredit === false ? (<View style={styles.info}>
-                                    <ThemedText type='midleText'>About me</ThemedText>
+                                    <ThemedText type='midleText'>{t.aboutme}</ThemedText>
                                     <ThemedText type='defaultSemiBold2'>{cuserData[0].bio}</ThemedText>
-                                    <ThemedText type='midleText'>Current Location</ThemedText>
+                                    <ThemedText type='midleText'>{t.curentLocal}</ThemedText>
                                     <ThemedText type='defaultSemiBold2'>{cuserData[0].city}</ThemedText>
                                 </View>) : (<View style={styles.infoTransfer}>
                                     <ThemedText type='midleText'>{t.transfert} {cuserData[0].name}</ThemedText>
@@ -855,7 +884,7 @@ export default function AproximiteScreen() {
                             <ThemedText type='defaultSemiBold'>{maxAge}</ThemedText>
                         </View>
                     </View>
-                    <Input label={t.findByEmail} value={email} onChangeText={setEmail} />
+                    {/* <Input label={t.findByEmail} value={email} onChangeText={setEmail} /> */}
 
                     <View style={styles.filterRange}>
                         <Input label={'Localisation'} value={location} placeholder={t.localisationInconu} onChangeText={setLocation} />
@@ -870,7 +899,7 @@ export default function AproximiteScreen() {
                         />
                     </View>
 
-                    <TouchableOpacity onPress={toggleFilterModal} style={styles.applyButton}>
+                    <TouchableOpacity onPress={toggleFilterModalSend} style={styles.applyButton}>
                         <Text style={styles.applyButtonText}>{t.applyFilter}</Text>
                     </TouchableOpacity>
                 </View>

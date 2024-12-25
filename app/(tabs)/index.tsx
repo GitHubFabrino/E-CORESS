@@ -148,14 +148,36 @@ export default function HomeScreen() {
     getData()
     getGame()
     getSolde()
-  }, []);
+    console.log('langue e', lang);
 
+    setLang(auth.lang)
+
+  }, []);
+  useEffect(() => {
+    getData()
+    getGame()
+    getSolde()
+    console.log('langue e', lang);
+
+    setLang(auth.lang)
+
+  }, [auth.lang]);
+  useFocusEffect(
+    useCallback(() => {
+      getGame();
+      getSolde()
+      console.log('langue e', lang);
+      setLang(auth.lang)
+    }, [auth.lang])
+  );
 
 
   useFocusEffect(
     useCallback(() => {
       getGame();
       getSolde()
+      console.log('langue e', lang);
+      setLang(auth.lang)
     }, [])
   );
 
@@ -261,9 +283,9 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#A1CEDC' }}
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">{t.meeting}</ThemedText>
+        <ThemedText type="title" style={{ color: COLORS.bg1 }}>{t.meeting}</ThemedText>
         <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
-          <Icon name="options-outline" size={30} color={COLORS.darkBlue} />
+          <Icon name="options" size={30} color={COLORS.bg1} />
         </TouchableOpacity>
       </ThemedView>
       {gameData && gameData.length > 0 && !isEnd ? (
@@ -507,7 +529,7 @@ const styles = StyleSheet.create({
     height: screenHeight * 0.7,
     marginHorizontal: 10,
     borderRadius: 20,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.bg5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
