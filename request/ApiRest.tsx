@@ -13,6 +13,15 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
+const apiClientLocal = axios.create({
+    baseURL: 'https://api.openweathermap.org/geo/1.0/direct',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
 const apiClientGif = axios.create({
     baseURL: 'https://api.giphy.com/v1/gifs/trending',
     headers: {
@@ -159,18 +168,30 @@ export const fetchUserDataWall = async (
 };
 // https://www.e-coress.com/requests/api.php?action=login_phone&login_email=testuser@example.com&login_pass=password123
 // https://www.e-coress.com/requests/api.php?action=login_phone&login_pass=password123&login_phone_number=1234567890
-export const authenticateUser = async (email: string, password: string): Promise<any> => {
+export const authenticateUser = async (email: string, password: string, isEmail: boolean): Promise<any> => {
     try {
-        const response = await apiClient.get('', {
-            params: {
-                action: 'login',
-                login_email: email,
-                login_pass: password,
-                dID: 0,
-            }
-        });
+        let response
+        if (isEmail == true) {
+            response = await apiClient.get('', {
+                params: {
+                    action: 'login',
+                    login_email: email,
+                    login_pass: password,
+                    dID: 0,
+                }
+            });
+        } else {
+            response = await apiClient.get('', {
+                params: {
+                    action: 'login_phone',
+                    login_phone_number: email,
+                    login_pass: password,
+                    dID: 0,
+                }
+            });
+        }
         // Vérifier si la réponse contient des cookies
-        const cookies = response.headers['set-cookie'];
+        const cookies = response?.headers['set-cookie'];
         console.log('Cookies1:', cookies);
 
         // Stockage de chaque cookie dans AsyncStorage
@@ -182,7 +203,7 @@ export const authenticateUser = async (email: string, password: string): Promise
 
         // console.log('storage : ', await AsyncStorage.getItem('session_cookie'));
         // console.log("Raw Response:", response); // Afficher la réponse brute
-        const responseData = response.data;
+        const responseData = response?.data;
 
         // Vérifiez si la réponse est une chaîne et commence par '<' (HTML)
         if (typeof responseData === 'string' && responseData.startsWith('<')) {
@@ -253,6 +274,12 @@ export const registerUser = async (userData: {
     reg_birthday: string;
     reg_looking: string | null;
     reg_city: string;
+    reg_country: string;
+    reg_lat: string;
+    reg_lng: string;
+    reg_photo: string;
+    reg_thumb: string;
+    reg_phone_number: string;
 
 }): Promise<any> => {
     try {
@@ -261,7 +288,7 @@ export const registerUser = async (userData: {
 
         const response = await apiClient.get('', {
             params: {
-                action: "register",
+                action: "registerUser",
                 reg_email: userData.reg_email,
                 reg_pass: userData.reg_pass,
                 reg_name: userData.reg_name,
@@ -269,10 +296,18 @@ export const registerUser = async (userData: {
                 reg_birthday: userData.reg_birthday,
                 reg_looking: userData.reg_looking,
                 reg_city: userData.reg_city,
-                reg_username: userData.reg_username
+                reg_username: userData.reg_username,
+                reg_country: userData.reg_country,
+                reg_lat: userData.reg_lat,
+                reg_lng: userData.reg_lng,
+                reg_photo: userData.reg_photo,
+                reg_thumb: userData.reg_thumb,
+                reg_phone_number: userData.reg_phone_number
             }
         });
         const responseData = response.data
+        console.log('REPONSE REGISTER ', responseData);
+
 
         if (typeof responseData === 'object') {
             if (responseData.error) {
@@ -488,7 +523,31 @@ export const updateCredits = async (idUser: string, type: string, credits: strin
         throw error;
     }
 };
+export const updateCreditsNewUser = async (idUser: string): Promise<any> => {
+    try {
+        const query = `${idUser},120,reward,Reward credits for register,newAccountFreeCredit`;
 
+        const response = await apiClient.get('', {
+            params: {
+                action: 'updateCredits',
+                query: query
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Mise à jour des crédits réussie:", response.status);
+            return response.status;
+        } else {
+            console.error("Échec de la mise à jour des crédits:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des crédits:", error);
+        throw error;
+    }
+};
 export const rt = async (query: string): Promise<any> => {
     try {
         // Effectuer la requête GET avec les paramètres nécessaires
@@ -792,7 +851,7 @@ export const unreadMessageCount = async (uid1: string): Promise<any> => {
 
         // Vérification du statut de la réponse
         if (response.status === 200) {
-            console.log("Action 'unreadMessageCount' réussie :", response.data);
+            // console.log("Action 'unreadMessageCount' réussie :", response.data);
             return response.data;
         } else {
             console.error("Échec de l'action 'unreadMessageCount':", response.status, response.statusText);
@@ -816,8 +875,8 @@ export const getChats = async (userId: string): Promise<any> => {
             }
         });
         const responseData = response.data
-        console.log('TYPE OF CHAT', typeof responseData);
-        console.log('DATA CHATS ALL', responseData);
+        // console.log('TYPE OF CHAT', typeof responseData);
+        // console.log('DATA CHATS ALL', responseData);
 
 
 
@@ -834,10 +893,10 @@ export const getChats = async (userId: string): Promise<any> => {
                 try {
                     const jsonData = JSON.parse(jsonString);
                     if (jsonData.error) {
-                        console.log("REPONSE API ERROR : ", jsonData);
+                        // console.log("REPONSE API ERROR : ", jsonData);
                         return jsonData;
                     } else {
-                        console.log("REPONSE API : ", jsonData);
+                        // console.log("REPONSE API : ", jsonData);
                         return jsonData;
                     }
                 } catch (e) {
@@ -876,7 +935,7 @@ export const spotlight = async (userId: string): Promise<any> => {
                 try {
                     const jsonData = JSON.parse(jsonMatch[1]);
 
-                    console.log('JSON spoteeee', jsonData);
+                    // console.log('JSON spoteeee', jsonData);
 
                     return jsonData;
                 } catch (e) {
@@ -921,7 +980,7 @@ export const getGif = async (): Promise<any> => {
 
         // Vérification du statut de la réponse
         if (response.status === 200) {
-            console.log("Action 'apiClientGif' réussie :", response.data);
+            // console.log("Action 'apiClientGif' réussie :", response.data);
             return response.data.data;
         } else {
             console.error("Échec de l'action 'apiClientGif':", response.status, response.statusText);
@@ -1036,6 +1095,31 @@ export const getAllInterests = async (): Promise<any> => {
     } catch (error: any) {
         console.error("Erreur lors de l'action 'getInterests':", error.message || error);
         throw new Error(`Erreur lors de l'action 'getInterests': ${error.message || error}`);
+    }
+};
+
+export const getUserCredits = async (userId: string): Promise<any> => {
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClient.get('', {
+            params: {
+                action: "getUserCredits",
+                id: userId
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            // console.log("Action 'getUserCredits' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'getUserCredits':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'getUserCredits':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'getUserCredits': ${error.message || error}`);
     }
 };
 
@@ -1513,5 +1597,95 @@ export const getGifts = async (): Promise<any> => {
     } catch (error: any) {
         console.error("Erreur lors de l'action 'getGifts':", error.message || error);
         throw new Error(`Erreur lors de l'action 'getGifts': ${error.message || error}`);
+    }
+};
+
+
+export const getLocal = async (local: string): Promise<any> => {
+
+    try {
+        // Effectuer la requête GET avec les paramètres nécessaires
+        const response = await apiClientLocal.get('', {
+            params: {
+                q: local,
+                limit: '10',
+                appid: '96bd8d6bc5ab8c519e9dfff3c684a3d0'
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("Action 'getLocal' réussie :", response.data);
+            return response.data;
+        } else {
+            console.error("Échec de l'action 'getLocal':", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+    } catch (error: any) {
+        console.error("Erreur lors de l'action 'getLocal':", error.message || error);
+        throw new Error(`Erreur lors de l'action 'getLocal': ${error.message || error}`);
+    }
+};
+
+
+
+export const registerUserNew = async (
+    name: string,
+    username: string,
+    email: string,
+    pass: string,
+    day: string,
+    month: string,
+    year: string,
+    gender: string,
+    looking: string,
+    city: string,
+    country: string,
+    lat: string,
+    lng: string
+): Promise<any> => {
+    try {
+        // Création de l'objet FormData
+        const formData = new FormData();
+        formData.append('action', 'register');
+        formData.append('username', username);
+        formData.append('pass', pass);
+        formData.append('email', email);
+        formData.append('name', name);
+        formData.append('day', day);
+        formData.append('month', month);
+        formData.append('year', year);
+        formData.append('gender', gender);
+        formData.append('city', city);
+        formData.append('country', country);
+        formData.append('lat', lat);
+        formData.append('lng', lng);
+        formData.append('looking', looking);
+        formData.append('ref', '');
+        formData.append('photo', '');
+        formData.append('checkbox', 'OK');
+
+
+
+        // Effectuer la requête POST avec FormData
+        const response = await apiClientUser.post('', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log('Name : ', name);
+            console.log("register envoyée avec succès :", response.data);
+            return response.status; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'register:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'register:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'register: ${error.message || error}`);
     }
 };

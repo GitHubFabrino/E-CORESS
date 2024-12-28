@@ -15,7 +15,7 @@ import GenderSelector from '@/components/input/InputGenreSelector';
 import MeetingPreferenceSelector from '@/components/input/InputMeetingPreferenceSelector';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LoadingSpinner from '@/components/spinner/LoadingSpinner';
-import { getLocal, registerUser, updateCredits, updateCreditsNewUser, userProfil } from '@/request/ApiRest';
+import { getLocal, registerUser, registerUserNew } from '@/request/ApiRest';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { login, setError } from '@/store/userSlice';
@@ -46,11 +46,11 @@ export default function SignUpScreen() {
 
     const [name, setName] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
-    const [emailUser, setEmailUser] = useState<string>('@gmail.com');
-    const [passwordUser, setPasswordUser] = useState<string>('123456789');
+    const [emailUser, setEmailUser] = useState<string>('');
+    const [passwordUser, setPasswordUser] = useState<string>('');
     const [birthDate, setBirthDate] = useState<Date>(new Date());
     const [adress, setAdress] = useState<string>('');
-    const [phoneNumber, setphoneNumber] = useState<string>('123456789');
+    const [phoneNumber, setphoneNumber] = useState<string>('');
     const [gender, setGender] = useState<'homme' | 'femme' | null>(null);
     const [selectedPreference, setSelectedPreference] = useState<'homme' | 'femme' | 'lesbienne' | 'gay' | null>(null);
 
@@ -65,7 +65,6 @@ export default function SignUpScreen() {
     const [Lat, setLat] = useState<string>('');
     const [Contry, setContry] = useState<string>('');
     const [City, setCity] = useState<string>('');
-    const [errorss, setErrorss] = useState<{ [key: string]: string }>({});
 
 
 
@@ -131,6 +130,13 @@ export default function SignUpScreen() {
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
+    const formatDateNew = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1);
+        const day = String(date.getDate());
+        const data = { "year": year, "month": month, "day": day }
+        return data;
+    };
     console.log("ERRORS : ", errors);
 
     const cleanInput = () => {
@@ -145,79 +151,88 @@ export default function SignUpScreen() {
         setPasswordUser('')
         setIsTermsAccepted(false)
     }
+    const [genderTrans, setgenderTrans] = useState('');
+    const [pref, setPref] = useState('');
+    const [isEmail, setisEmail] = useState(true);
+    const [isPhone, setisPhone] = useState();
 
     const handleCreateAccount = async () => {
         if (validateFields() && isTermsAccepted) {
             setIsLoading(true);
             // Préparer les données pour l'API
+            if (gender === 'homme') {
+                setgenderTrans('1')
+            }
+            if (gender === 'femme') {
+                setgenderTrans('2')
+            }
+
+            if (selectedPreference === 'homme') {
+                setPref('1')
+            }
+            if (selectedPreference === 'femme') {
+                setPref('2')
+            }
+            if (selectedPreference === 'lesbienne') {
+                setPref('3')
+            }
+            if (selectedPreference === 'gay') {
+                setPref('4')
+            }
             const userData = {
-                reg_name: name,
-                reg_username: userName,
-                reg_email: emailUser,
-                reg_pass: passwordUser,
-                reg_birthday: formatDate(birthDate), // Formater la date ici
-                reg_gender: gender || null,
-                reg_looking: selectedPreference || null,
-                reg_city: City,
-                reg_country: Contry,
-                reg_lat: Lat,
-                reg_lng: Lng,
-                reg_photo: '',
-                reg_thumb: '',
-                reg_phone_number: phoneNumber,
-                dID: '0'
+                name: name,
+                username: userName,
+                email: emailUser,
+                pass: passwordUser,
+                day: String(formatDateNew(birthDate).day), // Conversion en chaîne
+                month: String(formatDateNew(birthDate).month), // Conversion en chaîne
+                year: String(formatDateNew(birthDate).year), // Conversion en chaîne
+                gender: genderTrans,
+                looking: pref,
+                city: City,
+                country: Contry,
+                lat: Lat,
+                lng: Lng,
 
             };
             console.log('USERDATA', userData);
-            try {
-                // Inscription de l'utilisateur
-                const response = await registerUser(userData);
 
+            try {
+                const response = await registerUserNew(userData.name,
+                    userData.username,
+                    userData.email,
+                    userData.pass,
+                    userData.day,
+                    userData.month,
+                    userData.year,
+                    userData.gender,
+                    userData.looking,
+                    userData.city,
+                    userData.country,
+                    userData.lat,
+                    userData.lng)
                 if (response.error === 1) {
-                    setErrors({
-                        "Nom ou pseudo": "Nom ou pseudo est déjà pris",
-                        "Email": "Email déjà pris"
-                    });
+                    setErrors({ "Nom ou pseudo": "Nom ou pseudo est déjà pris", "Email": "Email déjà pris" })
                     setIsLoading(false);
                     dispatch(setError(response));
-                    return;
                 }
-
                 if (response.error === 0) {
-                    // Succès de l'inscription
                     setIsLoading(false);
                     dispatch(login(response));
                     cleanInput();
-                    console.log('ID utilisateur:', response.user.id);
-
-                    let userCredits = 0;
-                    const maxRetries = 3; // Limiter les tentatives de mise à jour
-                    let retryCount = 0;
-
-                    while (userCredits === 0 && retryCount < maxRetries) {
-                        await updateCreditsNewUser(response.user.id); // Mise à jour des crédits
-                        const profileResponse = await userProfil(response.user.id);
-                        userCredits = parseInt(profileResponse.user.credits, 10) || 0;
-                        retryCount++;
-                    }
-
-                    if (userCredits === 120) {
-                        console.log("Mise à jour réussie. Redirection...");
-                        router.replace('/(tabs)/');
-                    } else {
-                        console.warn("La mise à jour des crédits a échoué après plusieurs tentatives.", userCredits);
-                    }
+                    router.replace('/(tabs)/')
                 }
 
-                console.log('Données utilisateur retournées par l’API:', response);
+                console.log('USERDATA RETURN API ', response);
             } catch (error) {
-                console.error('Erreur lors de l’inscription:', error);
+                console.error('error', error);
+
                 throw error;
-            } finally {
-                setIsLoading(false);
             }
-
-
+            setTimeout(() => {
+                setIsLoading(false);
+                //  router.navigate('/importImage');
+            }, 2000);
         } else {
             setErrors((prev) => ({ ...prev, termsAccepted: t.errors.termsAccepted }));
         }
@@ -235,30 +250,19 @@ export default function SignUpScreen() {
 
     }
 
-    // Fonction de validation
-    const validatePhoneNumber = (phone: string): boolean => {
-        const phoneRegex = /^[0-9]{10}$/; // Vérifie si le numéro contient exactement 10 chiffres
-        return phoneRegex.test(phone);
-    };
+    const validateInput = (input: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex pour valider les emails
+        const phoneRegex = /^\d{10}$/; // Numéro de téléphone à 10 chiffres
 
-    // Gestionnaire de saisie
-    const handlePhoneNumberChange = (phone: string) => {
-        setphoneNumber(phone);
-
-        // Validation dynamique
-        if (!validatePhoneNumber(phone)) {
-            setErrorss(prevErrors => ({
-                ...prevErrors,
-                phone: 'Le numéro de téléphone doit contenir exactement 10 chiffres.'
-            }));
+        if (emailRegex.test(input)) {
+            setError(null); // Input valide comme email
+        } else if (phoneRegex.test(input)) {
+            setError(null); // Input valide comme numéro de téléphone
         } else {
-            setErrors(prevErrors => {
-                const { phone, ...rest } = prevErrors; // Supprime l'erreur de téléphone
-                return rest;
-            });
+            setError(t.errors.emailRequired); // Afficher une erreur
         }
+        setEmailUser(input); // Mettre à jour l'état
     };
-
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#fff' }}
@@ -286,20 +290,27 @@ export default function SignUpScreen() {
                         onChangeText={setUserName}
                         error={errors[t.errors.firstNameRequired]}
                     />
-                    <ThemedInput
+                    {/* <ThemedInput
                         label={t.email}
                         value={emailUser}
                         placeholder={t.placeholderEmail}
                         onChangeText={setEmailUser}
                         error={errors[t.errors.emailRequired]}
-                    />
+                    /> */}
                     <ThemedInput
+                        label={t.emailOrPhone}
+                        value={emailUser}
+                        placeholder={t.placeholderEmailOrPhone}
+                        onChangeText={validateInput}
+                        error={errors[t.errors.emailRequired]}
+                    />
+                    {/* <ThemedInput
                         label={'Phone'}
                         value={phoneNumber}
                         placeholder={t.phonePlace}
-                        onChangeText={handlePhoneNumberChange}
-                        error={errorss.phone}
-                    />
+                        onChangeText={setphoneNumber}
+                        error={errors[t.errors.emailRequired]}
+                    /> */}
                     <ThemedInput
                         label={t.password}
                         value={passwordUser}

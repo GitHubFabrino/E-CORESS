@@ -106,22 +106,23 @@ export default function ProfilScreen() {
         setisViewImage(!isViewImage)
         setOptionIsSelect(false)
     }
-    useEffect(() => {
-        if (auth.idUser) {
-            promeseAll()
-
-        }
-    }, [auth.newM]);
 
     useFocusEffect(
         useCallback(() => {
-            // Réinitialiser l'état des modals
-            getProfils()
+            promeseAll()
             setIsModalOption(false);
             setIsModalParam(false);
             setIsModalGallery(false);
         }, [birthDayOriginal, gender, usernamemodifier, langUser, lang])
     );
+
+    useEffect(() => {
+        if (lang === 'EN') {
+            setoption(['Male', 'Female', 'Other']);
+        } else {
+            setoption(['Masculin', 'Feminin', 'Autre']);
+        }
+    }, [lang]);
 
     const promeseAll = async () => {
         setLoading(true);
@@ -204,11 +205,6 @@ export default function ProfilScreen() {
         try {
             setLitlemodal(true)
             const response = await userProfil(auth.idUser);
-            console.log("RESPONSE QUESTION: ", response);
-            console.log("******************birth", response.user.birthday);
-            console.log("******************lang", response.user.lang);
-
-
             const { day, month, year } = splitBirthday(response.user.birthday);
             setBirthDayOriginal(response.user.birthday)
             setDay(day);
@@ -313,37 +309,12 @@ export default function ProfilScreen() {
         setIsModalDec(false)
     };
 
-    useEffect(() => {
-        if (lang === 'EN') {
-            setoption(['Male', 'Female', 'Other']);
-        } else {
-            setoption(['Masculin', 'Feminin', 'Autre']);
-        }
-    }, [lang]);
-
-    // if (loading) {
-    //     return (
-    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //             <ActivityIndicator size="large" color={COLORS.jaune} />
-    //         </View>
-    //     );
-    // }
-    // const updateTest = () => {
-    //     console.log('testeeeeee');
-
-    // };
-
-
     const updateInterests = () => {
         console.log('testeeeeee');
         getProfils()
     };
 
-
-
     const sendUpdateProfile = () => {
-        console.log('Bio', bio);
-        console.log('Bio', bio);
         const update = async () => {
             try {
                 const response = await updateUserBio(auth?.idUser, bio);
@@ -360,7 +331,6 @@ export default function ProfilScreen() {
         const date = new Date(isoDate);
 
         if (isNaN(date.getTime())) {
-            console.error("Invalid ISO date format:", isoDate);
             return { day: "Invalid", month: "Invalid", year: "Invalid" };
         }
 
@@ -375,34 +345,11 @@ export default function ProfilScreen() {
 
 
     const sendUpdateProfileAll = () => {
-        console.log("Day:", day);
-        console.log("Month:", month);
-        console.log("Year:", year);
-
-        console.log("UsernameUser:", usernameUser);
-        console.log("EmailUser:", emailUser);
-        console.log("NameUser:", nameUser);
-
-        console.log("Gender:", gender);
-        console.log("LangUser:", langUser);
-        console.log("City:", city);
-        console.log("City ubi:", ubication);
-        console.log("Country:", country);
-        console.log("Lat:", lat);
-        console.log("Lng:", lng);
-        console.log("EditEmail:", editEmail);
-        console.log("EditUsername:", editUsername);
-        console.log("editId:", auth.idUser);
-
         setusernamemodifier(usernameUser)
-
+        setLitlemodal(true)
         const update = async () => {
             try {
                 const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
-                if (response === 200) {
-                    console.log(/********************oeeeeee************* */);
-
-                }
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
@@ -620,12 +567,12 @@ export default function ProfilScreen() {
                 <ThemedText type="title" style={{ color: COLORS.bg1 }}>{t.profile}</ThemedText>
                 <ThemedView style={styles.containerIcon}>
 
-                    <TouchableOpacity onPress={handelGallery} style={styles.filterButton}>
+                    {isModalParam ? (<TouchableOpacity onPress={handelGallery} style={styles.filterButton}>
                         <Icon name="images" size={25} color={COLORS.darkBlue} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handelParam} style={styles.filterButton}>
-                        <Icon name="settings" size={25} color={COLORS.darkBlue} />
-                    </TouchableOpacity>
+                    </TouchableOpacity>) :
+                        (<TouchableOpacity onPress={handelParam} style={styles.filterButton}>
+                            <Icon name="settings" size={25} color={COLORS.darkBlue} />
+                        </TouchableOpacity>)}
                     <TouchableOpacity onPress={handledeEllips} style={styles.filterButton}>
                         <Icon name="ellipsis-vertical" size={25} color={COLORS.darkBlue} />
                     </TouchableOpacity>
@@ -757,184 +704,281 @@ export default function ProfilScreen() {
                                 <ThemedView>
                                     <ThemedView style={styles.containerInfo1}>
                                         {/* UserName */}
-                                        <ThemedView style={styles.containerInfo}>
+
+                                        {modifierusername ? (<ThemedView style={styles.containerInfoUser}>
+
+
+                                            <View style={styles.icon}>
+                                                <Icon name="person-outline" size={25} color={COLORS.bg1} />
+                                            </View>
+                                            <View style={styles.infoCardUser}>
+                                                <View>
+                                                    <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.username}</ThemedText>
+                                                    <ThemedText style={{ color: COLORS.text2 }}>{usernameUser}</ThemedText>
+
+                                                </View>
+
+                                                <TouchableOpacity onPress={() => {
+                                                    setmodifierusername(!modifierusername)
+                                                }}>
+                                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                </TouchableOpacity>
+
+                                            </View>
+
+
+                                        </ThemedView>) : (<ThemedView style={styles.containerInfo}>
                                             <View style={styles.itemTitre}>
                                                 <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
-
-                                                {
-                                                    modifierusername && <TouchableOpacity onPress={() => {
-                                                        setmodifierusername(!modifierusername)
-                                                    }}>
-                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
-                                                    </TouchableOpacity>
-                                                }
-                                                {!modifierusername && <TouchableOpacity onPress={() => {
+                                                <TouchableOpacity onPress={() => {
                                                     sendUpdateProfileAll()
                                                     setmodifierusername(!modifierusername)
                                                 }}>
                                                     <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
-                                                </TouchableOpacity>}
-                                            </View>
-                                            <View style={styles.infoCard}>
-                                                {modifierusername ? (
-                                                    <ThemedText>{usernameUser}</ThemedText>
-                                                ) : (
-                                                    <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
-                                                )
-                                                }
-                                            </View>
-                                        </ThemedView>
-                                        {/* Email User */}
-                                        <ThemedView style={styles.containerInfo}>
-                                            <View style={styles.itemTitre}>
-                                                <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
-                                                <TouchableOpacity onPress={() => {
-                                                    setmodifieremail(!modifieremail)
-                                                    if (emailOld !== emailUser) {
-                                                        console.log('mofiddidid');
-                                                        sendUpdateProfileAll()
-                                                    }
-
-
-                                                }}>
-                                                    <Icon name={!modifieremail ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
                                                 </TouchableOpacity>
                                             </View>
                                             <View style={styles.infoCard}>
-                                                {!modifieremail ? (
-                                                    <ThemedText>{emailUser}</ThemedText>
-                                                ) : (
-                                                    <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
-                                                )
-                                                }
+                                                <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
                                             </View>
-                                        </ThemedView>
-                                        {/* Name */}
-                                        <ThemedView style={styles.containerInfo}>
-                                            <View style={styles.itemTitre}>
-                                                <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
+                                        </ThemedView>)}
 
-                                                {
-                                                    modifiname ? (<TouchableOpacity onPress={() => {
+
+
+
+
+                                        {/* Email User */}
+                                        {!modifieremail ? (
+                                            <ThemedView style={styles.containerInfoUser}>
+
+
+                                                <View style={styles.icon}>
+                                                    <Icon name="at" size={25} color={COLORS.bg1} />
+                                                </View>
+                                                <View style={styles.infoCardUser}>
+                                                    <View>
+                                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.email}</ThemedText>
+                                                        <ThemedText style={{ color: COLORS.text2 }}>{emailUser}</ThemedText>
+
+                                                    </View>
+
+                                                    <TouchableOpacity onPress={() => {
+                                                        setmodifieremail(!modifieremail)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>
+
+                                                </View>
+
+
+                                            </ThemedView>
+                                        ) : (
+                                            <ThemedView style={styles.containerInfo}>
+                                                <View style={styles.itemTitre}>
+                                                    <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
+                                                    <TouchableOpacity onPress={() => {
+                                                        setmodifieremail(!modifieremail)
+                                                        sendUpdateProfileAll()
+                                                    }}>
+                                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View style={styles.infoCard}>
+
+                                                    <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
+
+                                                </View>
+                                            </ThemedView>)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        {/* Name */}
+                                        {modifiname ? (
+                                            <ThemedView style={styles.containerInfoUser}>
+
+
+                                                <View style={styles.icon}>
+                                                    <Icon name="trophy-outline" size={25} color={COLORS.bg1} />
+                                                </View>
+                                                <View style={styles.infoCardUser}>
+                                                    <View>
+                                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.Name}</ThemedText>
+                                                        <ThemedText style={{ color: COLORS.text2 }}>{nameUser}</ThemedText>
+
+                                                    </View>
+
+                                                    <TouchableOpacity onPress={() => {
                                                         setmodifname(!modifiname)
                                                     }}>
                                                         <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
-                                                    </TouchableOpacity>) : (<TouchableOpacity onPress={() => {
+                                                    </TouchableOpacity>
+
+                                                </View>
+
+
+                                            </ThemedView>
+                                        ) : (
+
+                                            <ThemedView style={styles.containerInfo}>
+                                                <View style={styles.itemTitre}>
+                                                    <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
+                                                    <TouchableOpacity onPress={() => {
                                                         sendUpdateProfileAll()
                                                         setmodifname(!modifiname)
                                                     }}>
                                                         <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
-                                                    </TouchableOpacity>)
-                                                }
-
-                                            </View>
-                                            <View style={styles.infoCard}>
-                                                {modifiname ? (
-                                                    <ThemedText>{nameUser}</ThemedText>
-                                                ) : (
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View style={styles.infoCard}>
                                                     <InputText value={nameUser} onChangeText={(text) => setNameUser(text)} />
-                                                )
-                                                }
-                                            </View>
-                                        </ThemedView>
+                                                </View>
+                                            </ThemedView>
+                                        )}
+
+
+
+
+
+
+
+
                                         {/* BirthDay */}
-                                        <ThemedView style={styles.containerInfo}>
-                                            <View style={styles.itemTitre}>
-                                                <ThemedText type='defaultSemiBold'>{t.birthday}</ThemedText>
-                                                {
-                                                    modifbirthday && <TouchableOpacity onPress={() => {
+                                        {modifbirthday ? (
+                                            <ThemedView style={styles.containerInfoUser}>
+
+
+                                                <View style={styles.icon}>
+                                                    <Icon name="calendar-clear-outline" size={25} color={COLORS.bg1} />
+                                                </View>
+                                                <View style={styles.infoCardUser}>
+                                                    <View>
+                                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.birthday}</ThemedText>
+                                                        <ThemedText style={{ color: COLORS.text2 }}>{birthDayOriginal}</ThemedText>
+
+                                                    </View>
+
+                                                    <TouchableOpacity onPress={() => {
                                                         setmodifbirthday(!modifbirthday)
                                                     }}>
                                                         <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
                                                     </TouchableOpacity>
-                                                }
-                                                {!modifbirthday && <TouchableOpacity onPress={() => {
-                                                    console.log(splitDate(newBirthDay));
-                                                    const { days, months, years } = splitDate(newBirthDay)
-                                                    if (days && months && years) {
 
-                                                        sendUpdateProfileAllBithDay(days, months, years)
-                                                        setmodifbirthday(!modifbirthday)
-                                                        console.log("New date ", newBirthDay);
-
-                                                        const monthL = {
-                                                            "01": "January",
-                                                            "02": "February",
-                                                            "03": "March",
-                                                            "04": "April",
-                                                            "05": "May",
-                                                            "06": "June",
-                                                            "07": "July",
-                                                            "08": "August",
-                                                            "09": "September",
-                                                            "10": "October",
-                                                            "11": "November",
-                                                            "12": "December",
-                                                        };
-
-                                                        const monthnew = monthL[months as keyof typeof monthL];
-                                                        console.log('test mois ', monthnew);
-                                                        const monthString = `${monthnew} ${days}, ${years}`
-                                                        setBirthDayOriginal(monthString)
+                                                </View>
 
 
+                                            </ThemedView>
+                                        ) : (
+                                            <ThemedView style={styles.containerInfo}>
+                                                <View style={styles.itemTitre}>
+                                                    <ThemedText type='defaultSemiBold'>{t.birthday}</ThemedText>
+                                                    <TouchableOpacity onPress={() => {
+                                                        console.log(splitDate(newBirthDay));
+                                                        const { days, months, years } = splitDate(newBirthDay)
+                                                        if (days && months && years) {
+
+                                                            sendUpdateProfileAllBithDay(days, months, years)
+                                                            setmodifbirthday(!modifbirthday)
+                                                            console.log("New date ", newBirthDay);
+
+                                                            const monthL = {
+                                                                "01": "January",
+                                                                "02": "February",
+                                                                "03": "March",
+                                                                "04": "April",
+                                                                "05": "May",
+                                                                "06": "June",
+                                                                "07": "July",
+                                                                "08": "August",
+                                                                "09": "September",
+                                                                "10": "October",
+                                                                "11": "November",
+                                                                "12": "December",
+                                                            };
+
+                                                            const monthnew = monthL[months as keyof typeof monthL];
+                                                            console.log('test mois ', monthnew);
+                                                            const monthString = `${monthnew} ${days}, ${years}`
+                                                            setBirthDayOriginal(monthString)
 
 
-                                                    }
-                                                }}>
-                                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
-                                                </TouchableOpacity>}
-                                            </View>
-                                            <View style={styles.infoCard}>
-                                                {modifbirthday ? (
-                                                    <ThemedText>{birthDayOriginal}</ThemedText>
-                                                ) : (
+
+
+                                                        }
+                                                    }}>
+                                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View style={styles.infoCard}>
+
                                                     <ThemedDatePicker
                                                         value={newBirthDay || new Date()}
                                                         onChange={setNewBirthDay}
-
-                                                    />)
-                                                }
-                                            </View>
-                                        </ThemedView>
+                                                    />
+                                                </View>
+                                            </ThemedView>)}
 
                                         {/* GENRE */}
-                                        <ThemedView style={styles.containerInfo}>
-                                            <View style={styles.itemTitre}>
-                                                <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
-                                                <TouchableOpacity onPress={() => {
-                                                    setmodifgenre(!modifigenre)
-                                                }}>
-                                                    <Icon name={modifigenre ? "create-outline" : "checkmark-done-outline"} size={25} color={modifApropos ? COLORS.darkBlue : COLORS.green} />
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View style={styles.infoCard}>
-                                                {modifigenre ? (
-                                                    <ThemedText>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
-                                                ) : (<InputSelectorA
-                                                    titre={t.genderLabel}
-                                                    options={[{ 'id': '1', 'gender': `${t.male}` }, { 'id': '2', 'gender': `${t.femelle}` }, { 'id': '3', 'gender': `${t.lesbienne}` }, { 'id': '4', 'gender': `${t.gay}` }].map(item => ({
-                                                        value: item.id,
-                                                        label: item.gender
-                                                    }))}
-                                                    selectedValue={selectedOption}
-                                                    onValueChange={(value) => {
+                                        {modifigenre ? (
+                                            <ThemedView style={styles.containerInfoUser}>
 
 
-                                                        console.log('id  : ', value);
-                                                        setGender(value)
-                                                        getProfils()
+                                                <View style={styles.icon}>
+                                                    <Icon name="male-female" size={25} color={COLORS.bg1} />
+                                                </View>
+                                                <View style={styles.infoCardUser}>
+                                                    <View>
+                                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.genderLabel}</ThemedText>
+                                                        <ThemedText style={{ color: COLORS.text2 }}>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
+
+                                                    </View>
+
+                                                    <TouchableOpacity onPress={() => {
+                                                        setmodifgenre(!modifigenre)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>
+
+                                                </View>
 
 
-                                                        // sendUpdateProfileAll()
-                                                        sendUpdateProfileAllGender(value)
-
-                                                    }}
-                                                />
-                                                )
-                                                }
-                                            </View>
-                                        </ThemedView>
+                                            </ThemedView>
+                                        ) : (
+                                            <ThemedView style={styles.containerInfo}>
+                                                <View style={styles.itemTitre}>
+                                                    <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
+                                                    <TouchableOpacity onPress={() => {
+                                                        setmodifgenre(!modifigenre)
+                                                    }}>
+                                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View style={styles.infoCard}>
+                                                    <InputSelectorA
+                                                        titre={t.genderLabel}
+                                                        options={[{ 'id': '1', 'gender': `${t.male}` }, { 'id': '2', 'gender': `${t.femelle}` }, { 'id': '3', 'gender': `${t.lesbienne}` }, { 'id': '4', 'gender': `${t.gay}` }].map(item => ({
+                                                            value: item.id,
+                                                            label: item.gender
+                                                        }))}
+                                                        selectedValue={selectedOption}
+                                                        onValueChange={(value) => {
+                                                            setGender(value)
+                                                            getProfils()
+                                                            sendUpdateProfileAllGender(value)
+                                                        }}
+                                                    />
+                                                </View>
+                                            </ThemedView>)}
 
                                     </ThemedView>
                                 </ThemedView>
@@ -1255,7 +1299,7 @@ export default function ProfilScreen() {
                             onBackdropPress={() => !litlemodal}
                             style={styles.modal}
                         >
-
+                            <ThemedText></ThemedText>
                         </Modal>
 
 
@@ -1534,6 +1578,25 @@ const styles = StyleSheet.create({
         width: '100%',
         marginVertical: 10,
         backgroundColor: COLORS.bg6
+    },
+    containerInfoUser: {
+        width: '100%',
+        marginVertical: 10,
+        backgroundColor: COLORS.transparence,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+
+    },
+    infoCardUser: {
+        width: '85%',
+        padding: 10,
+        backgroundColor: COLORS.bg2,
+        borderRadius: 10,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     textContainer: {
         width: '45%'

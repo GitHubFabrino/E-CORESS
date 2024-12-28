@@ -4,7 +4,7 @@ import { COLORS } from '@/assets/style/style.color';
 import { ThemedText } from '@/components/ThemedText';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { addToSpotlight, discover100, raiseUpF, userProfil } from '@/request/ApiRest';
+import { addToSpotlight, discover100, getUserCredits, raiseUpF, userProfil } from '@/request/ApiRest';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { translations } from '@/service/translate';
@@ -77,9 +77,10 @@ const Credit: React.FC = () => {
     );
 
     const getSolde = async () => {
-        const resultData = await userProfil(auth.idUser);
-        setsoldeUser(resultData.user.credits)
+        const resultData = await getUserCredits(auth.idUser);
+        setsoldeUser(resultData.credits)
         setLoading(false)
+        console.log('SOLDE', resultData.credits);
 
     };
     const getProfils = async () => {
@@ -208,7 +209,8 @@ const Credit: React.FC = () => {
                         style={[styles.btn, styles.colorBtn]}
                         onPress={() => {
                             if (soldeUser < 150) {
-                                setSoldeInsuffisant(true)
+                                // setSoldeInsuffisant(true)
+                                router.navigate('/(profil)/MostPopular')
                             } else {
                                 setraiseUp(true)
                             }
@@ -250,7 +252,8 @@ const Credit: React.FC = () => {
                             style={[styles.btn, styles.colorBtn1]}
                             onPress={() => {
                                 if (soldeUser < 200) {
-                                    setSoldeInsuffisant(true)
+                                    // setSoldeInsuffisant(true)
+                                    router.navigate('/(profil)/MostPopular')
                                 } else {
                                     setincreaseUp(true)
                                 }
@@ -307,6 +310,7 @@ const Credit: React.FC = () => {
                         onPress={() => {
                             if (soldeUser < 182) {
                                 setSoldeInsuffisant(true)
+                                router.navigate('/(profil)/MostPopular')
                             } else {
                                 setHighlightsUp(true)
                             }

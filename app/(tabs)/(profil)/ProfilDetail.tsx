@@ -431,51 +431,79 @@ export default function ProfilDetail() {
 
                         <ThemedView>
                             <ThemedView style={styles.containerInfo1}>
-                                {/* UserName */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
+                                {/* Name */}
+                                <ThemedView style={styles.containerInfoUser}>
+
+
+                                    <View style={styles.icon}>
+                                        <Icon name="person-outline" size={25} color={COLORS.bg1} />
                                     </View>
-                                    <View style={styles.infoCard}>
-                                        <ThemedText>{usernameUser}</ThemedText>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.Name}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{nameUser}</ThemedText>
+                                    </View>
+
+
+                                </ThemedView>
+                                {/* UserName */}
+                                <ThemedView style={styles.containerInfoUser}>
+                                    <View style={styles.icon}>
+                                        <Icon name="trophy-outline" size={25} color={COLORS.bg1} />
+                                    </View>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.username}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{usernameUser}</ThemedText>
                                     </View>
                                 </ThemedView>
                                 {/* Email User */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.email}</ThemedText>
+                                <ThemedView style={styles.containerInfoUser}>
+                                    <View style={styles.icon}>
+                                        <Icon name="at" size={25} color={COLORS.bg1} />
+                                    </View>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.email}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{emailUser}</ThemedText>
+                                    </View>
+                                </ThemedView>
 
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        <ThemedText>{emailUser}</ThemedText>
-                                    </View>
-                                </ThemedView>
-                                {/* Name */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.Name}</ThemedText>
-                                    </View>
-                                    <View style={styles.infoCard}>
-                                        <ThemedText>{nameUser}</ThemedText>
-                                    </View>
-                                </ThemedView>
                                 {/* BirthDay */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.birthday}</ThemedText>
+                                <ThemedView style={styles.containerInfoUser}>
+
+
+
+                                    <View style={styles.icon}>
+                                        <Icon name="calendar-clear-outline" size={25} color={COLORS.bg1} />
                                     </View>
-                                    <View style={styles.infoCard}>
-                                        <ThemedText>{birthDayOriginal}</ThemedText>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.birthday}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{birthDayOriginal}</ThemedText>
                                     </View>
+
+
+
                                 </ThemedView>
 
                                 {/* GENRE */}
-                                <ThemedView style={styles.containerInfo}>
-                                    <View style={styles.itemTitre}>
-                                        <ThemedText type='defaultSemiBold'>{t.genderLabel}</ThemedText>
+                                <ThemedView style={styles.containerInfoUser}>
+                                    <View style={styles.icon}>
+                                        <Icon name="male-female" size={25} color={COLORS.bg1} />
                                     </View>
-                                    <View style={styles.infoCard}>
-                                        <ThemedText>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.genderLabel}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
+
+                                    </View>
+
+                                </ThemedView>
+                                {/* LANGUAGE */}
+                                <ThemedView style={styles.containerInfoUser}>
+
+                                    <View style={styles.icon}>
+                                        <Icon name="language" size={25} color={COLORS.bg1} />
+                                    </View>
+                                    <View style={styles.infoCardUser}>
+                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.langage}</ThemedText>
+                                        <ThemedText style={{ color: COLORS.text2 }}>{langUser === "94" ? ('Francais') : ('Anglais')}</ThemedText>
 
                                     </View>
                                 </ThemedView>
@@ -574,15 +602,7 @@ export default function ProfilDetail() {
                             userId={auth.idUser}
                             profileInfo={{ interest: typeof profil?.interest === 'object' && !Array.isArray(profil?.interest) ? profil?.interest : {} }}
                         />
-                        {/* LANGUAGE */}
-                        <ThemedView style={styles.containerInfo}>
-                            <View style={styles.itemTitre}>
-                                <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.langage}</ThemedText>
-                            </View>
-                            <View style={styles.infoCard}>
-                                <ThemedText style={{ color: COLORS.text1 }}>{langUser === "94" ? ('Francais') : ('Anglais')}</ThemedText>
-                            </View>
-                        </ThemedView>
+
 
 
                     </ScrollView>
@@ -864,6 +884,22 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         backgroundColor: COLORS.bg6
     },
+    containerInfoUser: {
+        width: '100%',
+        marginVertical: 10,
+        backgroundColor: COLORS.transparence,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+
+    },
+    infoCardUser: {
+        width: '85%',
+        padding: 10,
+        backgroundColor: COLORS.bg2,
+        borderRadius: 10
+    },
     textContainer: {
         width: '45%'
     },
@@ -881,6 +917,7 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 10
     },
+
     item: {
         display: 'flex',
         flexDirection: 'row',

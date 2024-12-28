@@ -34,6 +34,7 @@ export const translations: {
             emailRequired: string;
             invalidEmail: string;
             passwordRequired: string;
+            phoneRequired: string;
             minPasswordLength: string;
             confirmPasswordRequired: string;
             passwordMismatch: string;
@@ -115,6 +116,7 @@ export const translations: {
         langage: string,
         logOut: string,
         profil: string,
+        emailOrPhoneError: string,
         story: string,
 
         delete: string,
@@ -154,10 +156,13 @@ export const translations: {
         selectPayText1: string,
         selectPayText2: string,
         saveOffre: string,
+        emailOrPhone: string,
+        placeholderEmailOrPhone: string,
         textp: string,
         aproximite1: string,
         aboutme: string,
         curentLocal: string,
+        phonePlace: string,
         byeCredit: string,
         activation: string,
         Increase: string,
@@ -207,7 +212,8 @@ export const translations: {
             required: 'est requis',
             nameRequired: "Nom ou pseudo ",
             firstNameRequired: "Prénom ",
-            emailRequired: "Email ",
+            phoneRequired: 'Numéro invalide',
+            emailRequired: "Email ou Phone ",
             invalidEmail: "Email invalide",
             passwordRequired: "Mot de passe ",
             minPasswordLength: "Le mot de passe doit comporter au moins 8 caractères",
@@ -242,6 +248,7 @@ export const translations: {
         request: 'Envoyer la demande',
         myPartener: 'Mes partenaires',
         noAnswer: 'Pas de réponse',
+        emailOrPhone: 'Email ou Numéro téléphone',
         username: 'Nom d\'utilisateur',
         Name: 'Nom',
         birthday: 'Anniversaire',
@@ -274,6 +281,7 @@ export const translations: {
         off: 'Hors ligne',
         send: 'Envoyer',
         sendGift1: 'J\'ai envoyé ce cadeau à',
+        emailOrPhoneError: 'Veuillez entrer un email ou un numéro de téléphone valide.',
         sendGift2: 'Ce cadeau a coûté',
         credit: 'Crédits',
         Langue: 'Francais',
@@ -283,7 +291,8 @@ export const translations: {
         story: 'Storie',
         yes: 'Oui',
         no: 'Non',
-
+        phonePlace: 'Votre numero téléphone',
+        placeholderEmailOrPhone: 'Votre email ou téléphone',
         delete: 'Supprimer',
         locked: 'Privée',
         unlocked: 'Public',
@@ -334,6 +343,7 @@ export const translations: {
         textp: 'Finalisation sécurisée de l\'achat.Vendu et fabriqué par E- coress, un distributeur agréé et un commerçant enregistré.E-coress utilise des problèmes courants de l\'industrie en matière de cryptage pour protéger la confidentialité de vos informations personnelles.'
     },
     EN: {
+        phonePlace: 'Your phone number',
         welcome: "WELCOME TO",
         description: "A great opportunity to build both friendly and romantic connections with real people.",
         connect: "Connect via",
@@ -364,17 +374,20 @@ export const translations: {
         birthDateLabel: "Date of birth",
         address: "Where do you live?",
         addressPlaceholder: "Your address",
+        emailOrPhoneError: 'Enter an email or phone validated',
         genderLabel: "Gender",
         meetingPreferenceLabel: "Meeting preference",
         termsText: "By continuing, you confirm that you have read and accepted our ",
         termsText1: "Terms and conditions and privacy policy.",
         createAccountButton: "Create your account",
+        emailOrPhone: 'Email or Phone',
         errors: {
             required: "is required",
             nameRequired: "Name or nickname",
             firstNameRequired: "First name",
-            emailRequired: "Email",
+            emailRequired: "Email or Phone",
             invalidEmail: "Invalid email",
+            phoneRequired: 'No validate number phone',
             passwordRequired: "Password ",
             minPasswordLength: "Password must be at least 8 characters long",
             confirmPasswordRequired: "Confirm password ",
@@ -398,6 +411,7 @@ export const translations: {
         allUsers: 'All users',
         onLigneNow: 'Online now',
         recent: 'Recent',
+        placeholderEmailOrPhone: 'Your email or phone',
         profile: 'Profile',
         years: 'years',
         about: 'About',

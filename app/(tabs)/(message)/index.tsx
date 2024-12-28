@@ -7,11 +7,12 @@ import PersonCard from '@/components/card/PersonCard';
 import MessageCard from '@/components/card/MessageCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { getChats, getGif, spotlight, unreadMessageCount, userProfil } from '@/request/ApiRest';
+import { getChats, getGif, getUserCredits, spotlight, unreadMessageCount, userProfil } from '@/request/ApiRest';
 import { setAllChats } from '@/store/userSlice';
 import { translations } from '@/service/translate';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -69,32 +70,31 @@ const MessageScreen: React.FC = () => {
     const [Spotlight, setSpotlight] = useState();
     const [dataImage, setdataImages] = useState<DataImage>([]);
 
-    useEffect(() => {
-        if (auth.idUser) {
-            promeseAll()
-        }
-    }, [auth.newM]);
-
     useFocusEffect(
         useCallback(() => {
-            getSpotLight()
-            getMessage();
-            getunreadMessageCount()
-            getSolde()
-        }, [])
+            fetchData();
+        }, [auth.idUser])
     );
 
-    const promeseAll = async () => {
+    const fetchData = async () => {
         setLoading(true);
-
         try {
-
-            await Promise.all([
-                getMessage(),
-                getunreadMessageCount(),
-                getSolde(),
-                getAllGift()
+            const [chats, unreadMessages, credits, gifts, spotlightData] = await Promise.all([
+                getChats(auth.idUser),
+                unreadMessageCount(auth.idUser),
+                getUserCredits(auth.idUser),
+                getGif(),
+                spotlight(auth.idUser)
             ]);
+            dispatch(setAllChats(chats));
+            setPeople(chats.matches);
+            setUnread(unreadMessages.unreadMessageCount)
+            setdataImages(findIndexAndImage(gifts));
+            setSolde(credits.credits)
+            setSpotlight(spotlightData.spotlight.filter((item: { id: any; }, index: any, self: any[]) =>
+                index === self.findIndex((t) => t.id === item.id)
+            ));
+
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
         } finally {
@@ -103,71 +103,15 @@ const MessageScreen: React.FC = () => {
     };
 
     const [loading, setLoading] = useState(true);
-
-    const getAllGift = async () => {
-        // Fonction pour récupérer l'index et `downsized_medium`
-        const findIndexAndImage = (data: GifArray) => {
-            return data.map((item, index) => ({
-                id: index + 1, // Index de l'objet (commence à 1)
-                Image: item.images?.fixed_height_small?.url || null, // URL de l'image ou null si non disponible
-            }));
-        };
-
-        // Appeler la fonction avec des données
-        const resultData = await getGif(); // Typiquement, cela renvoie un tableau
-        const result = findIndexAndImage(resultData);
-        setdataImages(result); // Mettre à jour l'état avec des données typées
-
-        // Afficher le résultat
-        console.log(result);
-    };
     const [Solde, setSolde] = useState<number>(0);
-    const getSolde = async () => {
-        const resultData = await userProfil(auth.idUser);
-        setSolde(resultData.user.credits)
-        console.log('SOLDE', resultData.user.credits);
-
-    };
-    const getMessage = async () => {
-        try {
-            const response = await getChats(auth.idUser);
-            dispatch(setAllChats(response));
-            const { matches } = response;
-            setPeople(matches);
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    };
-
-    const getSpotLight = async () => {
-        try {
-            const response = await spotlight(auth?.idUser);
-
-            // Filtrer les éléments avec des id uniques
-            const uniqueSpotlight = response.spotlight.filter((item: { id: any; }, index: any, self: any[]) =>
-                index === self.findIndex((t) => t.id === item.id)
-            );
-
-            setSpotlight(uniqueSpotlight);
-            console.log("spot", uniqueSpotlight);
-
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    };
-
     const [unread, setUnread] = useState('');
-
-    const getunreadMessageCount = async () => {
-        try {
-            const response = await unreadMessageCount(auth?.idUser);
-            setUnread(response.unreadMessageCount)
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    };
-
     const [selectedType, setSelectedType] = useState('all');
+    const findIndexAndImage = (data: GifArray) => {
+        return data.map((item, index) => ({
+            id: index + 1, // Index de l'objet (commence à 1)
+            Image: item.images?.fixed_height_small?.url || null, // URL de l'image ou null si non disponible
+        }));
+    };
 
     const selectType = (type: string) => {
         setSelectedType(type);
@@ -197,25 +141,32 @@ const MessageScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Messages</ThemedText>
-            </ThemedView>
-            {Spotlight && <FlatList
-                horizontal
-                data={Spotlight}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <PersonCard
-                        name={item.name}
-                        profilePic={item.photo}
-                        id={item.id}
-                        lastMessage={item.last_m}
-                        isOnline={item.online !== 0}
-                        unreadCount={item.unreadCount}
+                <ThemedText type="title" style={{ color: COLORS.bg1 }}>Messages</ThemedText>
 
-                    />
-                )}
-                contentContainerStyle={styles.personList}
-            />}
+            </ThemedView>
+            <TouchableOpacity onPress={() => fetchData()} style={[styles.filterButton, { position: 'absolute', top: 50, right: 0 }]}>
+                <Icon name="refresh-circle" size={25} color={COLORS.darkBlue} />
+            </TouchableOpacity>
+            {Spotlight && (
+                <FlatList
+                    horizontal
+                    data={Spotlight}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        item.id !== auth.idUser ? (
+                            <PersonCard
+                                name={item.name}
+                                profilePic={item.photo}
+                                id={item.id}
+                                lastMessage={item.last_m}
+                                isOnline={item.status}
+                                unreadCount={item.unreadCount}
+                            />
+                        ) : null // Vous pouvez retourner null si l'utilisateur est le même que auth.idUser 
+                    )}
+                    contentContainerStyle={styles.personList}
+                />
+            )}
             <ThemedView style={styles.type}>
                 <View style={styles.center}>
                     <TouchableOpacity onPress={() => selectType('all')} style={styles.filterButton}>
@@ -347,7 +298,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     mess: {
-        // height: 400,
+        height: screenWidth * 0.8,
         flex: 20,
         // backgroundColor: 'green'
     },

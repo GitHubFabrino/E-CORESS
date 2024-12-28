@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '@/assets/style/style.color';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
-import { game, gameLike, updateAge, updateCredits, updateGender, updateSRadius, userProfil } from '@/request/ApiRest';
+import { game, gameLike, getUserCredits, updateAge, updateCredits, updateGender, updateSRadius, userProfil } from '@/request/ApiRest';
 import { login } from '@/store/userSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
@@ -39,9 +39,6 @@ interface GameDataItem {
   total: string;
 }
 
-interface GameResponse {
-  game: GameDataItem[];
-}
 export default function HomeScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.user);
@@ -88,10 +85,11 @@ export default function HomeScreen() {
   const closeTarif = () => {
     setSoldeInsuffisant(false);
   };
+
   const getSolde = async () => {
-    const resultData = await userProfil(auth.idUser);
-    setsetSolde(resultData.user.credits)
-    console.log('SOLDE', resultData.user.credits);
+    const resultData = await getUserCredits(auth.idUser);
+    setsetSolde(resultData.credits)
+    console.log('SOLDE', resultData.credits);
 
   };
   const getData = async () => {
@@ -144,49 +142,17 @@ export default function HomeScreen() {
       console.error(`Error updating ${field}:`, error);
     }
   };
-  useEffect(() => {
-    getData()
-    getGame()
-    getSolde()
-    console.log('langue e', lang);
-
-    setLang(auth.lang)
-
-  }, []);
-  useEffect(() => {
-    getData()
-    getGame()
-    getSolde()
-    console.log('langue e', lang);
-
-    setLang(auth.lang)
-
-  }, [auth.lang]);
-  useFocusEffect(
-    useCallback(() => {
-      getGame();
-      getSolde()
-      console.log('langue e', lang);
-      setLang(auth.lang)
-    }, [auth.lang])
-  );
-
 
   useFocusEffect(
     useCallback(() => {
+      console.log('usefocus2');
+      getData()
       getGame();
       getSolde()
       console.log('langue e', lang);
       setLang(auth.lang)
     }, [])
   );
-
-  useEffect(() => {
-    sendUpdate('age', maxAge);
-    sendUpdate('gender', gender);
-    sendUpdate('distance', distance);
-    getGame()
-  }, [maxAge, gender, distance]);
 
 
   const handleNextCard = () => {
@@ -255,7 +221,8 @@ export default function HomeScreen() {
         }, 2000);
 
       } else {
-        setSoldeInsuffisant(true)
+        // setSoldeInsuffisant(true)
+        router.navigate('/(profil)/MostPopular')
       }
     }
   };
@@ -274,6 +241,7 @@ export default function HomeScreen() {
     sendUpdate('age', maxAge);
     sendUpdate('gender', gender);
     sendUpdate('distance', distance);
+    getGame()
     setIsFilterModalVisible(!isFilterModalVisible);
   };
 

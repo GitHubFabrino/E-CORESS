@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     },
     labelInput: {
         fontSize: 16,
-        color: '#333',
+        color: COLORS.bg1,
         marginBottom: 5,
         fontWeight: 'bold',
     },
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
-        padding: 10,
+        padding: 5,
     },
     inputError: {
         borderColor: 'red',

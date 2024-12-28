@@ -4,18 +4,20 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link, router } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
 import ThemedInput from '@/components/input/InputText';
 import ThemedButton from '@/components/button/Button';
+import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS } from '@/assets/style/style.color';
 import { LogoWave } from '@/components/LogoWave';
 import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 import ForgotPasswordModal from '@/components/Modal/ForgotPasswordModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { login, logout, setError, setLanguage } from '@/store/userSlice';
+import { login, logout, setActiveMethod, setError, setLanguage } from '@/store/userSlice';
 import { authenticateUser, fetchUserData } from '@/request/ApiRest';
 import { translations } from '@/service/translate';
-
+// import { router } from 'expo-router';
 
 export default function SignInScreen() {
     const dispatch = useDispatch<AppDispatch>();
@@ -32,9 +34,6 @@ export default function SignInScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [errorEmail, setErrorEmail] = useState('');
     const [errorPwd, setErrorPwd] = useState('');
-
-    const [isEmail, setisEmail] = useState(auth.isEmail);
-    const [isPhone, setisPhone] = useState(auth.isPhone);
     const [isFb, setisFb] = useState(auth.isFb);
 
 
@@ -48,11 +47,13 @@ export default function SignInScreen() {
     const validateForm = () => {
         let valid = true;
 
-        if (emailUser.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailUser)) {
-            setErrorEmail(t.invalidEmail);
-            valid = false;
+        if (isEmailsend == true || isPhonesend == true) {
+            setErrors('');
+            valid = true;
         } else {
-            setErrorEmail('');
+            setErrors(t.emailOrPhoneError);
+            valid = false;
+
         }
 
         if (passwordUser.trim() === '') {
@@ -65,42 +66,81 @@ export default function SignInScreen() {
         return valid;
     };
 
+    const [emailOrPhone, setEmailOrPhone] = useState('faly@gmail.com');
+    const [errors, setErrors] = useState('');
+    const [isEmailsend, setisEmailsend] = useState(false);
+    const [isPhonesend, setisPhonesend] = useState(false);
+    // Fonction de validation
+    const validateInput = (input: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Vérifie si c'est un email valide
+        const phoneRegex = /^[0-9]{10}$/; // Vérifie si c'est un numéro de téléphone à 10 chiffres
+
+
+        if (emailRegex.test(input)) {
+            setisEmailsend(true)
+            setisPhonesend(false)
+            return true; // Email valide
+        } else if (phoneRegex.test(input)) {
+            setisEmailsend(false)
+            setisPhonesend(true)
+            return true; // Téléphone valide
+        } else {
+            return false; // Ni email ni téléphone valide
+        }
+    };
+
+    // Gestionnaire de changement de texte
+    const handleInputChange = (input: string) => {
+        setEmailOrPhone(input);
+
+        // Validation dynamique
+        if (!validateInput(input)) {
+            setErrors(t.emailOrPhoneError);
+        } else {
+            setErrors(''); // Aucune erreur
+        }
+    };
+
     const handleConnect = async () => {
         if (validateForm()) {
             setIsLoading(true);
-            try {
-                const response = await authenticateUser(emailUser, passwordUser);
+            if (isEmailsend || isPhonesend) {
+                try {
+                    setEmailUser(emailOrPhone)
+                    const response = await authenticateUser(emailOrPhone, passwordUser, isEmailsend);
 
-                console.log("REPOSNSE LOGIN", response);
+                    console.log("REPOSNSE LOGIN", response);
 
-                if (response.error === 0) {
+                    if (response.error === 0) {
 
-                    await dispatch(login(response));
-                    console.log('response login ', response.user.lang_prefix);
-                    if (response.user.lang_prefix === 'en') {
-                        dispatch(setLanguage('EN'))
-                    } else {
-                        dispatch(setLanguage('FR'))
+                        await dispatch(login(response));
+                        console.log('response login ', response.user.lang_prefix);
+                        if (response.user.lang_prefix === 'en') {
+                            dispatch(setLanguage('EN'))
+                        } else {
+                            dispatch(setLanguage('FR'))
+                        }
+
+                        const targetRoute = response.user.profile_photo ? '/(tabs)/' : '/importImage';
+                        router.replace(targetRoute);
+
+                    } else if (response.error === 1) {
+
+                        setErrorEmail(t.invalidEmail);
+                        setErrorPwd(t.requiredPassword);
+                        dispatch(setError(response));
+
+                        throw new Error(response.error_m);
                     }
 
-                    const targetRoute = response.user.profile_photo ? '/(tabs)/' : '/importImage';
-                    router.replace(targetRoute);
-
-                } else if (response.error === 1) {
-
-                    setErrorEmail(t.invalidEmail);
-                    setErrorPwd(t.requiredPassword);
-                    dispatch(setError(response));
-
-                    throw new Error(response.error_m);
+                } catch (error) {
+                    console.error('Error during authentication:', error);
+                    dispatch(logout());
+                } finally {
+                    setIsLoading(false);
                 }
-
-            } catch (error) {
-                console.error('Error during authentication:', error);
-                dispatch(logout());
-            } finally {
-                setIsLoading(false);
             }
+
         }
     };
 
@@ -128,23 +168,13 @@ export default function SignInScreen() {
                 </ThemedText>
             </ThemedView>
 
-            {isEmail && <ThemedInput
-                label={t.email}
-                value={emailUser}
-                placeholder={t.email}
-                onChangeText={setEmailUser}
-                style={styles.textColor}
-                error={errorEmail}
-            />}
-
-            {isPhone && <ThemedInput
-                label={t.phone}
-                value={phoneUser}
-                placeholder={t.phone}
-                onChangeText={setPhoneUser}
-                style={styles.textColor}
-                error={errorEmail}
-            />}
+            <ThemedInput
+                label={t.emailOrPhone}
+                value={emailOrPhone}
+                placeholder={t.placeholderEmailOrPhone}
+                onChangeText={handleInputChange}
+                error={errors} // Affiche l'erreur si présente
+            />
 
             {isFb && <ThemedInput
                 label={t.facebook}
@@ -173,11 +203,32 @@ export default function SignInScreen() {
                 </ThemedView>
             </Pressable>
 
+
             <ThemedButton
                 onClick={handleConnect}
                 text={t.login}
                 style={styles.button}
             />
+
+            {/* <ThemedView style={styles.container}>
+                <TouchableOpacity onPress={() => {
+                    dispatch(setActiveMethod('email'));
+                    router.navigate('/(Auth)/singin')
+                    setisEmail(true)
+                    setisPhone(false)
+                }}  >
+                    <IconMaterial name="gmail" size={25} color={COLORS.darkBlue} />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => {
+                    dispatch(setActiveMethod('phone'));
+                    router.navigate('/(Auth)/singin')
+                    setisPhone(true)
+                    setisEmail(false)
+                }}  >
+                    <IconMaterial name="phone" size={25} color={COLORS.darkBlue} />
+                </TouchableOpacity>
+            </ThemedView> */}
 
             <ThemedView style={styles.accountContainer}>
                 <ThemedText style={styles.textContainer}>{t.alreadyHaveAccount}</ThemedText>
@@ -196,17 +247,25 @@ export default function SignInScreen() {
                 onSubmit={handleForgotPasswordSubmit}
             />
 
-            <ThemedButton
+            {/* <ThemedButton
                 onClick={() => {
                     router.navigate('/');
                 }}
                 text="intro"
                 style={{ backgroundColor: "#F4B20A", marginTop: 50, color: '#232B57' }}
-            />
+            /> */}
         </ParallaxScrollView>
     );
 }
 const styles = StyleSheet.create({
+    container: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '80%',
+        alignItems: 'center',
+        alignSelf: 'center'
+    },
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',

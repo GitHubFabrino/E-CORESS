@@ -1,3 +1,6 @@
 .test {
     color: #7a7979;
 }
+
+/* http: //api.openweathermap.org/geo/1.0/direct?q=Antsiranana&limit=5&appid=96bd8d6bc5ab8c519e9dfff3c684a3d0 */
+/* https: //api.openweathermap.org/geo/1.0/direct?q=Tanambao%20I&limit=10&appid=96bd8d6bc5ab8c519e9dfff3c684a3d0 */

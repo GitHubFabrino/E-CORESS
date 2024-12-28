@@ -9,37 +9,36 @@ interface PersonCardProps {
     name: string;
     profilePic: any;
     lastMessage: string;
-    isOnline: boolean;
+    isOnline: number;
     unreadCount: string;
 
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({ id, name, profilePic, lastMessage, isOnline, unreadCount }) => {
+    console.log('STATUS', typeof isOnline);
+
     return (
 
         <TouchableOpacity onPress={() => router.push(`/Chat?userId=${id}&userName=${name}&profilePic=${profilePic}`)} // Utiliser router.push pour naviguer
             style={styles.personCard}>
             <Image source={{ uri: profilePic }} style={styles.profilePic} />
-            <View style={[styles.onlineIndicator, styles.indicator, { backgroundColor: !isOnline ? COLORS.green : '' }, { display: isOnline ? 'flex' : 'none' }]} >
-            </View>
+            <View style={[styles.indicator, { display: isOnline === 1 ? 'flex' : 'none' }]} ></View>
             <Text style={styles.personName}>{name}</Text>
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    onlineIndicator: {
-        // width: 12,
-        // height: 12,
-        // borderRadius: 6,
-        padding: 5,
 
-    },
     indicator: {
-        width: 5,
-        height: 5,
-        marginLeft: 10,
-        borderRadius: 20
+        width: 8,
+        height: 8,
+        position: 'absolute',
+        right: 12,
+        bottom: 30,
+        backgroundColor: COLORS.green,
+        borderRadius: 100
+
     },
     personCard: {
         width: 80,
@@ -60,7 +59,7 @@ const styles = StyleSheet.create({
     personName: {
         marginTop: 5,
         fontSize: 12,
-        color: COLORS.bg1,
+        color: COLORS.text2,
     },
 });
 

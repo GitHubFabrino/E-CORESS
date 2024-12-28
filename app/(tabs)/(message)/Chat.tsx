@@ -6,7 +6,7 @@ import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import ParseHtmlToComponents from '@/components/ParseHtmlComponent';
-import { getGif, getGifts, getMessage, message, rt, sendImage, sendMessage, today, updateCredits, uploadBase64Image, userProfil } from '@/request/ApiRest';
+import { getGif, getGifts, getMessage, getUserCredits, message, rt, sendImage, sendMessage, today, updateCredits, uploadBase64Image, userProfil } from '@/request/ApiRest';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import * as ImagePicker from 'expo-image-picker';
@@ -139,11 +139,14 @@ const ChatScreen: React.FC = () => {
         console.log('SOLDE', resultData.user.credits);
 
     };
+
     const getSolde = async () => {
-        const resultData = await userProfil(auth.idUser);
-        setsoldeUser(resultData.user.credits)
+        const resultData = await getUserCredits(auth.idUser);
+        setsoldeUser(resultData.credits)
+        console.log('SOLDE', resultData.credits);
 
     };
+
     const getMessageAll = async () => {
         const dataMessage = await getMessage(auth.idUser, userId)
         console.log('DATA RESPONSE MESSAGE', dataMessage);
@@ -165,7 +168,8 @@ const ChatScreen: React.FC = () => {
 
     const handleSend = async () => {
         if (soldeUser <= 1) {
-            setSoldeUserInsuffisant(true);
+            // setSoldeUserInsuffisant(true);
+            router.navigate('/(profil)/MostPopular')
             return;
         }
 
@@ -276,7 +280,7 @@ const ChatScreen: React.FC = () => {
                         ))}
                     </View>
                 )}
-                {item.type === 'text' && <ParseHtmlToComponents html={item.body} />}
+                {item.type === 'text' && <ParseHtmlToComponents html={item.body} isMe={item.isMe} />}
             </View>
         </View>
     );
@@ -331,7 +335,8 @@ const ChatScreen: React.FC = () => {
         const prixNumber = parseFloat(prix);
 
         if (soldeUser <= (10 + prixNumber)) {
-            setSoldeUserInsuffisant(true);
+            // setSoldeUserInsuffisant(true);
+            router.navigate('/(profil)/MostPopular')
             return;
         }
 
@@ -407,7 +412,8 @@ const ChatScreen: React.FC = () => {
         if (soldeUser < (20)) {
             console.log('SOLDE E', soldeUser);
 
-            setSoldeUserInsuffisant(true);
+            // setSoldeUserInsuffisant(true);
+            router.navigate('/(profil)/MostPopular')
             return;
         }
 
@@ -909,7 +915,7 @@ const styles = StyleSheet.create({
         color: COLORS.red,
     },
     otherMessage: {
-        backgroundColor: COLORS.lightGray,
+        // backgroundColor: COLORS.lightGray,
     },
     messageImage: {
         width: 150,

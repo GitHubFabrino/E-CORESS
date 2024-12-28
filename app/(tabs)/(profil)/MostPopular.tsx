@@ -115,7 +115,7 @@ const MostPopular: React.FC = () => {
                             <ThemedText type='midleText' style={{ color: COLORS.bg1, }}>{t.offre} {data.name}</ThemedText>
                             <View>
                                 {data.plans.map((pl, i) => (
-                                    <TouchableOpacity onPress={() =>
+                                    <TouchableOpacity key={i} onPress={() =>
                                         router.push(`/(tabs)/Payement?userId=${auth.idUser}&photo=${profil?.profile_photo}&offre=${data.name}&availability=${pl.availability}&duration=${pl.duration}&price=${pl.price}&packages=${pl.package}`)
                                     }>
                                         <View style={styles.offreCard}>
@@ -183,7 +183,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
         borderRadius: 90,
         alignItems: 'center',
-        alignSelf: 'center'
+        alignSelf: 'center',
+        backgroundColor: COLORS.bg6
 
 
     },

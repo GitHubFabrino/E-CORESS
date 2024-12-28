@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { router, useFocusEffect } from 'expo-router';
 import { translations } from '@/service/translate';
-import { addVisit, cuser, fetchUserData, fetchUserDataWall, gameLike, getMessage, meet, message, sendMessageCredit, updateAge, updateCredits, updateGender, updateSRadius, userProfil } from '@/request/ApiRest';
+import { addVisit, cuser, fetchUserData, fetchUserDataWall, gameLike, getMessage, getUserCredits, meet, message, sendMessageCredit, updateAge, updateCredits, updateGender, updateSRadius, userProfil } from '@/request/ApiRest';
 import LoadingSpinner from '@/components/spinner/LoadingSpinner';
 import CardMeet from '@/components/card/CardMeet';
 import ThemedButton from '@/components/button/Button';
@@ -278,7 +278,6 @@ export default function AproximiteScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [gender, setGender] = useState('');
     const [maxAge, setMaxAge] = useState<number>(18);
-    const [email, setEmail] = useState('');
     const [location, setLocation] = useState('');
     const [distance, setDistance] = useState<number>(1);
 
@@ -286,15 +285,26 @@ export default function AproximiteScreen() {
     const [allUser, setallUser] = useState<boolean>(true);
 
     const t = translations[lang];
+
+
+    const [valueCredits, setValueCredits] = useState<number | null>(null);
+    const [creditSend, setcreditSend] = useState<number | null>(null);
+
+    const [Solde, setsetSolde] = useState<number>(0);
+    const [data, setData] = useState<CardData[]>([]);
+
     const getDataMeet = async () => {
 
         const result = await meet(auth.idUser, "0", "0");
         setMeetData(result)
         console.log("popular", result.popular);
-
-
-
     };
+
+
+    useEffect(() => {
+        setData(transformApiData(dataMeet));
+    }, [dataMeet]);
+
     const getData = async () => {
 
         const resultData = await userProfil(auth.idUser);
@@ -304,100 +314,53 @@ export default function AproximiteScreen() {
         setDistance(Number(resultData.user.s_radius || 1));
         setIsLoading(false);
     };
-    useEffect(() => {
+
+    const fetchData = useCallback(() => {
         getDataMeet();
         getData();
-        getSolde()
-        setLang(auth.lang)
+        getSolde();
+        setLang(auth.lang);
+    }, [auth.lang]); // Dépend uniquement de `auth.lang`
 
-    }, []);
-    useFocusEffect(
-        useCallback(() => {
-            getDataMeet();
-            getSolde()
-            setLang(auth.lang)
-        }, [])
-    );
+    // Appel initial des données
     useEffect(() => {
-        getDataMeet();
-        getData();
-        getSolde()
-        setLang(auth.lang)
+        console.log('USEEFFECT 1');
 
-    }, [auth.lang]);
-    useFocusEffect(
-        useCallback(() => {
-            getDataMeet();
-            getSolde()
-            setLang(auth.lang)
-        }, [auth.lang])
-    );
-    useEffect(() => {
-        const sendUpdate = async (field: string, value: string | number) => {
-            try {
-                let resultData;
-                switch (field) {
-                    case 'age':
-                        resultData = await updateAge(auth.idUser, value.toString());
-                        break;
-                    case 'gender':
-                        resultData = await updateGender(auth.idUser, value as string);
-                        break;
-                    case 'distance':
-                        resultData = await updateSRadius(auth.idUser, value.toString());
-                        break;
-                    default:
-                        return;
-                }
-                console.log(`Update successful for ${field}:`, resultData);
+        fetchData();
+    }, [fetchData]); // Utilisez `fetchData` dans les dépendances
 
-                // Teste
-                dispatch(login(resultData));
-            } catch (error) {
-                console.error(`Error updating ${field}:`, error);
+    // Mise à jour des données lors du focus sur l'écran
+    useFocusEffect(fetchData);
+    const sendUpdate = async (field: string, value: string | number) => {
+        try {
+            let resultData;
+            switch (field) {
+                case 'age':
+                    resultData = await updateAge(auth.idUser, value.toString());
+                    break;
+                case 'gender':
+                    resultData = await updateGender(auth.idUser, value as string);
+                    break;
+                case 'distance':
+                    resultData = await updateSRadius(auth.idUser, value.toString());
+                    break;
+                default:
+                    return;
             }
-        };
+            console.log(`Update successful for ${field}:`, resultData);
 
-        sendUpdate('age', maxAge);
-        sendUpdate('gender', gender);
-        sendUpdate('distance', distance);
-
-        getDataMeet()
-    }, [maxAge, gender, distance]);
-
-
-
-    // const getDataAlluser = async () => {
-
-    //     console.log('aaaaaa', gender);
-
-
-    //     setIsLoading(true)
-    //     const result = await fetchUserData(`18,${maxAge}`, gender, distance.toString(), "0", "0", "");
-    //     setDataMeet(result.data || []);
-    //     setIsLoading(false)
-    // };
-
-    const getAllDatauser = async () => {
-
-        console.log("Teste ve", maxAge);
-
-        setIsLoading(true)
-
-        const resultData = await userProfil(auth.idUser);
-        console.log("tester", resultData.user.s_radius);
-
-        // setDataMeet(result.data || []);
-        setIsLoading(false)
+            // Teste
+            dispatch(login(resultData));
+        } catch (error) {
+            console.error(`Error updating ${field}:`, error);
+        }
     };
 
-    // const getDataOneLigne = async () => {
-    //     setIsLoading(true)
-    //     const result = await fetchUserData("18,57", "2", "100", "1", "0", "");
-    //     setDataMeet(result.data || []);
-    //     setIsLoading(false)
-    // };
-
+    const getAllDatauser = async () => {
+        setIsLoading(true)
+        const resultData = await userProfil(auth.idUser);
+        setIsLoading(false)
+    };
 
 
     const transformApiData = (apiData: any[]): CardData[] => {
@@ -415,29 +378,8 @@ export default function AproximiteScreen() {
         }));
     };
 
-    const [data, setData] = useState<CardData[]>([]);
-
-    useEffect(() => {
-        setData(transformApiData(dataMeet));
-    }, [dataMeet]);
-
-    useFocusEffect(
-        useCallback(() => {
-            setSelectedItem(null);
-            setIsModalVisible(false);
-            setFilteredData(data);
-        }, [data])
-    );
-
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<CardData | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [filteredData, setFilteredData] = useState<CardData[] | null>(data);
     const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-    const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
-
-    const [profil1, setprofil1] = useState(true);
-    const [profil2, setprofil2] = useState(false);
 
     const [cuserData, setcuser] = useState<Game[] | null>(null);
     const [cuserDataUserFan, setcuserDataUserFan] = useState();
@@ -445,25 +387,15 @@ export default function AproximiteScreen() {
     const [nameReceveMessage, setnameReceveMessage] = useState("");
 
     const toggleModalMeet = (id: string, name: string) => {
-
         setnameReceveMessage(name)
-
         const getCuser = async () => {
             const addVisitUpdate = await addVisit(auth.idUser, id)
-            console.log("Addvisit : ", addVisitUpdate);
-
             const resultWall = await cuser(id, auth.idUser);
             setcuser(resultWall.game)
             setcuserDataUserFan(resultWall.user.isFan)
-
         };
-
         getCuser()
-        console.log("CUSER DATA :", cuserData);
-        console.log("CUSER ISFAN :", cuserDataUserFan);
-
         if (cuserData) {
-
             setCurrentImageIndex(0);
             setIsModalVisibleCuser(!isModalVisibleCuser);
         }
@@ -484,36 +416,18 @@ export default function AproximiteScreen() {
         setIsModalVisibleCuser(false);
         setnameReceveMessage('')
     };
-    // const closeModal = () => {
-    //     setIsModalVisible(false);
-    //     setprofil1(true);
-    //     setprofil2(false);
-    //     setSelectedItem(null);
-    //     setProfileInfo(null)
-    // };
-
-    // const showProfilFunc = () => {
-    //     setprofil1(!profil1);
-    //     setprofil2(!profil2);
-    // };
     const handleNextImage = () => {
         if (cuserData && cuserData[0]?.full?.galleria?.length) {
             const nextIndex = (currentImageIndex + 1) % cuserData[0]?.full.galleria.length
             setCurrentImageIndex(nextIndex);
-            console.log('ici koa :', profileInfo?.galleria.length, nextIndex);
-
         }
-        console.log("current ", currentImageIndex);
     };
 
     const handlePreviousImage = () => {
         if (cuserData && cuserData[0]?.full?.galleria?.length) {
             const prevIndex = (currentImageIndex - 1 + cuserData[0]?.full.galleria.length) % cuserData[0]?.full.galleria.length;
             setCurrentImageIndex(prevIndex);
-            console.log('ici');
         }
-        console.log("current ", currentImageIndex);
-
     };
 
 
@@ -521,7 +435,7 @@ export default function AproximiteScreen() {
     const handleSendCredit = (idReceve: string) => {
         setcreditSend(valueCredits)
         if (valueCredits && valueCredits > Solde) {
-            // setSoldeInsuffisant(true)
+
             router.navigate('/(profil)/MostPopular')
         } else {
             const messageSend = async () => {
@@ -570,14 +484,11 @@ export default function AproximiteScreen() {
 
     };
     const handleCancelCredit = () => {
-
         setisTransferCredit(false)
-
     };
 
     const handleHeartLike = (uid1: string, uid2: string) => {
         if (Solde < 0) {
-            // setSoldeInsuffisant(true)
             router.navigate('/(profil)/MostPopular')
         } else {
             setcreditSend(1)
@@ -619,51 +530,26 @@ export default function AproximiteScreen() {
 
     const showOnlineUsers = () => {
         setallUser(false)
-        // getDataOneLigne();
-        // setData(transformApiData(dataMeet));
-        // setFilteredData(data);
     };
     const toggleFilterModal = () => {
         setIsFilterModalVisible(!isFilterModalVisible);
-        // getDataAlluser()
-        // getAllDatauser()
     };
     const toggleFilterModalSend = () => {
         setIsFilterModalVisible(!isFilterModalVisible);
-        // getDataAlluser()
+        sendUpdate('age', maxAge);
+        sendUpdate('gender', gender);
+        sendUpdate('distance', distance);
+        getDataMeet()
         getAllDatauser()
     };
 
-
-
-
-    const [valueCredits, setValueCredits] = useState<number | null>(null);
-    const [creditSend, setcreditSend] = useState<number | null>(null);
-
-    const [Solde, setsetSolde] = useState<number>(0);
-    const [soldeInsuffisant, setSoldeInsuffisant] = useState(false);
-
-    const dataImage = [
-        { id: 1, Image: require('../../assets/images/tarif/img1.png') },
-        { id: 2, Image: require('../../assets/images/tarif/img2.png') },
-        { id: 3, Image: require('../../assets/images/tarif/img3.png') },
-        { id: 4, Image: require('../../assets/images/tarif/img4.png') },
-        { id: 5, Image: require('../../assets/images/tarif/img5.png') },
-        { id: 6, Image: require('../../assets/images/tarif/img6.png') },
-        { id: 7, Image: require('../../assets/images/tarif/img7.png') },
-    ];
-
-
-
-    const closeTarif = () => {
-        setSoldeInsuffisant(false);
-    };
     const getSolde = async () => {
-        const resultData = await userProfil(auth.idUser);
-        setsetSolde(resultData.user.credits)
-        console.log('SOLDE', resultData.user.credits);
+        const resultData = await getUserCredits(auth.idUser);
+        setsetSolde(resultData.credits)
+        console.log('SOLDE', resultData.credits);
 
     };
+
 
     return (
         <ThemedView style={styles.container}>
@@ -905,53 +791,6 @@ export default function AproximiteScreen() {
                 </View>
             </Modal>
 
-            <Modal
-                isVisible={soldeInsuffisant}
-                onBackdropPress={closeTarif}
-                style={styles.modal}
-            >
-
-                <View style={styles.filterModalContent1}>
-                    <TouchableOpacity onPress={closeTarif} style={styles.notNowBtn}>
-                        <Text style={styles.notNow}>{t.notNow}</Text>
-                    </TouchableOpacity>
-
-                    <FlatList
-                        data={dataImage}
-                        horizontal
-                        renderItem={({ item }) => (
-                            <View style={styles.containeImage}>
-                                <Image
-                                    source={item.Image} // Directement l'objet require()
-                                    style={styles.stepImage1}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                        )}
-                        keyExtractor={(item) => item.id.toString()}
-                        showsHorizontalScrollIndicator={false}
-                    />
-                    <View style={styles.notNowBtn}>
-                        <Text style={styles.notNow}>{t.pack}</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>1001 Credits</Text>
-                        <Text style={styles.notNow}>4.99Eur</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>2501 Credits</Text>
-                        <Text style={styles.notNow}>9.99Eur</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>5000 Credits</Text>
-                        <Text style={styles.notNow}>14.99Eur</Text>
-                    </TouchableOpacity>
-
-
-
-                </View>
-            </Modal>
         </ThemedView>
     );
 }

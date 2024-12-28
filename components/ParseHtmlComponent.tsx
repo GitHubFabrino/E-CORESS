@@ -4,9 +4,10 @@ import { ThemedText } from './ThemedText';
 import { COLORS } from '@/assets/style/style.color';
 import he from 'he';
 
-const ParseHtmlToComponents: React.FC<{ html: string }> = ({ html }) => {
+const ParseHtmlToComponents: React.FC<{ html: string, isMe: boolean }> = ({ html, isMe }) => {
     const [htmltext, setHtmltext] = useState<string>('');
     const [imageSrc, setImageSrc] = useState<string | null>(null); // Déclarer comme null pour mieux gérer les cas sans image
+    // const [isme, setisMe] = useState(isMe);
 
     useEffect(() => {
         // Regex pour trouver les balises HTML
@@ -45,8 +46,8 @@ const ParseHtmlToComponents: React.FC<{ html: string }> = ({ html }) => {
     }, [html]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.messageText}>{htmltext}</Text>
+        <View style={[styles.container, isMe ? { backgroundColor: COLORS.jaune } : { backgroundColor: COLORS.bg1 }]} >
+            <Text style={[isMe ? { color: COLORS.bg1 } : { color: COLORS.white }]}>{htmltext}</Text>
             {imageSrc ? <Image source={{ uri: imageSrc }} style={{ width: 34, height: 34, marginHorizontal: 10 }} /> : null}
         </View>
     );
@@ -54,16 +55,14 @@ const ParseHtmlToComponents: React.FC<{ html: string }> = ({ html }) => {
 
 // StyleSheet (si nécessaire)
 const styles = StyleSheet.create({
-    messageText: {
-        color: COLORS.bg1,
-    },
+
     container: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.jaune,
+        // backgroundColor: COLORS.jaune,
         padding: 10,
-        borderRadius: 5
+        borderRadius: 10
     }
 
 });
