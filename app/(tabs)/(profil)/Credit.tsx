@@ -8,10 +8,7 @@ import { addToSpotlight, discover100, getUserCredits, raiseUpF, userProfil } fro
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { translations } from '@/service/translate';
-import { ThemedView } from '@/components/ThemedView';
-import { color } from 'react-native-elements/dist/helpers';
 import { UserProfileInterface } from './interfaceProfile';
-import { setLanguage } from '@/store/userSlice';
 import Modal from 'react-native-modal/dist/modal';
 
 import { useFocusEffect } from '@react-navigation/native';
@@ -35,23 +32,7 @@ const Credit: React.FC = () => {
     const [okHight, setOkHight] = useState(false);
     const [discover, setdiscover] = useState('');
     const [meet, setmeet] = useState('');
-    const [soldeInsuffisant, setSoldeInsuffisant] = useState(false);
 
-    const dataImage = [
-        { id: 1, Image: require('../../../assets/images/tarif/img1.png') },
-        { id: 2, Image: require('../../../assets/images/tarif/img2.png') },
-        { id: 3, Image: require('../../../assets/images/tarif/img3.png') },
-        { id: 4, Image: require('../../../assets/images/tarif/img4.png') },
-        { id: 5, Image: require('../../../assets/images/tarif/img5.png') },
-        { id: 6, Image: require('../../../assets/images/tarif/img6.png') },
-        { id: 7, Image: require('../../../assets/images/tarif/img7.png') },
-    ];
-
-
-
-    const closeTarif = () => {
-        setSoldeInsuffisant(false);
-    };
     const closeRaiseUp = () => {
         setraiseUp(!raiseUp)
     }
@@ -209,7 +190,6 @@ const Credit: React.FC = () => {
                         style={[styles.btn, styles.colorBtn]}
                         onPress={() => {
                             if (soldeUser < 150) {
-                                // setSoldeInsuffisant(true)
                                 router.navigate('/(profil)/MostPopular')
                             } else {
                                 setraiseUp(true)
@@ -252,7 +232,6 @@ const Credit: React.FC = () => {
                             style={[styles.btn, styles.colorBtn1]}
                             onPress={() => {
                                 if (soldeUser < 200) {
-                                    // setSoldeInsuffisant(true)
                                     router.navigate('/(profil)/MostPopular')
                                 } else {
                                     setincreaseUp(true)
@@ -309,7 +288,6 @@ const Credit: React.FC = () => {
                         style={[styles.btn, styles.colorBtn2]}
                         onPress={() => {
                             if (soldeUser < 182) {
-                                setSoldeInsuffisant(true)
                                 router.navigate('/(profil)/MostPopular')
                             } else {
                                 setHighlightsUp(true)
@@ -465,7 +443,7 @@ const Credit: React.FC = () => {
                     </View>
                 </Modal>
 
-                {/* Insuffisance */}
+                {/* Insuffisance
                 <Modal
                     isVisible={soldeInsuffisant}
                     onBackdropPress={closeTarif}
@@ -512,7 +490,7 @@ const Credit: React.FC = () => {
 
 
                     </View>
-                </Modal>
+                </Modal> */}
 
 
             </ScrollView >

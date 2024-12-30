@@ -68,23 +68,6 @@ export default function HomeScreen() {
   const [creditSend, setcreditSend] = useState<number | null>(null);
 
   const [setSolde, setsetSolde] = useState<number>(0);
-  const [soldeInsuffisant, setSoldeInsuffisant] = useState(false);
-
-  const dataImage = [
-    { id: 1, Image: require('../../assets/images/tarif/img1.png') },
-    { id: 2, Image: require('../../assets/images/tarif/img2.png') },
-    { id: 3, Image: require('../../assets/images/tarif/img3.png') },
-    { id: 4, Image: require('../../assets/images/tarif/img4.png') },
-    { id: 5, Image: require('../../assets/images/tarif/img5.png') },
-    { id: 6, Image: require('../../assets/images/tarif/img6.png') },
-    { id: 7, Image: require('../../assets/images/tarif/img7.png') },
-  ];
-
-
-
-  const closeTarif = () => {
-    setSoldeInsuffisant(false);
-  };
 
   const getSolde = async () => {
     const resultData = await getUserCredits(auth.idUser);
@@ -221,7 +204,6 @@ export default function HomeScreen() {
         }, 2000);
 
       } else {
-        // setSoldeInsuffisant(true)
         router.navigate('/(profil)/MostPopular')
       }
     }
@@ -402,53 +384,6 @@ export default function HomeScreen() {
         </Modal>
       )}
 
-      <Modal
-        isVisible={soldeInsuffisant}
-        onBackdropPress={closeTarif}
-        style={styles.modal}
-      >
-
-        <View style={styles.filterModalContent1}>
-          <TouchableOpacity onPress={closeTarif} style={styles.notNowBtn}>
-            <Text style={styles.notNow}>{t.notNow}</Text>
-          </TouchableOpacity>
-
-          <FlatList
-            data={dataImage}
-            horizontal
-            renderItem={({ item }) => (
-              <View style={styles.containeImage}>
-                <Image
-                  source={item.Image} // Directement l'objet require()
-                  style={styles.stepImage1}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
-            keyExtractor={(item) => item.id.toString()}
-            showsHorizontalScrollIndicator={false}
-          />
-          <View style={styles.notNowBtn}>
-            <Text style={styles.notNow}>{t.pack}</Text>
-          </View>
-          <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-            <Text style={styles.notNow}>1001 Credits</Text>
-            <Text style={styles.notNow}>4.99Eur</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-            <Text style={styles.notNow}>2501 Credits</Text>
-            <Text style={styles.notNow}>9.99Eur</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-            <Text style={styles.notNow}>5000 Credits</Text>
-            <Text style={styles.notNow}>14.99Eur</Text>
-          </TouchableOpacity>
-
-
-
-        </View>
-      </Modal>
 
     </ParallaxScrollView >
 

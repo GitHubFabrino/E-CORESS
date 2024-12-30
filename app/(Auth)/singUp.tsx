@@ -58,6 +58,7 @@ export default function SignUpScreen() {
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingSearch, setIsLoadingSearch] = useState(false);
     const [viewAddressModal, setviewAddressModal] = useState(false);
     const [searchAdd, setSearchAdd] = useState<string>('');
     const [dataLocation, setDataLocation] = useState<LocationData[]>();
@@ -224,12 +225,15 @@ export default function SignUpScreen() {
     };
     const sendSearch = async (search: string) => {
         try {
+            setIsLoadingSearch(true)
             const response = await getLocal(search)
             console.log('RESPONSE GET LOCAL ', response);
-
             setDataLocation(response)
+
         } catch (error) {
 
+        } finally {
+            setIsLoadingSearch(false)
         }
         console.log(dataLocation);
 
@@ -382,41 +386,45 @@ export default function SignUpScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            {dataLocation?.length === 0 ? (
-                                <ThemedText type="default">No locations available.</ThemedText>
-                            ) : (
-                                dataLocation?.map((item, index) => (
-                                    <TouchableOpacity onPress={() => {
-                                        setAdress(item?.local_names?.fr || item.name)
-                                        setLng(item?.lon)
-                                        setLat(item.lat)
-                                        setContry(item.country)
-                                        setCity(item?.local_names?.fr || item.name)
-                                        viewAddress()
-                                    }} key={index}>
-                                        <View style={styles.card}>
-                                            <View style={styles.local}>
-                                                <ThemedText
-                                                    type="default"
-                                                    style={{ fontSize: 12, color: COLORS.bg1, fontWeight: '500' }}
-                                                >
-                                                    {item?.country || 'Unknown State'}
-                                                </ThemedText>
+                        {isLoadingSearch ? (<LoadingSpinner isVisible={isLoadingSearch} text={t.loading} size={60} />) : (
+
+                            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                                {dataLocation?.length === 0 ? (
+                                    <ThemedText type="default">No locations available.</ThemedText>
+                                ) : (
+                                    dataLocation?.map((item, index) => (
+                                        <TouchableOpacity onPress={() => {
+                                            setAdress(item?.local_names?.fr || item.name)
+                                            setLng(item?.lon)
+                                            setLat(item.lat)
+                                            setContry(item.country)
+                                            setCity(item?.local_names?.fr || item.name)
+                                            viewAddress()
+                                        }} key={index}>
+                                            <View style={styles.card}>
+                                                <View style={styles.local}>
+                                                    <ThemedText
+                                                        type="default"
+                                                        style={{ fontSize: 12, color: COLORS.bg1, fontWeight: '500' }}
+                                                    >
+                                                        {item?.country || 'Unknown State'}
+                                                    </ThemedText>
+                                                </View>
+                                                <View style={styles.btnLocal}>
+                                                    <ThemedText type="defaultSemiBold2" style={styles.text} >
+                                                        {item.local_names?.fr || item.name}
+                                                    </ThemedText>
+                                                    <ThemedText type="defaultSemiBold2" style={styles.text2} >
+                                                        {item.state}
+                                                    </ThemedText>
+                                                </View>
                                             </View>
-                                            <View style={styles.btnLocal}>
-                                                <ThemedText type="defaultSemiBold2" style={styles.text} >
-                                                    {item.local_names?.fr || item.name}
-                                                </ThemedText>
-                                                <ThemedText type="defaultSemiBold2" style={styles.text2} >
-                                                    {item.state}
-                                                </ThemedText>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))
-                            )}
-                        </ScrollView>
+                                        </TouchableOpacity>
+                                    ))
+                                )}
+                            </ScrollView>
+                        )}
+
 
 
                     </View>

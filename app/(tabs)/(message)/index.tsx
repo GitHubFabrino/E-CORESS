@@ -69,15 +69,26 @@ const MessageScreen: React.FC = () => {
     const [people, setPeople] = useState<Person[]>([]);
     const [Spotlight, setSpotlight] = useState();
     const [dataImage, setdataImages] = useState<DataImage>([]);
+    const [loading, setLoading] = useState(true);
+    const [Solde, setSolde] = useState<number>(0);
+    const [unread, setUnread] = useState('');
+    const [selectedType, setSelectedType] = useState('all');
 
+    useEffect(() => {
+        console.log('useEffect Message');
+        setLoading(true);
+        fetchData();
+    }, []);
     useFocusEffect(
         useCallback(() => {
             fetchData();
+            console.log('useFocuse Message');
+
         }, [auth.idUser])
     );
 
     const fetchData = async () => {
-        setLoading(true);
+
         try {
             const [chats, unreadMessages, credits, gifts, spotlightData] = await Promise.all([
                 getChats(auth.idUser),
@@ -102,10 +113,7 @@ const MessageScreen: React.FC = () => {
         }
     };
 
-    const [loading, setLoading] = useState(true);
-    const [Solde, setSolde] = useState<number>(0);
-    const [unread, setUnread] = useState('');
-    const [selectedType, setSelectedType] = useState('all');
+
     const findIndexAndImage = (data: GifArray) => {
         return data.map((item, index) => ({
             id: index + 1, // Index de l'objet (commence à 1)

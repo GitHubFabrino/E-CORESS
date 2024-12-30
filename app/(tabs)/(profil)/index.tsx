@@ -71,6 +71,7 @@ export default function ProfilScreen() {
     const [month, setMonth] = useState<string>('');
     const [year, setYear] = useState<string>('');
     const [gender, setGender] = useState<string>('');
+    const [genderUpdate, setGenderUpdate] = useState<string>('');
     const [langUser, setlangUser] = useState<string>('');
     const [action, setAction] = useState<string>('');
     const [city, setCity] = useState<string>('');
@@ -102,6 +103,10 @@ export default function ProfilScreen() {
     const [birthDayOriginal, setBirthDayOriginal] = useState('');
 
     const [usernamemodifier, setusernamemodifier] = useState('');
+    const [usernameUserModifier, setusernameUserModifier] = useState('');
+
+    const [emailUserUpdate, setEmailUserUpdate] = useState('');
+
     const closeViewImage = () => {
         setisViewImage(!isViewImage)
         setOptionIsSelect(false)
@@ -113,7 +118,7 @@ export default function ProfilScreen() {
             setIsModalOption(false);
             setIsModalParam(false);
             setIsModalGallery(false);
-        }, [birthDayOriginal, gender, usernamemodifier, langUser, lang])
+        }, [langUser, lang])
     );
 
     useEffect(() => {
@@ -203,7 +208,7 @@ export default function ProfilScreen() {
     const [litlemodal, setLitlemodal] = useState(false);
     const getProfils = async () => {
         try {
-            setLitlemodal(true)
+            // setLitlemodal(true)
             const response = await userProfil(auth.idUser);
             const { day, month, year } = splitBirthday(response.user.birthday);
             setBirthDayOriginal(response.user.birthday)
@@ -345,110 +350,70 @@ export default function ProfilScreen() {
 
 
     const sendUpdateProfileAll = () => {
-        setusernamemodifier(usernameUser)
-        setLitlemodal(true)
+
+        const originaleUsername = usernameUser
+        const originalEmail = emailUser
+        setUsernameUser(usernameUserModifier)
+        setEmailUserUpdate(emailUser)
+
         const update = async () => {
             try {
-                const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                const response = await updateProfilAll(usernameUserModifier, emailUserUpdate, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
+                if (response.status != 'success') {
+                    setUsernameUser(originaleUsername)
+                    setEmailUser(originalEmail)
+                }
             } catch (error) {
                 console.error('Error fetching messages:', error);
+                setUsernameUser(originaleUsername)
+                setEmailUser(originalEmail)
             }
         };
         update()
-        getProfils()
     };
 
     const sendUpdateProfileAllBithDay = (day: string, month: string, year: string) => {
-
-
+        const birthdayold = birthDayOriginal
+        setBirthDayOriginal(birthDayOriginal)
         const update = async () => {
             try {
                 const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
-                if (response === 200) {
-                    console.log(/********************oeeeeee************* */);
-
+                if (response.status != 'success') {
+                    setBirthDayOriginal(birthdayold)
                 }
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
         };
         update()
-        getProfils()
     };
     const sendUpdateProfileAllLang = (idlang: string) => {
-        console.log("Day:", day);
-        console.log("Month:", month);
-        console.log("Year:", year);
-
-        console.log("UsernameUser:", usernameUser);
-        console.log("EmailUser:", emailUser);
-        console.log("NameUser:", nameUser);
-
-        console.log("Gender:", gender);
-        console.log("LangUser:", idlang);
-        console.log("City:", city);
-        console.log("City ubi:", ubication);
-        console.log("Country:", country);
-        console.log("Lat:", lat);
-        console.log("Lng:", lng);
-        console.log("EditEmail:", editEmail);
-        console.log("EditUsername:", editUsername);
-        console.log("editId:", auth.idUser);
-
         const update = async () => {
             try {
-
                 const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, gender, idlang, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
-                console.log('response : ', response);
-
-                if (response === 200) {
-                    console.log(/********************oeeeeee************* */);
-
-                }
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
         };
         update()
-        // getProfils()
     };
+
     const sendUpdateProfileAllGender = (idGender: string) => {
-        console.log("Day:", day);
-        console.log("Month:", month);
-        console.log("Year:", year);
-
-        console.log("UsernameUser:", usernameUser);
-        console.log("EmailUser:", emailUser);
-        console.log("NameUser:", nameUser);
-
-        console.log("Gender:", idGender);
-        console.log("LangUser:", langUser);
-        console.log("City:", city);
-        console.log("City ubi:", ubication);
-        console.log("Country:", country);
-        console.log("Lat:", lat);
-        console.log("Lng:", lng);
-        console.log("EditEmail:", editEmail);
-        console.log("EditUsername:", editUsername);
-        console.log("editId:", auth.idUser);
         setmodifgenre(!modifigenre)
-
+        const originaleGender = gender
+        setGender(idGender)
         const update = async () => {
             try {
-
                 const response = await updateProfilAll(usernameUser, emailUser, nameUser, day, month, year, idGender, langUser, ubication, country, lat, lng, editEmail, editUsername, auth.idUser);
-                console.log('response : ', response);
-
-                if (response === 200) {
-                    console.log(/********************oeeeeee************* */);
-
+                if (response.status != 'success') {
+                    setGender(originaleGender)
                 }
             } catch (error) {
                 console.error('Error fetching messages:', error);
+                setGender(originaleGender)
             }
         };
         update()
-        getProfils()
     };
 
 
@@ -651,100 +616,45 @@ export default function ProfilScreen() {
                             </View>)
                         }
 
-                        <Modal
-                            isVisible={isViewImage}
-                            onBackdropPress={closeViewImage}
-                            style={styles.modal}
-                        >
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalOverlay}>
-
-                                    {
-                                        selectImageView && <View style={styles.modalContent1}>
-                                            <Image
-                                                source={{ uri: selectImageView }}
-                                                style={{ width: '100%', height: '100%', borderRadius: 10, }}
-                                                resizeMode="contain"
-                                            />
-                                        </View>
-                                    }
-                                    <TouchableOpacity onPress={() => { setOptionIsSelect(!optionIsSelect) }} style={styles.optionImage}>
-                                        <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.white} />
-                                    </TouchableOpacity>
-                                    {optionIsSelect && <View style={styles.optionImageDesicion}>
-                                        <TouchableOpacity onPress={() => optionImageFunc('private')} style={[styles.sendAction,]}>
-                                            <Icon name={selectedImageViewPublic === '1' ? "lock-closed-outline" : "lock-open-outline"} size={25} color={COLORS.bg1} />
-                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{selectedImageViewPublic === '1' ? t.locked : t.unlocked}</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => optionImageFunc('profil')} style={[styles.sendAction,]}>
-                                            <Icon name="person-circle-outline" size={25} color={COLORS.bg1} />
-                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => optionImageFunc('story')} style={[styles.sendAction,]}>
-                                            <Icon name="add-circle-outline" size={25} color={COLORS.jaune} />
-                                            <Text style={[styles.sendActionText, { color: COLORS.jaune }]}>{t.story}</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => optionImageFunc('delete')} style={[styles.sendAction,]}>
-                                            <Icon name="trash-bin-outline" size={25} color={COLORS.red} />
-                                            <Text style={[styles.sendActionText, { color: 'red' }]}>{t.delete}</Text>
-                                        </TouchableOpacity>
-                                    </View>}
-
-
-                                </View>
-
-
-                            </View>
-
-                        </Modal>
-
-
                         {
                             isModalParam && (
                                 <ThemedView>
                                     <ThemedView style={styles.containerInfo1}>
                                         {/* UserName */}
 
-                                        {modifierusername ? (<ThemedView style={styles.containerInfoUser}>
-
-
-                                            <View style={styles.icon}>
-                                                <Icon name="person-outline" size={25} color={COLORS.bg1} />
-                                            </View>
-                                            <View style={styles.infoCardUser}>
-                                                <View>
-                                                    <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.username}</ThemedText>
-                                                    <ThemedText style={{ color: COLORS.text2 }}>{usernameUser}</ThemedText>
-
+                                        {modifierusername ? (
+                                            <ThemedView style={styles.containerInfoUser}>
+                                                <View style={styles.icon}>
+                                                    <Icon name="person-outline" size={25} color={COLORS.bg1} />
                                                 </View>
+                                                <View style={styles.infoCardUser}>
+                                                    <View>
+                                                        <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.username}</ThemedText>
+                                                        <ThemedText style={{ color: COLORS.text2 }}>{usernameUser}</ThemedText>
+                                                    </View>
 
-                                                <TouchableOpacity onPress={() => {
-                                                    setmodifierusername(!modifierusername)
-                                                }}>
-                                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
-                                                </TouchableOpacity>
-
-                                            </View>
-
-
-                                        </ThemedView>) : (<ThemedView style={styles.containerInfo}>
-                                            <View style={styles.itemTitre}>
-                                                <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
-                                                <TouchableOpacity onPress={() => {
-                                                    sendUpdateProfileAll()
-                                                    setmodifierusername(!modifierusername)
-                                                }}>
-                                                    <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View style={styles.infoCard}>
-                                                <InputText value={usernameUser} onChangeText={(text) => setUsernameUser(text)} />
-                                            </View>
-                                        </ThemedView>)}
-
-
-
-
+                                                    <TouchableOpacity onPress={() => {
+                                                        setmodifierusername(!modifierusername)
+                                                        setusernameUserModifier(usernameUser)
+                                                    }}>
+                                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </ThemedView>) : (
+                                            <ThemedView style={styles.containerInfo}>
+                                                <View style={styles.itemTitre}>
+                                                    <ThemedText type='defaultSemiBold'>{t.username}</ThemedText>
+                                                    <TouchableOpacity onPress={() => {
+                                                        sendUpdateProfileAll()
+                                                        setmodifierusername(!modifierusername)
+                                                    }}>
+                                                        <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View style={styles.infoCard}>
+                                                    <InputText value={usernameUserModifier} onChangeText={(text) => setusernameUserModifier(text)} />
+                                                </View>
+                                            </ThemedView>)}
 
                                         {/* Email User */}
                                         {!modifieremail ? (
@@ -762,6 +672,7 @@ export default function ProfilScreen() {
                                                     </View>
 
                                                     <TouchableOpacity onPress={() => {
+                                                        setEmailUserUpdate(emailUser)
                                                         setmodifieremail(!modifieremail)
                                                     }}>
                                                         <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
@@ -784,24 +695,10 @@ export default function ProfilScreen() {
                                                 </View>
                                                 <View style={styles.infoCard}>
 
-                                                    <InputText value={emailUser} onChangeText={(text) => setEmailUser(text)} />
+                                                    <InputText value={emailUserUpdate} onChangeText={(text) => setEmailUserUpdate(text)} />
 
                                                 </View>
                                             </ThemedView>)}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                                         {/* Name */}
                                         {modifiname ? (
@@ -846,13 +743,6 @@ export default function ProfilScreen() {
                                             </ThemedView>
                                         )}
 
-
-
-
-
-
-
-
                                         {/* BirthDay */}
                                         {modifbirthday ? (
                                             <ThemedView style={styles.containerInfoUser}>
@@ -889,8 +779,6 @@ export default function ProfilScreen() {
 
                                                             sendUpdateProfileAllBithDay(days, months, years)
                                                             setmodifbirthday(!modifbirthday)
-                                                            console.log("New date ", newBirthDay);
-
                                                             const monthL = {
                                                                 "01": "January",
                                                                 "02": "February",
@@ -931,8 +819,6 @@ export default function ProfilScreen() {
                                         {/* GENRE */}
                                         {modifigenre ? (
                                             <ThemedView style={styles.containerInfoUser}>
-
-
                                                 <View style={styles.icon}>
                                                     <Icon name="male-female" size={25} color={COLORS.bg1} />
                                                 </View>
@@ -940,7 +826,6 @@ export default function ProfilScreen() {
                                                     <View>
                                                         <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.genderLabel}</ThemedText>
                                                         <ThemedText style={{ color: COLORS.text2 }}>{gender === "1" ? (t.male) : (gender === '2' ? (t.femelle) : (gender === '3' ? (t.lesbienne) : (t.gay)))}</ThemedText>
-
                                                     </View>
 
                                                     <TouchableOpacity onPress={() => {
@@ -948,10 +833,7 @@ export default function ProfilScreen() {
                                                     }}>
                                                         <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
                                                     </TouchableOpacity>
-
                                                 </View>
-
-
                                             </ThemedView>
                                         ) : (
                                             <ThemedView style={styles.containerInfo}>
@@ -972,8 +854,8 @@ export default function ProfilScreen() {
                                                         }))}
                                                         selectedValue={selectedOption}
                                                         onValueChange={(value) => {
-                                                            setGender(value)
-                                                            getProfils()
+                                                            setGenderUpdate(value)
+                                                            // getProfils()
                                                             sendUpdateProfileAllGender(value)
                                                         }}
                                                     />
@@ -984,40 +866,11 @@ export default function ProfilScreen() {
                                 </ThemedView>
                             )
                         }
-                        {/* IMAGE SELECT */}
-                        <Modal
-                            isVisible={isImageSelect}
-                            onBackdropPress={closeImageselect}
-                            style={styles.modal}
-                        >
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalOverlay}>
-
-                                    <View style={styles.modalContent1}>
-                                        <Image
-                                            source={{ uri: selectedImage }}
-                                            style={{ width: '100%', height: '100%', borderRadius: 10, }}
-                                            resizeMode="contain"
-                                        />
-                                    </View>
-                                    <TouchableOpacity onPress={() => sendImageMessage()} style={styles.sendGift}>
-                                        <Text style={styles.sendGiftText}>{t.send}</Text>
-                                    </TouchableOpacity>
-
-
-                                </View>
-
-
-                            </View>
-
-                        </Modal>
-
 
                         <ThemedView style={styles.containerOption}>
-                            <TouchableOpacity onPress={() => { }} >
+                            <TouchableOpacity onPress={() => { router.push('/(profil)/Credit') }} >
                                 <View style={styles.cardItem}>
                                     <View style={styles.icon}>
-                                        {/* <Image source={require('@/assets/images/icon1.png')} style={styles.iconItem} /> */}
                                         <Icon name="battery-half" size={25} color={COLORS.bg1} />
                                     </View>
                                     <View style={styles.textItem}>
@@ -1026,7 +879,7 @@ export default function ProfilScreen() {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => { }} >
+                            <TouchableOpacity onPress={() => { router.push('/(profil)/Credit') }} >
                                 <View style={styles.cardItem}>
                                     <View style={styles.icon}>
                                         <Image source={require('@/assets/images/icon2.png')} style={styles.iconItem} />
@@ -1037,10 +890,9 @@ export default function ProfilScreen() {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => { }} >
+                            <TouchableOpacity onPress={() => { router.push('/(profil)/Credit') }} >
                                 <View style={styles.cardItem}>
                                     <View style={styles.icon}>
-                                        {/* <Image source={require('@/assets/images/icon3.png')} style={styles.iconItem} /> */}
                                         <Icon name="diamond-sharp" size={25} color={COLORS.bg1} />
                                     </View>
                                     <View style={styles.textItem}>
@@ -1057,15 +909,13 @@ export default function ProfilScreen() {
                         <ThemedView style={styles.containerInfo}>
                             <View style={styles.itemTitre}>
                                 <ThemedText type='defaultSemiBold' style={{ color: COLORS.bg1 }}>{t.about}</ThemedText>
-                                {!modifierBio ? (<TouchableOpacity onPress={() => { setmodifierBio(!modifierBio) }}>
-                                    <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
-                                </TouchableOpacity>) :
+                                {!modifierBio ? (
+                                    <TouchableOpacity onPress={() => { setmodifierBio(!modifierBio) }}>
+                                        <Icon name={"create-outline"} size={25} color={COLORS.darkBlue} />
+                                    </TouchableOpacity>) :
                                     (<TouchableOpacity onPress={() => {
                                         setmodifierBio(!modifierBio)
-                                        if (bioOld !== bio) {
-                                            console.log('mofiddidid');
-                                            sendUpdateProfile()
-                                        }
+                                        sendUpdateProfile()
                                     }}>
                                         <Icon name={"checkmark-done-outline"} size={25} color={COLORS.green} />
                                     </TouchableOpacity>)}
@@ -1249,6 +1099,82 @@ export default function ProfilScreen() {
                                 }
                             </View>
                         </ThemedView>
+
+                        {/* IMAGE SELECT */}
+                        <Modal
+                            isVisible={isImageSelect}
+                            onBackdropPress={closeImageselect}
+                            style={styles.modal}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalOverlay}>
+
+                                    <View style={styles.modalContent1}>
+                                        <Image
+                                            source={{ uri: selectedImage }}
+                                            style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+                                    <TouchableOpacity onPress={() => sendImageMessage()} style={styles.sendGift}>
+                                        <Text style={styles.sendGiftText}>{t.send}</Text>
+                                    </TouchableOpacity>
+
+
+                                </View>
+
+
+                            </View>
+
+                        </Modal>
+
+                        <Modal
+                            isVisible={isViewImage}
+                            onBackdropPress={closeViewImage}
+                            style={styles.modal}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalOverlay}>
+
+                                    {
+                                        selectImageView && <View style={styles.modalContent1}>
+                                            <Image
+                                                source={{ uri: selectImageView }}
+                                                style={{ width: '100%', height: '100%', borderRadius: 10, }}
+                                                resizeMode="contain"
+                                            />
+                                        </View>
+                                    }
+                                    <TouchableOpacity onPress={() => { setOptionIsSelect(!optionIsSelect) }} style={styles.optionImage}>
+                                        <Icon name="ellipsis-vertical-outline" size={25} color={COLORS.white} />
+                                    </TouchableOpacity>
+                                    {optionIsSelect && <View style={styles.optionImageDesicion}>
+                                        <TouchableOpacity onPress={() => optionImageFunc('private')} style={[styles.sendAction,]}>
+                                            <Icon name={selectedImageViewPublic === '1' ? "lock-closed-outline" : "lock-open-outline"} size={25} color={COLORS.bg1} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{selectedImageViewPublic === '1' ? t.locked : t.unlocked}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('profil')} style={[styles.sendAction,]}>
+                                            <Icon name="person-circle-outline" size={25} color={COLORS.bg1} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.bg1 }]}>{t.profil}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('story')} style={[styles.sendAction,]}>
+                                            <Icon name="add-circle-outline" size={25} color={COLORS.jaune} />
+                                            <Text style={[styles.sendActionText, { color: COLORS.jaune }]}>{t.story}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => optionImageFunc('delete')} style={[styles.sendAction,]}>
+                                            <Icon name="trash-bin-outline" size={25} color={COLORS.red} />
+                                            <Text style={[styles.sendActionText, { color: 'red' }]}>{t.delete}</Text>
+                                        </TouchableOpacity>
+                                    </View>}
+
+
+                                </View>
+
+
+                            </View>
+
+                        </Modal>
+
                         {/* Option */}
                         <Modal
                             isVisible={isModalOption}

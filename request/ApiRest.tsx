@@ -1220,7 +1220,7 @@ export const updateProfilAll = async (
     try {
         // Création de l'objet FormData
         const formData = new FormData();
-        formData.append('action', 'update');
+        formData.append('action', 'updateApp');
         formData.append('username', username);
         formData.append('email', email);
         formData.append('name', name);
@@ -1248,9 +1248,8 @@ export const updateProfilAll = async (
 
         // Vérification du statut de la réponse
         if (response.status === 200) {
-            console.log('Name : ', name);
             console.log("UPDATE envoyée avec succès :", response.data);
-            return response.status; // Retourner les données de la réponse
+            return response.data; // Retourner les données de la réponse
         } else {
             console.error("Échec de l'envoi de l'UPDATE:", response.status, response.statusText);
             throw new Error(`Erreur ${response.status}: ${response.statusText}`);

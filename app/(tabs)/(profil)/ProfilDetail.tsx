@@ -349,7 +349,6 @@ export default function ProfilDetail() {
                             <TouchableOpacity onPress={() => { }} >
                                 <View style={styles.cardItem}>
                                     <View style={styles.icon}>
-                                        {/* <Image source={require('@/assets/images/icon1.png')} style={styles.iconItem} /> */}
                                         <Icon name="battery-half" size={25} color={COLORS.bg1} />
                                     </View>
                                     <View style={styles.textItem}>
@@ -372,7 +371,6 @@ export default function ProfilDetail() {
                             <TouchableOpacity onPress={() => { }} >
                                 <View style={styles.cardItem}>
                                     <View style={styles.icon}>
-                                        {/* <Image source={require('@/assets/images/icon3.png')} style={styles.iconItem} /> */}
                                         <Icon name="diamond-sharp" size={25} color={COLORS.bg1} />
                                     </View>
                                     <View style={styles.textItem}>

@@ -93,13 +93,7 @@ const ChatScreen: React.FC = () => {
 
     const [soldeChat, setSolde] = useState<number>(0);
     const [soldeUser, setsoldeUser] = useState<number>(0);
-
-    const [SoldeUserInsuffisant, setSoldeUserInsuffisant] = useState(false);
     const [State, setState] = useState('');
-
-    const closeTarif = () => {
-        setSoldeUserInsuffisant(false);
-    };
 
     const getAllGift = async () => {
         // Fonction pour récupérer l'index et `downsized_medium`
@@ -168,7 +162,6 @@ const ChatScreen: React.FC = () => {
 
     const handleSend = async () => {
         if (soldeUser <= 1) {
-            // setSoldeUserInsuffisant(true);
             router.navigate('/(profil)/MostPopular')
             return;
         }
@@ -335,7 +328,6 @@ const ChatScreen: React.FC = () => {
         const prixNumber = parseFloat(prix);
 
         if (soldeUser <= (10 + prixNumber)) {
-            // setSoldeUserInsuffisant(true);
             router.navigate('/(profil)/MostPopular')
             return;
         }
@@ -404,15 +396,9 @@ const ChatScreen: React.FC = () => {
 
 
     const sendGiftMessage = (idReceve: string, image: string) => {
-        console.log('idSend:', auth.idUser);
-        console.log('idReceve : ', idReceve);
-        console.log('image : ', image);
         setShowGif(false)
 
         if (soldeUser < (20)) {
-            console.log('SOLDE E', soldeUser);
-
-            // setSoldeUserInsuffisant(true);
             router.navigate('/(profil)/MostPopular')
             return;
         }
@@ -492,9 +478,7 @@ const ChatScreen: React.FC = () => {
         console.log('idReceve : ', idReceveMessage);
 
         if (soldeUser < (20)) {
-            console.log('SOLDE E', soldeUser);
-
-            setSoldeUserInsuffisant(true);
+            router.navigate('/(profil)/MostPopular')
             return;
         }
 
@@ -717,53 +701,7 @@ const ChatScreen: React.FC = () => {
 
 
             </View>
-            <Modal
-                isVisible={SoldeUserInsuffisant}
-                onBackdropPress={closeTarif}
-                style={styles.modal}
-            >
 
-                <View style={styles.filterModalContent1}>
-                    <TouchableOpacity onPress={closeTarif} style={styles.notNowBtn}>
-                        <Text style={styles.notNow}>{t.notNow}</Text>
-                    </TouchableOpacity>
-
-                    <FlatList
-                        data={dataImage}
-                        horizontal
-                        renderItem={({ item }) => (
-                            <View style={styles.containeImage}>
-                                <Image
-                                    source={item.Image} // Directement l'objet require()
-                                    style={styles.stepImage1}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                        )}
-                        keyExtractor={(item) => item.id.toString()}
-                        showsHorizontalScrollIndicator={false}
-                    />
-                    <View style={styles.notNowBtn}>
-                        <Text style={styles.notNow}>{t.pack}</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>1001 Credits</Text>
-                        <Text style={styles.notNow}>4.99Eur</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>2501 Credits</Text>
-                        <Text style={styles.notNow}>9.99Eur</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => { }} style={styles.btnPack}>
-                        <Text style={styles.notNow}>5000 Credits</Text>
-                        <Text style={styles.notNow}>14.99Eur</Text>
-                    </TouchableOpacity>
-
-
-
-                </View>
-            </Modal>
             <Modal
                 isVisible={isAlert}
                 onBackdropPress={closeAlert}
