@@ -1,6 +1,54 @@
 .test {
-    color: #7a7979;
+    color: #E0F7FA;
+    color: #F5F5F5;
 }
 
 /* http: //api.openweathermap.org/geo/1.0/direct?q=Antsiranana&limit=5&appid=96bd8d6bc5ab8c519e9dfff3c684a3d0 */
 /* https: //api.openweathermap.org/geo/1.0/direct?q=Tanambao%20I&limit=10&appid=96bd8d6bc5ab8c519e9dfff3c684a3d0 */
+/* eas build --platform android */
+
+/*
+
+Call video 
+1 - 
+https://www.e-coress.com/requests/videocall.php
+Request Method:POST
+action: check
+id: 1 ( id nilay olona atsona )
+Reponse : ""
+
+2 - 
+https://www.e-coress.com/requests/videocall.php
+Request Method:
+POST
+action: getpeerid
+id: 1
+response : 
+{"name":"kameni","id":"1","peer":"3b46b440-1e29-4ceb-82ab-9340c43c5ccf","status":1,"photo":"https:\/\/www.e-coress.com\/assets\/sources\/uploads\/thumb_6656a7a864a77_PXL202306110819297892.jpg"}
+
+3 -
+https://www.e-coress.com/requests/videocall.php
+Request Method:
+POST
+action: saveCall
+c_id: 20
+r_id: 1
+callId: ab8a7546-a769-4a89-aa33-c6c69df56d653b46b440-1e29-4ceb-82ab-9340c43c5ccf
+
+4-
+https://www.e-coress.com/requests/videocall.php
+Request Method:
+POST
+action: invideocall
+
+
+claracoeursincere
+wajic19851@nolanzip.com
+
+kameni.modeste@yahoo.fr
+
+user1@yopmail.com
+user1@yopmail.com
+
+
+*/

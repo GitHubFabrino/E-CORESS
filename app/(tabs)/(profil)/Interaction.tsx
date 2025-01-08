@@ -324,7 +324,7 @@ const Interaction: React.FC = () => {
 
 
                 {activeView === 'visited' &&
-                    (preniumUser != '1' ? ((dataVisitors?.visitors.length != 0 ? (dataVisitors?.visitors.map((data, index) => (
+                    (preniumUser == '1' ? ((dataVisitors?.visitors.length != 0 ? (dataVisitors?.visitors.map((data, index) => (
 
                         <TouchableOpacity key={index} onPress={() => {
                             if (profil?.premium === 1) {

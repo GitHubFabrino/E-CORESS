@@ -278,16 +278,6 @@ const ChatScreen: React.FC = () => {
         </View>
     );
 
-    const dataImage = [
-        { id: 1, Image: require('../../../assets/images/tarif/img1.png') },
-        { id: 2, Image: require('../../../assets/images/tarif/img2.png') },
-        { id: 3, Image: require('../../../assets/images/tarif/img3.png') },
-        { id: 4, Image: require('../../../assets/images/tarif/img4.png') },
-        { id: 5, Image: require('../../../assets/images/tarif/img5.png') },
-        { id: 6, Image: require('../../../assets/images/tarif/img6.png') },
-        { id: 7, Image: require('../../../assets/images/tarif/img7.png') },
-    ];
-
     const [creditSend, setcreditSend] = useState<number | null>(null);
 
     const [isAlert, setisAlert] = useState(false);

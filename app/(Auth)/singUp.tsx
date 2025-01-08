@@ -47,10 +47,10 @@ export default function SignUpScreen() {
     const [name, setName] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
     const [emailUser, setEmailUser] = useState<string>('@gmail.com');
-    const [passwordUser, setPasswordUser] = useState<string>('123456789');
+    const [passwordUser, setPasswordUser] = useState<string>('');
     const [birthDate, setBirthDate] = useState<Date>(new Date());
     const [adress, setAdress] = useState<string>('');
-    const [phoneNumber, setphoneNumber] = useState<string>('123456789');
+    const [phoneNumber, setphoneNumber] = useState<string>('');
     const [gender, setGender] = useState<'homme' | 'femme' | null>(null);
     const [selectedPreference, setSelectedPreference] = useState<'homme' | 'femme' | 'lesbienne' | 'gay' | null>(null);
 

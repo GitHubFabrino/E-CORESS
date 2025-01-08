@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { addToSpotlight, discover100, getMatches, getVisitors, initiatePayement, raiseUpF, userProfil } from '@/request/ApiRest';
+import { addToSpotlight, apiPayement, discover100, getMatches, getVisitors, initiatePayement, raiseUpF, userProfil } from '@/request/ApiRest';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { translations } from '@/service/translate';
@@ -52,7 +52,7 @@ const PayementScreen: React.FC = () => {
     const initiatePayment = async () => {
         setLoading(true);
         try {
-            const response = await initiatePayement(price);
+            const response = await apiPayement(userId , packages, monthsCommitment , type , price);
             console.log('responce pay ', response.payment_url);
             setPaymentUrl(response.payment_url);
         } catch (error) {

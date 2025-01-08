@@ -51,6 +51,24 @@ const apiInitialisationPayement = axios.create({
     withCredentials: true,
 });
 
+const apiurlPayement = axios.create({
+    baseURL: 'https://www.e-coress.com/pay/apiPayement.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
+const apiConfirmationPayement = axios.create({
+    baseURL: 'https://www.e-coress.com/pay/apiIndex.php',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    },
+    withCredentials: true,
+});
 const apiClientBello = axios.create({
     baseURL: 'https://www.e-coress.com/requests/belloo.php',
     headers: {
@@ -1544,7 +1562,42 @@ export const getVisitors = async (iduser: string): Promise<any> => {
         throw new Error(`Erreur lors de l'action 'getMatches': ${error.message || error}`);
     }
 };
+export const apiPayement = async (
+    userId : string,
+    packages : string,
+    commitmentMonths : string,
+    offerType : string,
+    price : string,
+): Promise<any> => {
+    try {
+        // Création de l'objet FormData
+        const formData = new FormData();
+        formData.append('userId', userId);
+        formData.append('package', packages);
+        formData.append('commitmentMonths', commitmentMonths);
+        formData.append('offerType', offerType);
+        formData.append('price', price);
 
+        // Effectuer la requête POST avec FormData
+        const response = await apiurlPayement.post('', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("initiatePayement envoyée avec succès :", response.data);
+            return response.data; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'initiatePayement:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'initiatePayement:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'initiatePayement: ${error.message || error}`);
+    }
+};
 export const initiatePayement = async (
     amount: string,
 ): Promise<any> => {
@@ -1563,6 +1616,48 @@ export const initiatePayement = async (
         // Vérification du statut de la réponse
         if (response.status === 200) {
             console.log("initiatePayement envoyée avec succès :", response.data);
+            return response.data; // Retourner les données de la réponse
+        } else {
+            console.error("Échec de l'envoi de l'initiatePayement:", response.status, response.statusText);
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error: any) {
+        console.error("Erreur lors de l'envoi de l'initiatePayement:", error.message || error);
+        throw new Error(`Erreur lors de l'envoi de l'initiatePayement: ${error.message || error}`);
+    }
+};
+
+
+
+export const confirmationPayement = async (
+    user_id: string,
+    packageSelect: string,
+    type: string,
+    price: string,
+    monthsCommitment: string,
+): Promise<any> => {
+    try {
+        
+
+        const response = await apiConfirmationPayement.get('', {
+            params: {
+                user_id: user_id,
+                package: packageSelect,
+                type: type,
+                price: price,
+                monthsCommitment: monthsCommitment,
+                // user_id: '107',
+                // package: '1',
+                // type: 'premium',
+                // price: '7',
+                // monthsCommitment: '3',
+
+            }
+        });
+
+        // Vérification du statut de la réponse
+        if (response.status === 200) {
+            console.log("confirmationPayement:", response.data);
             return response.data; // Retourner les données de la réponse
         } else {
             console.error("Échec de l'envoi de l'initiatePayement:", response.status, response.statusText);

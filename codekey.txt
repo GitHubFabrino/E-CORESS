@@ -1,0 +1,17 @@
+java -jar bundletool.jar build-apks --bundle=/media/fabrino/7D0510B60DAB790E1/document fianarana/DevellopementWeb/dev_React_Native/Project_Ecorresse/versionApp --output=output.apks --mode=universal
+
+vrais : java -jar bundletool.jar build-apks --bundle=/media/fabrino/7D0510B60DAB790E1/document\ fianarana/DevellopementWeb/dev_React_Native/Project_Ecorresse/versionApp/application-65b1b6ae-7609-4331-b5a6-8fed583a6dd8.aab --output=output.apks --mode=universal
+
+https://expo.dev/artifacts/eas/oiKyhUupKUSJZRtgKUT15b.aab
+
+java -jar bundletool.jar build-apks --bundle=/media/fabrino/7D0510B60DAB790E1/document\ fianarana/DevellopementWeb/dev_React_Native/Project_Ecorresse/versionApp/application-b4a38993-b910-4101-b8e6-de5fd714cc4a.aab --output=output.apks --mode=ecoress
+unzip output.apks -d output-folder
+
+
+Etape pour builder app : 
+1 - connection eas : eas login : username : rakotoharilalainafabrino@gmail.com pass : Fabpro12699
+2 - eas build --platform android -- télécharger l'app par le lien
+3 - chercher le bundletool.jar 
+4 - java -jar bundletool.jar build-apks --bundle=/media/fabrino/7D0510B60DAB790E1/document\ fianarana/DevellopementWeb/dev_React_Native/Project_Ecorresse/versionApp/application-b4a38993-b910-4101-b8e6-de5fd714cc4a.aab --output=output.apks --mode=universal
+5 - unzip output.apks -d output-folder
+6 - application est dans le output-folder

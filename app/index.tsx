@@ -29,6 +29,9 @@ export default function HomeScreenAcceuil() {
         require('@/assets/images/imageAcceuil/img3.jpeg'),
     ];
 
+//https://www.e-coress.com/assets/sources/uploads/thumb_677c171f67d45_img3.jpeg
+//https://www.e-coress.com/assets/sources/uploads/thumb_677c17d629ed1_img2.jpeg
+//https://www.e-coress.com/assets/sources/uploads/thumb_677c18bdf2290_img1.jpeg
     useEffect(() => {
         setLang('FR')
         dispatch(setLanguage('FR'));
@@ -80,9 +83,7 @@ export default function HomeScreenAcceuil() {
             />
 
             <View style={styles.containerText}>
-                <Text style={styles.text}>
-                    {currentTranslation.description}
-                </Text>
+                <ThemedText style={styles.text} > {currentTranslation.description}</ThemedText>
             </View>
 
             <ThemedText style={styles.text}>{currentTranslation.connect}</ThemedText>

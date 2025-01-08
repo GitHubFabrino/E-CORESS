@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { addToSpotlight, discover100, getMatches, getVisitors, raiseUpF, userProfil } from '@/request/ApiRest';
+import { addToSpotlight, confirmationPayement, discover100, getMatches, getVisitors, raiseUpF, userProfil } from '@/request/ApiRest';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { translations } from '@/service/translate';
@@ -40,7 +40,35 @@ const Payement: React.FC = () => {
     const t = translations[lang];
     const [loading, setLoading] = useState(true);
     const [profil, setProfil] = useState<UserProfileInterface | null>(null);
+    const [currency, setcurrency] = useState('');
+    const [price_in_local_currency, setprice_in_local_currency] = useState(0);
+    const [status, setstatus] = useState(0);
 
+    useEffect(() => {
+        initiatePayment()
+    }, []);
+    useFocusEffect(
+        useCallback(() => {
+
+        }, [])
+    );
+
+    const initiatePayment = async () => {
+        setLoading(true);
+        try {
+            const response = await confirmationPayement(userId , packages , offre , price , availability);
+            console.log('responce pay ', response);
+            setcurrency(response.data.currency)
+            setprice_in_local_currency(response.data.price_in_local_currency)
+            setstatus(response.status)
+           
+        } catch (error) {
+            console.error(error);
+            // Alert.alert('Erreur', 'Une erreur est survenue.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -63,20 +91,23 @@ const Payement: React.FC = () => {
                     onPress={() => { }}
                 >
                     <View style={styles.cardType}>
-                        <ThemedText type='defaultSemiBold2'>Orange Money</ThemedText>
+                        <ThemedText type='defaultSemiBold'>Orange Money</ThemedText>
                         <Image
-                            source={require('../../../assets/images/orange.png')}
+                            // source={require('../../../assets/images/orange.png')}
+                            source={{ uri:'https://www.e-coress.com/assets/sources/uploads/thumb_677c15ec94fdb_orange.png'}}
                             style={styles.orange}
                             resizeMode="contain"
                         />
                     </View>
                 </TouchableOpacity>
 
+
+
                 <ThemedText type='default' style={{ color: 'green', marginTop: 20, alignSelf: 'center' }}>{t.securtyText}</ThemedText>
-                <ThemedText type='defaultSemiBold2' style={{ color: COLORS.bg1, marginTop: 30, alignSelf: 'center', textAlign: 'center', width: '80%' }}>{t.selectPayText} {offre} {t.selectPayText1} {availability} {t.selectPayText2}</ThemedText>
+                <ThemedText type='defaultSemiBold2' style={{ color: COLORS.bg1, marginTop: 30, alignSelf: 'center', textAlign: 'center', width: '80%' }}>{t.selectPayText} {offre} {t.selectPayText1} {availability} {t.selectPayText2} {t.selectPayText3} {currency} : {price_in_local_currency}</ThemedText>
                 <TouchableOpacity
 
-                    onPress={() => { router.push(`/(profil)/PaymentScreen?userId=${userId}&packages=${packages}&type=${offre}&monthsCommitment=${availability}&price=${price}`) }}
+                    onPress={() => { router.push(`/(profil)/PaymentScreen?userId=${userId}&packages=${packages}&type=${offre}&monthsCommitment=${availability}&price=${price_in_local_currency}`) }}
                 >
                     <View style={styles.btnOffre}>
                         <ThemedText type='default' style={{ color: 'white', alignSelf: 'center' }}>{t.saveOffre}</ThemedText>
